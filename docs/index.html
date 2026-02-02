@@ -132,49 +132,49 @@
         <div class="mt-4 rounded-2xl border bg-slate-50 p-3 sm:p-4">
           <div class="text-xs sm:text-sm font-medium">Ehdota halvin aika</div>
 
-          <div class="mt-2 grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-4">
+          <div class="mt-2 grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-4 items-start auto-rows-max">
             <div>
-              <label class="block text-xs sm:text-sm text-slate-600 mb-1">Aikaväli alkaa (klo)</label>
+              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Aikaväli alkaa </label>
               <input
                 id="winStart"
                 type="number"
                 min="0"
                 max="23"
                 value="0"
-                class="w-full rounded-xl border p-2 text-center text-xs sm:text-sm"
+                class="w-full h-10 rounded-xl border p-2 text-center text-xs sm:text-sm"
               />
             </div>
 
             <div>
-              <label class="block text-xs sm:text-sm text-slate-600 mb-1">Aikaväli päättyy (klo)</label>
+              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Aikaväli päättyy </label>
               <input
                 id="winEnd"
                 type="number"
                 min="0"
                 max="23"
                 value="23"
-                class="w-full rounded-xl border p-2 text-center text-xs sm:text-sm"
+                class="w-full h-10 rounded-xl border p-2 text-center text-xs sm:text-sm"
               />
             </div>
 
             <div>
-              <label class="block text-xs sm:text-sm text-slate-600 mb-1">Kesto (h)</label>
+              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Kesto (h)</label>
               <input
                 id="durHours"
                 type="number"
                 min="1"
                 max="24"
                 value="1"
-                class="w-full rounded-xl border p-2 text-center text-xs sm:text-sm"
+                class="w-full h-10 rounded-xl border p-2 text-center text-xs sm:text-sm"
               />
             </div>
 
             <div>
-              <label class="block text-xs sm:text-sm text-slate-600 mb-1">Päivä</label>
+              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Päivä</label>
               <input
                 id="date3"
                 type="date"
-                class="w-full rounded-xl border p-2 text-center text-xs sm:text-sm"
+                class="w-full h-10 rounded-xl border p-2 text-center text-xs sm:text-sm"
               />
             </div>
           </div>
@@ -1399,7 +1399,7 @@ function addSavings(euro) {
         // Only show average if we have at least some valid data
         if (validPrices.length > 0 && label) {
           const avgPrice = validPrices.reduce((a, b) => a + b, 0) / validPrices.length;
-          label.textContent = `${label.textContent}  ${avgPrice.toFixed(2)} snt/kWh`;
+          label.textContent = `  ${avgPrice.toFixed(2)} snt/kWh`;
         } else if (validPrices.length === 0 && label) {
           label.textContent = `${label.textContent}  Ei dataa`;
         }
