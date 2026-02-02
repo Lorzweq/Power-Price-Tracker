@@ -25,4 +25,4 @@ jobs:
 
       - name: Success
         shell: bash
-        run: echo "OK: Deployment ready"
+        run: echo "Deployment successful"
