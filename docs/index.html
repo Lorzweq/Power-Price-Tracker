@@ -50,9 +50,9 @@
       Valitse laitteet, määritä päivät ja kellonajat, ja paina "Laske säästö".
     </p>
 
-    <div class="mt-6 grid gap-4 md:grid-cols-2">
-      <div class="bg-white rounded-2xl shadow p-4">
-        <label class="block text-sm font-medium">Laitteet</label>
+    <div class="mt-6 grid gap-3 sm:gap-4 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
+      <div class="bg-white rounded-2xl shadow p-3 sm:p-4 md:p-5 lg:col-span-2 xl:col-span-2">
+        <label class="block text-xs sm:text-sm font-medium">Laitteet</label>
 
         <div id="deviceList" class="mt-2 grid gap-2"></div>
 
@@ -62,13 +62,13 @@
 
         <div class="mt-4">
           <div class="flex items-center justify-between">
-            <span class="text-sm font-medium">Kulutus</span>
+            <span class="text-xs sm:text-sm font-medium">Kulutus</span>
             <span id="unitBadge" class="text-xs bg-slate-100 px-2 py-1 rounded-full"></span>
           </div>
           <p class="mt-1 text-xs sm:text-sm text-slate-600" id="consumptionText"></p>
 
-          <label class="block mt-3 text-sm font-medium">Käytettävä arvo</label>
-          <select id="pick" class="mt-2 w-full rounded-xl border p-2">
+          <label class="block mt-3 text-xs sm:text-sm font-medium">Käytettävä arvo</label>
+          <select id="pick" class="mt-2 w-full rounded-xl border p-2 text-xs sm:text-sm">
             <option value="min">Min</option>
             <option value="avg" selected>Keskiarvo</option>
             <option value="max">Max</option>
@@ -78,16 +78,16 @@
         </div>
       </div>
 
-      <div class="bg-white rounded-2xl shadow p-4">
-        <div class="grid gap-3">
+      <div class="bg-white rounded-2xl shadow p-3 sm:p-4 md:p-5 lg:col-span-1 xl:col-span-2">
+        <div class="grid gap-2 sm:gap-3">
           <div>
-            <label class="block text-sm font-medium">Aika 1 (päivä + tunti)</label>
+            <label class="block text-xs sm:text-sm font-medium">Aika 1 (päivä + tunti)</label>
 
-            <div class="flex items-end gap-2">
+            <div class="flex items-end gap-2 flex-wrap">
               <input
                 id="date1"
                 type="date"
-                class="flex-1 max-w-[16rem] rounded-xl border p-2"
+                class="flex-1 min-w-[140px] rounded-xl border p-2 text-xs sm:text-sm"
               >
 
               <div class="flex flex-col">
@@ -105,13 +105,13 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium">Aika 2 (vertailu)</label>
+            <label class="block text-xs sm:text-sm font-medium">Aika 2 (vertailu)</label>
 
-            <div class="flex items-end gap-2">
+            <div class="flex items-end gap-2 flex-wrap">
               <input
                 id="date2"
                 type="date"
-                class="flex-1 max-w-[16rem] rounded-xl border p-2"
+                class="flex-1 min-w-[140px] rounded-xl border p-2 text-xs sm:text-sm"
               >
 
               <div class="flex flex-col">
@@ -129,10 +129,10 @@
           </div>
         </div>
 
-        <div class="mt-4 rounded-2xl border bg-slate-50 p-4">
-          <div class="text-sm font-medium">Ehdota halvin aika</div>
+        <div class="mt-4 rounded-2xl border bg-slate-50 p-3 sm:p-4">
+          <div class="text-xs sm:text-sm font-medium">Ehdota halvin aika</div>
 
-          <div class="mt-2 grid gap-3 grid-cols-2 md:grid-cols-2">
+          <div class="mt-2 grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-4">
             <div>
               <label class="block text-xs sm:text-sm text-slate-600 mb-1">Aikaväli alkaa (klo)</label>
               <input
