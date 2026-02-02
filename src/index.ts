@@ -108,6 +108,21 @@ export default {
           );
         }
 
+        // Check if date is too far in the future (limit to ~1 day ahead)
+        const now = new Date();
+        const maxFutureDate = new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000);
+        if (requestedDate > maxFutureDate) {
+          return json(
+            { 
+              ok: false,
+              error: "No data yet",
+              timestamp: requestedDate.toISOString(),
+              note: "Data is not available for dates more than 1 day in the future"
+            },
+            { status: 400, headers: cors }
+          );
+        }
+
         const isoUtc = requestedDate.toISOString();
         const upstream = 
           "https://api.porssisahko.net/v2/price.json?date=" +
@@ -119,10 +134,16 @@ export default {
           if (response.ok) {
             const data = await response.json() as any;
             
-            // Extract price from response
-            const priceInCents = typeof data?.price === 'number' 
-              ? data.price 
-              : (typeof data?.PriceWithTax === 'number' ? data.PriceWithTax : null);
+            // Extract price from response - handle multiple possible formats
+            let priceInCents = null;
+            if (typeof data?.price === 'number') {
+              priceInCents = data.price;
+            } else if (typeof data?.PriceWithTax === 'number') {
+              priceInCents = data.PriceWithTax;
+            } else if (Array.isArray(data) && data.length > 0 && typeof data[0]?.price === 'number') {
+              // Handle array response
+              priceInCents = data[0].price;
+            }
             
             if (priceInCents !== null) {
               return json(
@@ -140,24 +161,15 @@ export default {
           console.error("Upstream API error:", apiError);
         }
 
-        // Fallback: return estimated price with variation based on hour
-        // Typical Finnish pricing: cheaper at night (2-6), expensive during day (10-18)
-        const hour = requestedDate.getUTCHours();
-        let estimatedPrice = 5.0;
-        if (hour >= 6 && hour <= 9) estimatedPrice = 8.5;
-        else if (hour >= 10 && hour <= 17) estimatedPrice = 12.0;
-        else if (hour >= 18 && hour <= 20) estimatedPrice = 9.5;
-        else if (hour >= 21 && hour <= 23) estimatedPrice = 6.5;
-        
+        // No data available from API
         return json(
           { 
-            ok: true, 
-            price: estimatedPrice,
+            ok: false,
+            error: "No data available",
             timestamp: requestedDate.toISOString(),
-            unit: "snt/kWh",
-            note: "Using estimated price - external API unavailable"
+            note: "External API unavailable or no data available for this date"
           },
-          { status: 200, headers: cors }
+          { status: 404, headers: cors }
         );
 
       } catch (error) {

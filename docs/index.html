@@ -199,12 +199,20 @@
 
     <div class="mt-4 bg-white rounded-2xl shadow p-4">
       <div class="flex items-center justify-between">
-        <div>
-          <div class="text-sm text-slate-600">Päivän pörssisähkö (snt/kWh)</div>
-          <div id="chartTitle" class="text-sm font-medium"></div>
+        <div class="flex items-center gap-3">
+          <button id="chartPrev" class="rounded-xl border px-3 py-2 text-sm hover:bg-slate-100" title="Aiemmat hinnat">
+            ← Aiemmin
+          </button>
+          <div>
+            <div class="text-sm text-slate-600">Päivän pörssisähkö (snt/kWh)</div>
+            <div id="chartTitle" class="text-sm font-medium"></div>
+          </div>
+          <button id="chartNext" class="rounded-xl border px-3 py-2 text-sm hover:bg-slate-100" title="Tulevat hinnat">
+            Myöhemmin →
+          </button>
         </div>
         <button id="loadDay" class="rounded-xl border px-3 py-2 text-sm hover:bg-slate-50">
-          Näytä päivän hinnat
+          Nykyhetki
         </button>
       </div>
 
@@ -636,6 +644,18 @@ function addSavings(euro) {
 
         const { rows, daily } = getSchedulableSelection(idxs, pickMode);
 
+        // Define candidates early so we can use them later
+        const s = Math.min(parseHour(winStart, 0), parseHour(winEnd, 23));
+        const e = Math.max(parseHour(winStart, 0), parseHour(winEnd, 23));
+        const candidates = [];
+        const maxStart = e - (durHours - 1);
+        for (let h = s; h <= maxStart; h++) {
+          const slice = pricesLocal.slice(h, h + durHours);
+          const avgP = slice.reduce((a,b)=>a+b,0) / slice.length;
+          candidates.push({ h, avgP });
+        }
+        candidates.sort((a,b)=>a.avgP - b.avgP);
+
         let costEuro = 0;
 
         const perUse = rows.filter(r => r.kind === "perUse");
@@ -687,16 +707,6 @@ function addSavings(euro) {
           box.classList.remove("hidden");
       }
 
-        const s = Math.min(parseHour(winStart, 0), parseHour(winEnd, 23));
-        const e = Math.max(parseHour(winStart, 0), parseHour(winEnd, 23));
-        const candidates = [];
-        const maxStart = e - (durHours - 1);
-        for (let h = s; h <= maxStart; h++) {
-          const slice = pricesLocal.slice(h, h + durHours);
-          const avgP = slice.reduce((a,b)=>a+b,0) / slice.length;
-          candidates.push({ h, avgP });
-        }
-        candidates.sort((a,b)=>a.avgP - b.avgP);
         const top3 = candidates.slice(0, 3)
           .map(x => `klo ${String(x.h).padStart(2,"0")} (avg ${x.avgP.toFixed(2)} snt/kWh)`)
           .join(" • ");
@@ -1032,6 +1042,19 @@ function addSavings(euro) {
         const better = diff > 0 ? "Aika 2" : "Aika 1";
         const abs = Math.abs(diff);
 
+        // Track savings
+        const savedNow = Math.max(0, abs);
+        const totals = addSavings(savedNow);
+
+        const box = document.getElementById("savingsBox");
+        if (box) {
+          box.innerHTML = `
+            <b>Säästit tässä laskennassa:</b> ${savedNow.toFixed(3)} € (valitsemalla ${better})<br/>
+            <b>Yhteensä säästetty:</b> ${totals.total.toFixed(3)} € (${totals.runs} laskua)
+          `;
+          box.classList.remove("hidden");
+        }
+
         const rows = perDevice.map(x =>
           `<div class="text-slate-700">• ${x.name}: ${x.qty} ${x.qtyLabel} → ${x.kwh.toFixed(2)} kWh</div>`
         ).join("");
@@ -1099,7 +1122,7 @@ function addSavings(euro) {
       return tip;
     }
 
-    function drawBarChartSolidWithHover(canvas, hourlyPrices) {
+    function drawBarChartSolidWithHover(canvas, hourlyPrices, startHour = 0) {
       const prices = (hourlyPrices || []).slice(0, 24);
       const ctx = canvas.getContext("2d");
 
@@ -1173,13 +1196,14 @@ function addSavings(euro) {
       const approxLabelW = 10;
       const step = Math.max(1, Math.ceil(approxLabelW / Math.max(1, barW)));
 
-      for (let hour = 0; hour < n; hour += step) {
-        const x = padL + hour * barW + barW / 2;
-        ctx.fillText(String(hour), x, padT + chartH + 6);
+      for (let i = 0; i < n; i += step) {
+        const displayHour = (startHour + i) % 24;
+        const x = padL + i * barW + barW / 2;
+        ctx.fillText(String(displayHour).padStart(2, "0"), x, padT + chartH + 6);
       }
 
       const tip = ensureTooltip(canvas);
-      canvas.__chartMeta = { padL, padT, chartW, chartH, barW, prices };
+      canvas.__chartMeta = { padL, padT, chartW, chartH, barW, prices, startHour };
 
       const onMove = (ev) => {
         const rect = canvas.getBoundingClientRect();
@@ -1201,8 +1225,9 @@ function addSavings(euro) {
         const idx = Math.floor((mx - meta.padL) / meta.barW);
         const hour = Math.max(0, Math.min(meta.prices.length - 1, idx));
         const v = meta.prices[hour];
+        const displayHour = (meta.startHour + hour) % 24;
 
-        const hourLabel = `${String(hour).padStart(2,"0")}:00–${String(hour).padStart(2,"0")}:59`;
+        const hourLabel = `${String(displayHour).padStart(2,"0")}:00–${String(displayHour).padStart(2,"00")}:59`;
 
         tip.innerHTML = `
           <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
@@ -1237,46 +1262,169 @@ function addSavings(euro) {
       canvas.addEventListener("mouseleave", onLeave);
     }
 
-    async function loadDayAndDraw() {
-      const dayStr = $("date1").value;
-      $("chartTitle").textContent = dayStr;
+    let chartOffset = 0; // Track current offset in hours
+    let chartLoading = false; // Prevent double-clicks
+
+    async function loadDayAndDraw(hoursOffset = 0) {
+      if (chartLoading) return; // Prevent multiple simultaneous requests
+      chartLoading = true;
+
+      chartOffset = hoursOffset;
+      const now = new Date();
+      const currentHour = now.getHours();
+      const currentDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+      // Calculate the starting hour with offset
+      const startingHourWithOffset = currentHour + hoursOffset;
+      const startHour = ((startingHourWithOffset % 24) + 24) % 24;
+      const dayOffset = Math.floor(startingHourWithOffset / 24);
+
+      const displayDate = new Date(currentDate);
+      displayDate.setDate(displayDate.getDate() + dayOffset);
+
+      const dateStr = `${displayDate.getFullYear()}-${String(displayDate.getMonth() + 1).padStart(2, '0')}-${String(displayDate.getDate()).padStart(2, '0')}`;
+      
+      if (hoursOffset === 0) {
+        $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - Nyt ⏳`;
+      } else if (hoursOffset > 0) {
+        $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - +${hoursOffset}h ⏳`;
+      } else {
+        $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - ${hoursOffset}h ⏳`;
+      }
 
       try {
-        const [y, m, d] = dayStr.split("-").map(Number);
+        const pricesLocal = [];
 
-        const pricesLocal = await Promise.all(
-          Array.from({ length: 24 }, async (_, h) => {
-            const local = new Date(y, m - 1, d, h, 0, 0);
-            const isoUtc = local.toISOString();
-            const url = `${PRICE_ENDPOINT}?date=${encodeURIComponent(isoUtc)}`;
+        // Build all fetch promises at once for parallel execution
+        const fetchPromises = [];
+        for (let i = 0; i < 22; i++) {
+          const hourOffset = startHour + i;
+          const daysOffset = Math.floor(hourOffset / 24);
+          const hourOfDay = hourOffset % 24;
+
+          const fetchDate = new Date(displayDate);
+          fetchDate.setDate(fetchDate.getDate() + daysOffset);
+
+          const y = fetchDate.getFullYear();
+          const m = String(fetchDate.getMonth() + 1).padStart(2, '0');
+          const d = String(fetchDate.getDate()).padStart(2, '0');
+
+          const local = new Date(y, fetchDate.getMonth(), fetchDate.getDate(), hourOfDay, 0, 0);
+          const isoUtc = local.toISOString();
+          const url = `${PRICE_ENDPOINT}?date=${encodeURIComponent(isoUtc)}`;
+          
+          fetchPromises.push(
+            fetch(url, { cache: "no-store" })
+              .then(res => res.json().catch(() => null))
+              .then(data => {
+                if (data && typeof data.price === 'number') {
+                  return data.price;
+                }
+                return 5.0; // fallback
+              })
+              .catch(() => 5.0)
+          );
+        }
+
+        // Wait for all fetches in parallel
+        const results = await Promise.all(fetchPromises);
+        pricesLocal.push(...results);
+
+        drawBarChartSolidWithHover($("dayChart"), pricesLocal, startHour);
+        
+        // Update title with final text (no loading indicator)
+        if (hoursOffset === 0) {
+          $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - Nyt`;
+        } else if (hoursOffset > 0) {
+          $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - +${hoursOffset}h`;
+        } else {
+          $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - ${hoursOffset}h`;
+        }
+      } catch (e) {
+        drawBarChartSolidWithHover($("dayChart"), Array(22).fill(0), startHour);
+        $("chartTitle").textContent = `Virhe hintojen haussa`;
+      } finally {
+        chartLoading = false;
+      }
+    }
+
+    // Calculate and display average daily price
+    async function updateDateAvgPrice(dateInputId) {
+      const dateStr = $(dateInputId).value;
+      if (!dateStr) return;
+
+      // Clear the earlier average price first
+      const dateInput = $(dateInputId);
+      const label = dateInput.previousElementSibling;
+      if (label) {
+        const originalText = label.textContent.split(" - ")[0].split("  ")[0];
+        label.textContent = originalText;
+      }
+
+      try {
+        const [y, m, d] = dateStr.split("-").map(Number);
+        const avgPrices = [];
+
+        // Fetch all 24 hours for the day in parallel
+        const promises = Array.from({ length: 24 }, async (_, h) => {
+          const local = new Date(y, m - 1, d, h, 0, 0);
+          const isoUtc = local.toISOString();
+          const url = `${PRICE_ENDPOINT}?date=${encodeURIComponent(isoUtc)}`;
+          
+          try {
             const res = await fetch(url, { cache: "no-store" });
             const data = await res.json().catch(() => null);
-            if (!res.ok || !data || typeof data.price !== "number") throw new Error("Päivähintojen haku epäonnistui");
-            return data.price;
-          })
-        );
+            return (data && typeof data.price === 'number') ? data.price : 5.0;
+          } catch {
+            return 5.0;
+          }
+        });
 
-        drawBarChartSolidWithHover($("dayChart"), pricesLocal);
+        const prices = await Promise.all(promises);
+        const avgPrice = prices.reduce((a, b) => a + b, 0) / prices.length;
+
+        // Find the label next to the date input and update it with new average
+        if (label) {
+          label.textContent = `${label.textContent}  ${avgPrice.toFixed(2)} snt/kWh`;
+        }
       } catch (e) {
-        drawBarChartSolidWithHover($("dayChart"), Array(24).fill(0));
-        $("chartTitle").textContent = `${dayStr} (ei hintadataa)`;
+        console.error("Error fetching avg price:", e);
       }
     }
 
     $("loadDay").addEventListener("click", async () => {
-      try { await loadDayAndDraw(); }
+      try { await loadDayAndDraw(0); }
+      catch (e) { $("chartTitle").textContent = `Virhe: ${e.message}`; }
+    });
+
+    $("chartPrev").addEventListener("click", async () => {
+      try { await loadDayAndDraw(chartOffset - 6); }
+      catch (e) { $("chartTitle").textContent = `Virhe: ${e.message}`; }
+    });
+
+    $("chartNext").addEventListener("click", async () => {
+      try { await loadDayAndDraw(chartOffset + 6); }
       catch (e) { $("chartTitle").textContent = `Virhe: ${e.message}`; }
     });
 
     $("date1").addEventListener("change", () => {
-      loadDayAndDraw().catch(() => {});
+      loadDayAndDraw(0).catch(() => {});
+      updateDateAvgPrice("date1");
+    });
+
+    $("date2").addEventListener("change", () => {
+      updateDateAvgPrice("date2");
+    });
+
+    $("date3").addEventListener("change", () => {
+      updateDateAvgPrice("date3");
     });
 
     let resizeRaf = null;
     window.addEventListener("resize", () => {
       if (resizeRaf) cancelAnimationFrame(resizeRaf);
       resizeRaf = requestAnimationFrame(() => {
-        loadDayAndDraw().catch(() => {});
+        loadDayAndDraw(chartOffset).catch(() => {});
       });
     });
 
@@ -1287,9 +1435,15 @@ function addSavings(euro) {
     renderDevices();
     onSelectionChange();
 
-    loadDayAndDraw().catch(e => {
+    // Load chart and calculate average prices
+    loadDayAndDraw(0).catch(e => {
       $("chartTitle").textContent = `Virhe: ${e.message}`;
     });
+
+    // Update average prices for all date inputs
+    updateDateAvgPrice("date1");
+    updateDateAvgPrice("date2");
+    updateDateAvgPrice("date3");
   });
   </script>
 </body>
