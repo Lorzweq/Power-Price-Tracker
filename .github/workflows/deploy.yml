@@ -14,13 +14,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Verify docs folder
+        shell: bash
         run: |
-          if (Test-Path docs/index.html) {
-            Write-Host "✓ index.html found"
-          } else {
-            Write-Host "✗ index.html not found"
+          if [ -f docs/index.html ]; then
+            echo "OK: index.html found"
+          else
+            echo "ERROR: index.html not found"
             exit 1
-          }
+          fi
 
       - name: Success
-        run: Write-Host "✓ Deployment ready"
+        shell: bash
+        run: echo "OK: Deployment ready"
