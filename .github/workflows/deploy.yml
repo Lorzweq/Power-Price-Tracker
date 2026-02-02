@@ -10,19 +10,21 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      - name: Checkout
+      - name: Checkout main branch
         uses: actions/checkout@v4
+        with:
+          ref: main
 
-      - name: Deploy to gh-pages branch
+      - name: Deploy to gh-pages
         shell: cmd
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git checkout --orphan gh-pages
-          git rm -rf .
-          xcopy /E /I /Y docs\* .
-          del /F /Q .github\workflows\deploy.yml
-          git add .
-          git commit -m "Deploy to GitHub Pages"
+          git fetch origin gh-pages || echo Creating new gh-pages branch
+          git checkout -B gh-pages
+          git rm -rf . || echo Already clean
+          xcopy /E /I /Y docs .\
+          git add -A
+          git commit -m "Deploy to GitHub Pages [skip ci]" || echo No changes
           git push -f origin gh-pages
           git checkout main
