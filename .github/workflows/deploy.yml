@@ -1,4 +1,4 @@
-name: Deploy to Pages
+name: Build and Deploy to Pages
 
 on:
   push:
@@ -6,23 +6,24 @@ on:
       - main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: self-hosted
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify docs folder
-        shell: cmd
-        run: |
-          if exist docs\index.html (
-            echo OK: index.html found
-          ) else (
-            echo ERROR: index.html not found
-            exit /b 1
-          )
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
 
-      - name: Success
-        shell: cmd
-        run: echo Deployment successful
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'docs'
+
+      - name: Deploy to Pages
+        uses: actions/deploy-pages@v3
