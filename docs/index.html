@@ -209,6 +209,8 @@
       </div>
 
       <canvas id="dayChart" class="mt-4 w-full" height="220"></canvas>
+  
+        <div id="savingsBox" class="hidden mt-3 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3"></div>
     </div>
 
     <!-- (OPTIONAALINEN) MAINOSPAIKKA: näytä vasta kun consent.ads === true 
@@ -456,7 +458,7 @@
     </script>
   </main>
 
-  <!-- SOVELLUSLOGIIKKA (sun iso scripti ennallaan) -->
+  <!-- SOVELLUSLOGIIKKA -->
   <script>
   document.addEventListener("DOMContentLoaded", () => {
     const $ = (id) => document.getElementById(id);
@@ -559,6 +561,40 @@
       }
       return best;
     }
+
+    function costForSliceEuro(slicePricesCents, perUseKwh, perHourKwhPerHour) {
+  // perUse: käytetään slice-keskiarvoa
+  const avgPrice = slicePricesCents.reduce((a, b) => a + b, 0) / slicePricesCents.length;
+  const perUseEuro = moneyEuro(avgPrice, perUseKwh);
+
+  // perHour: jokaiselle tunnille oma hinta
+  const perHourEuro = slicePricesCents.reduce(
+    (sum, priceCents) => sum + moneyEuro(priceCents, perHourKwhPerHour),
+    0
+  );
+
+  return perUseEuro + perHourEuro;
+}
+
+const SAVINGS_KEY = "psl_savings_v1";
+
+function loadSavings() {
+  try {
+    return JSON.parse(localStorage.getItem(SAVINGS_KEY)) || { total: 0, runs: 0 };
+  } catch {
+    return { total: 0, runs: 0 };
+  }
+}
+
+function addSavings(euro) {
+  const s = loadSavings();
+  s.total = (Number(s.total) || 0) + (Number(euro) || 0);
+  s.runs = (Number(s.runs) || 0) + 1;
+  localStorage.setItem(SAVINGS_KEY, JSON.stringify(s));
+  return s;
+}
+
+
     // ---- /EHDOTUSLASKURIN APUFUNKTIOT ----
 
     $("suggest").addEventListener("click", async () => {
@@ -622,6 +658,34 @@
           </div>
         ` : ""}
       `;
+
+      // Lasketaan kustannus jokaiselle mahdolliselle aloitusajalle (ajastettaville valinnoille)
+      const candidateCosts = candidates.map(({ h }) => {
+        const slice = pricesLocal.slice(h, h + durHours);
+        const euro = costForSliceEuro(slice, perUseKwh, perHourKwhPerHour);
+        return { h, euro };
+      });
+
+      // Vertailu: keskimääräinen ja kallein
+      const avgEuro = candidateCosts.reduce((s, x) => s + x.euro, 0) / candidateCosts.length;
+      const worstEuro = candidateCosts.reduce((m, x) => Math.max(m, x.euro), -Infinity);
+
+      // Säästö: valitse kumpaa haluat käyttää (keskimääräiseen verrattuna on "reilumpi")
+      const savingVsAvg = avgEuro - costEuro;
+      const savingVsWorst = worstEuro - costEuro;
+
+      // Tallennetaan vain positiiviset säästöt
+      const savedNow = Math.max(0, savingVsAvg);
+      const totals = addSavings(savedNow);
+
+      const box = document.getElementById("savingsBox");
+        if (box) {
+          box.innerHTML = `
+            <b>Säästit tässä haussa:</b> ${savedNow.toFixed(3)} € (verrattuna keskimääräiseen aloitusaikaan)<br/>
+            <b>Yhteensä säästetty:</b> ${totals.total.toFixed(3)} € (${totals.runs} hakua)
+          `;
+          box.classList.remove("hidden");
+      }
 
         const s = Math.min(parseHour(winStart, 0), parseHour(winEnd, 23));
         const e = Math.max(parseHour(winStart, 0), parseHour(winEnd, 23));
