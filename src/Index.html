@@ -1,0 +1,1043 @@
+<!doctype html>
+<html lang="fi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Pörssisähkö-säästölaskuri</title>
+</head>
+<body class="bg-slate-50 text-slate-900">
+  <main class="max-w-3xl mx-auto p-6">
+    <h1 class="text-2xl font-bold text-center">Pörssisähkö - säästö laitteella ja kellonajalla</h1>
+    <p class="mt-2 text-sm text-slate-600">
+      Laske, kuinka paljon voit säästää siirtämällä sähkölaitteiden käyttöä edullisempaan aikaan päivän aikana.
+      Valitse laitteet, määritä päivät ja kellonajat, ja paina "Laske säästö".
+    </p>
+    <div class="mt-6 grid gap-4 md:grid-cols-2">
+      <div class="bg-white rounded-2xl shadow p-4">
+        <label class="block text-sm font-medium">Laitteet</label>
+
+        <div id="deviceList" class="mt-2 grid gap-2"></div>
+
+        <p class="mt-2 text-xs text-slate-500">
+        Valitse yksi tai useampi laite.
+        </p>
+
+        <div class="mt-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm font-medium">Kulutus</span>
+            <span id="unitBadge" class="text-xs bg-slate-100 px-2 py-1 rounded-full"></span>
+          </div>
+          <p class="mt-1 text-sm text-slate-600" id="consumptionText"></p>
+
+          <label class="block mt-3 text-sm font-medium">Käytettävä arvo</label>
+          <select id="pick" class="mt-2 w-full rounded-xl border p-2">
+            <option value="min">Min</option>
+            <option value="avg" selected>Keskiarvo</option>
+            <option value="max">Max</option>
+          </select>
+
+          <p id="note" class="mt-3 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3 hidden"></p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl shadow p-4">
+        <div class="grid gap-3">
+          <div>
+                <label class="block text-sm font-medium">Aika 1 (päivä + tunti)</label>
+
+                <div class=" flex items-end gap-2">
+                        <input
+                        id="date1"
+                        type="date"
+                        class="flex-1 max-w-[16rem] rounded-xl border p-2"
+                        >
+
+                        <div class="flex flex-col">
+                        <label class="text-sm text-slate-600 mb-1">Klo</label>
+                        <input
+                            id="hour1"
+                            type="number"
+                            min="0"
+                            max="23"
+                            value="18"
+                            class="w-20 rounded-xl border p-2 text-center"
+                        />
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                <label class="block text-sm font-medium">Aika 2 (vertailu)</label>
+
+                 <div class="flex items-end gap-2">
+                        <input
+                        id="date2"
+                        type="date"
+                        class="flex-1 max-w-[16rem] rounded-xl border p-2"
+                        >
+
+                        <div class="flex flex-col">
+                        <label class="text-sm text-slate-600 mb-1">Klo</label>
+                        <input
+                            id="hour2"
+                            type="number"
+                            min="0"
+                            max="23"
+                            value="2"
+                            class="w-20 rounded-xl border p-2 text-center"
+                        />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 rounded-2xl border bg-slate-50 p-4">
+                <div class="text-sm font-medium">Ehdota halvin aika</div>
+
+                <div class="mt-2 grid gap-3 md:grid-cols-3">
+                    <div>
+                    <label class="block text-sm text-slate-600 mb-1">Aikaväli alkaa (klo)</label>
+                    <input id="winStart" type="number" min="0" max="23" value="0"
+                        class="w-full rounded-xl border p-2 text-center" />
+                    </div>
+
+                    <div>
+                    <label class="block text-sm text-slate-600 mb-1">Aikaväli päättyy (klo)</label>
+                    <input id="winEnd" type="number" min="0" max="23" value="23"
+                        class="w-full rounded-xl border p-2 text-center" />
+                    </div>
+
+                    <div>
+                    <label class="block text-sm text-slate-600 mb-1">Kesto tunteina (h)</label>
+                    <input id="durHours" type="number" min="1" max="24" value="1" class="w-full rounded-xl border p-2 text-center"
+                         input/>
+                    
+                    </div>
+                </div>
+
+                <button id="suggest" class="my-4 rounded-xl w-full bg-slate-600 text-white py-2 font-medium hover:bg-slate-500">
+                    Ehdota halvin aloitusaika
+                </button>
+
+                <div id="suggestOut" class="mt-3 text-sm text-slate-700"></div>
+            </div>
+
+          <button id="calc" class="my-4 rounded-xl w-full bg-slate-900 text-white py-2 font-medium hover:bg-slate-800">
+            Laske säästö
+          </button>
+
+          <div class="mt-2 rounded-2xl bg-slate-50 border p-4">
+            <div class="text-sm text-slate-600">Tulos</div>
+            <div id="out" class="mt-2 text-sm">Valitse laite ja paina “Laske säästö”.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-4 bg-white rounded-2xl shadow p-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <div class="text-sm text-slate-600">Päivän pörssisähkö (snt/kWh)</div>
+          <div id="chartTitle" class="text-sm font-medium"></div>
+        </div>
+        <button id="loadDay" class="rounded-xl border px-3 py-2 text-sm hover:bg-slate-50">
+          Näytä päivän hinnat
+        </button>
+      </div>
+
+      <canvas id="dayChart" class="mt-4 w-full" height="220"></canvas>
+    </div>
+  </main>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const $ = (id) => document.getElementById(id);
+
+ const DEVICES = [
+  { category: "Kylmälaitteet", name: "Jääkaappi",           min: 0.3,  max: 0.8,  unit: "kWh/vrk",   schedulable: false },
+  { category: "Kylmälaitteet", name: "Jääkaappi-pakastin",  min: 0.8,  max: 1.6,  unit: "kWh/vrk",   schedulable: false },
+  { category: "Kylmälaitteet", name: "Pakastin",            min: 0.5,  max: 1.5,  unit: "kWh/vrk",   schedulable: false },
+
+  { category: "Keittiö",       name: "Sähköliesi",          min: 1.0,  max: 2.0,  unit: "kWh/vrk",   schedulable: true  },
+  { category: "Keittiö",       name: "Induktioliesi",       min: 0.6,  max: 1.9,  unit: "kWh/30 min",schedulable: true  },
+  { category: "Keittiö",       name: "Airfryer",            min: 0.3,  max: 0.3,  unit: "kWh/10–15 min", schedulable: true },
+  { category: "Keittiö",       name: "Leivänpaahdin",       min: 0.1,  max: 0.1,  unit: "kWh/5 min", schedulable: true },
+  { category: "Keittiö",       name: "Parila / vohvelirauta",min: 0.2, max: 0.2,  unit: "kWh/10 min",schedulable: true },
+  { category: "Keittiö",       name: "Mikroaaltouuni",      min: 0.12, max: 0.20, unit: "kWh/10 min",schedulable: true },
+  { category: "Keittiö",       name: "Vedenkeitin",         min: 0.10, max: 0.10, unit: "kWh/5 min", schedulable: true },
+  { category: "Keittiö",       name: "Kahvinkeitin",        min: 0.10, max: 0.10, unit: "kWh/10 min",schedulable: true },
+  { category: "Keittiö",       name: "Liesituuletin",       min: 0.2,  max: 0.2,  unit: "kWh/h",     schedulable: true },
+
+  { category: "Kodinhoito",    name: "Astianpesukone",      min: 0.6,  max: 1.6,  unit: "kWh/kerta", schedulable: true },
+  { category: "Kodinhoito",    name: "Pyykinpesukone",      min: 0.2,  max: 2.5,  unit: "kWh/kerta", schedulable: true },
+  { category: "Kodinhoito",    name: "Kuivausrumpu",        min: 2.0,  max: 6.0,  unit: "kWh/kerta", schedulable: true },
+  { category: "Kodinhoito",    name: "Kuivauskaappi",       min: 2.2,  max: 2.8,  unit: "kWh/3 kg",  schedulable: true },
+
+  { category: "Viihde",        name: "Televisio (LED)",     min: 0.08, max: 0.16, unit: "kWh/h",     schedulable: true },
+  { category: "Viihde",        name: "Televisio (Plasma)",  min: 0.15, max: 0.30, unit: "kWh/h",     schedulable: true },
+  { category: "Viihde",        name: "Digiboksi",           min: 0.02, max: 0.05, unit: "kWh/h",     schedulable: true },
+  { category: "Viihde",        name: "Pelikonsoli",         min: 0.10, max: 0.15, unit: "kWh/h",     schedulable: true },
+
+  { category: "Tietotekniikka",name: "Kannettava tietokone",min: 0.03, max: 0.03, unit: "kWh/h",     schedulable: true },
+  { category: "Tietotekniikka",name: "Pöytätietokone",      min: 0.13, max: 0.18, unit: "kWh/h",     schedulable: true },
+  { category: "Tietotekniikka",name: "Pelitietokone",       min: 0.05, max: 0.16, unit: "kWh/h",     schedulable: true },
+  { category: "Tietotekniikka",name: "Tabletti",            min: 0.003,max: 0.003,unit: "kWh/h",     schedulable: true },
+  { category: "Tietotekniikka",name: "Laajakaistamodeemi",  min: 0.14, max: 0.14, unit: "kWh/vrk",   schedulable: false },
+
+  { category: "Toimisto",      name: "Monitoimilaite",      min: 0.09, max: 0.09, unit: "kWh/vrk",   schedulable: false },
+  { category: "Toimisto",      name: "Tulostin",            min: 0.05, max: 0.05, unit: "kWh/vrk",   schedulable: false },
+];
+      const PRICE_ENDPOINT = "https://porssisahko-proxy.leevi-hanninen3.workers.dev";
+
+  // ---- EHDOTUSLASKURIN APUFUNKTIOT (pidä tässä, ennen suggest-listeneriä) ----
+  function parseHour(x, fallback = 0) {
+    const n = Number(x);
+    if (!Number.isFinite(n)) return fallback;
+    return Math.max(0, Math.min(23, Math.floor(n)));
+  }
+
+  function parseIntClamped(x, min, max, fallback) {
+    const n = Math.floor(Number(x));
+    if (!Number.isFinite(n)) return fallback;
+    return Math.max(min, Math.min(max, n));
+  }
+
+  function unitKind(unit) {
+    if (unit.includes("kWh/vrk")) return "daily";
+    if (unit.includes("kWh/h")) return "perHour";
+    return "perUse";
+  }
+
+  function getSchedulableSelection(idxs, pickMode) {
+    const rows = [];
+    const daily = [];
+
+    idxs.forEach(i => {
+      const d = DEVICES[i];
+      const qty = getQtyForIndex(i);
+      const kwhBase = pickedKwh(d, pickMode) * qty;
+
+      const kind = unitKind(d.unit);
+      const row = { i, name: d.name, unit: d.unit, kind, kwhBase, schedulable: d.schedulable };
+
+      if (kind === "daily" || !d.schedulable) daily.push(row);
+      else rows.push(row);
+    });
+
+    return { rows, daily };
+  }
+
+  function findCheapestStart(prices24, winStart, winEnd, durHours) {
+    const start = parseHour(winStart, 0);
+    const end = parseHour(winEnd, 23);
+    const dur = parseIntClamped(durHours, 1, 24, 1);
+
+    const s = Math.min(start, end);
+    const e = Math.max(start, end);
+
+    const maxStart = e - (dur - 1);
+    if (maxStart < s) return null;
+
+    let best = { hour: s, avgPrice: Infinity, slice: [] };
+
+    for (let h = s; h <= maxStart; h++) {
+      const slice = prices24.slice(h, h + dur);
+      const avgPrice = slice.reduce((a, b) => a + b, 0) / slice.length;
+
+      if (avgPrice < best.avgPrice) {
+        best = { hour: h, avgPrice, slice };
+      }
+    }
+    return best;
+  }
+  // ---- /EHDOTUSLASKURIN APUFUNKTIOT ----
+
+    $("suggest").addEventListener("click", async () => {
+    const idxs = getSelectedDeviceIndexes();
+    if (idxs.length === 0) {
+        $("suggestOut").textContent = "Valitse vähintään yksi laite.";
+        return;
+    }
+
+    const dayStr = $("date1").value;
+    const pickMode = $("pick").value;
+
+    $("suggestOut").textContent = "Haetaan päivän hinnat ja etsitään halvin aika…";
+
+    try {
+        const [y, m, d] = dayStr.split("-").map(Number);
+
+        // Hae päivän 24 tuntihintaa (sama logiikka kuin loadDayAndDraw)
+        const pricesLocal = await Promise.all(
+        Array.from({ length: 24 }, async (_, h) => {
+            const local = new Date(y, m - 1, d, h, 0, 0);
+            const isoUtc = local.toISOString();
+            const url = `${PRICE_ENDPOINT}?date=${encodeURIComponent(isoUtc)}`;
+            const res = await fetch(url, { cache: "no-store" });
+            const data = await res.json().catch(() => null);
+            if (!res.ok || !data || typeof data.price !== "number") throw new Error("Päivähintojen haku epäonnistui");
+            return data.price; // snt/kWh
+        })
+        );
+
+        const winStart = $("winStart").value;
+        const winEnd = $("winEnd").value;
+        const durHours = parseIntClamped($("durHours").value, 1, 24, 1);
+
+        const best = findCheapestStart(pricesLocal, winStart, winEnd, durHours);
+        if (!best) {
+        $("suggestOut").textContent = "Valittu aikaväli on liian lyhyt valitulle kestolle.";
+        return;
+        }
+
+        // Erotellaan optimointiin kelpaavat laitteet
+        const { rows, daily } = getSchedulableSelection(idxs, pickMode);
+
+        // Lasketaan kustannus parhaalle jaksolle:
+        // - perUse: käytetään best.avgPrice (siirretään “tähän tuntiin”)
+        // - perHour: käytetään best.slice (tunti tunnilta)
+        // - daily: ei vaikuta ajastukseen -> raportoidaan erikseen (voi halutessa laskea vaikka best.avgPrice:lla, mutta se on harhaanjohtavaa)
+        let costEuro = 0;
+
+        // perUse
+        const perUse = rows.filter(r => r.kind === "perUse");
+        const perUseKwh = perUse.reduce((s, r) => s + r.kwhBase, 0);
+        costEuro += moneyEuro(best.avgPrice, perUseKwh);
+
+        // perHour (kesto vaikuttaa)
+        const perHour = rows.filter(r => r.kind === "perHour");
+        const perHourKwhPerHour = perHour.reduce((s, r) => s + r.kwhBase, 0);
+        // kustannus = sum(hinnan_tunti * kwh_per_h) tuntijaksolta
+        const perHourEuro = best.slice.reduce((sum, priceCents) => sum + moneyEuro(priceCents, perHourKwhPerHour), 0);
+        costEuro += perHourEuro;
+
+        const hh = String(best.hour).padStart(2, "0");
+        const hhEnd = String(best.hour + durHours - 1).padStart(2, "0");
+
+        const noteDaily = daily.length
+        ? `<div class="mt-2 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">
+            Huom: mukana on jatkuvaa kulutusta (kWh/vrk / “jatkuva”), jota ei kannata optimoida kellonajalla:
+            ${daily.map(x => x.name).join(", ")}.
+            </div>`
+        : "";
+
+        // Näytetään myös TOP 3 aloitusta (helpottaa käyttäjää)
+        const s = Math.min(parseHour(winStart, 0), parseHour(winEnd, 23));
+        const e = Math.max(parseHour(winStart, 0), parseHour(winEnd, 23));
+        const candidates = [];
+        const maxStart = e - (durHours - 1);
+        for (let h = s; h <= maxStart; h++) {
+        const slice = pricesLocal.slice(h, h + durHours);
+        const avgP = slice.reduce((a,b)=>a+b,0) / slice.length;
+        candidates.push({ h, avgP });
+        }
+        candidates.sort((a,b)=>a.avgP - b.avgP);
+        const top3 = candidates.slice(0, 3)
+        .map(x => `klo ${String(x.h).padStart(2,"0")} (avg ${x.avgP.toFixed(2)} snt/kWh)`)
+        .join(" • ");
+
+        $("suggestOut").innerHTML = `
+        <div style="line-height:1.6">
+            <div><b>Halvin aloitusaika</b> valitulla aikavälillä:</div>
+            <div class="mt-1">
+            <b>${dayStr} klo ${hh}:00</b> ${durHours > 1 ? `– ${hhEnd}:59 (${durHours} h)` : "(1 h)"}
+            <br/>
+            Keskimääräinen hinta: <b>${best.avgPrice.toFixed(2)} snt/kWh</b>
+            </div>
+
+            <div class="mt-2">
+            Arvioitu kustannus (ajastettavat valinnat): <b>${costEuro.toFixed(3)} €</b>
+            </div>
+
+            <div class="mt-2 text-xs text-slate-600">
+            Seuraavat vaihtoehdot : ${top3}
+            </div>
+
+            ${noteDaily}
+        </div>
+        `;
+    } catch (e) {
+        $("suggestOut").textContent = `Virhe: ${e.message}`;
+        console.error(e);
+    }
+    });
+  
+
+  const STORAGE_KEY = "psl_state_v1";
+
+    function saveState() {
+        const selected = Array.from(document.querySelectorAll('input[name="device"]:checked'))
+            .map(cb => Number(cb.value))
+            .filter(Number.isFinite);
+
+        const qty = {};
+        document.querySelectorAll('input[name="qty"]').forEach(inp => {
+            const i = inp.dataset.i;
+            qty[i] = Number(inp.value) || 1;
+        });
+
+        // kategoriat: true = hidden, false = näkyvissä
+        const cats = {};
+        document.querySelectorAll("[data-cat-body]").forEach(div => {
+            cats[div.id] = div.classList.contains("hidden");
+        });
+
+        const state = { selected, qty, cats, pick: $("pick").value };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+function loadState() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return null;
+  try { return JSON.parse(raw); } catch { return null; }
+}
+
+  function unitQtyLabel(unit) {
+  if (unit.includes("kWh/h")) return "h";
+  if (unit.includes("kWh/vrk")) return "vrk";
+  if (unit.includes("kWh/kerta")) return "krt";
+  // esim. kWh/30 min, kWh/10 min, kWh/5 min, kWh/3 kg jne
+  return "krt";
+}
+
+function getQtyForIndex(i) {
+  const el = document.querySelector(`input[name="qty"][data-i="${i}"]`);
+  const v = el ? Number(el.value) : 1;
+  return Number.isFinite(v) && v > 0 ? v : 1;
+}
+
+  function twoDigits(n) { return (n < 10 ? "0" + n : "" + n); }
+  function avg(a, b) { return (a + b) / 2; }
+
+  function pickedKwh(device, pickMode) {
+    if (pickMode === "min") return device.min;
+    if (pickMode === "max") return device.max;
+    return avg(device.min, device.max);
+  }
+
+  function getSelectedDeviceIndexes() {
+    return Array.from(document.querySelectorAll('input[name="device"]:checked'))
+      .map(el => Number(el.value))
+      .filter(n => Number.isFinite(n));
+  }
+
+  function setTodayDefaults() {
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = twoDigits(today.getMonth() + 1);
+    const dd = twoDigits(today.getDate());
+    const iso = `${yyyy}-${mm}-${dd}`;
+    $("date1").value = iso;
+    $("date2").value = iso;
+  }
+
+  function renderDevices() {
+    const groups = DEVICES.reduce((acc, d, i) => {
+        (acc[d.category] ||= []).push({ d, i });
+        return acc;
+    }, {});
+
+        const html = Object.entries(groups).map(([cat, items]) => {
+            const bodyId = `cat-${cat.replace(/\s+/g, "-")}`;
+
+            const rows = items.map(({ d, i }) => {
+            const qtyLabel = unitQtyLabel(d.unit);
+
+            return `
+                <label class="flex items-center gap-3 rounded-xl border p-3 hover:bg-slate-50">
+                <input
+                    type="checkbox"
+                    name="device"
+                    value="${i}"
+                    class="h-4 w-4"
+                >
+
+                <div class="flex-1">
+                    <div class="text-sm font-medium">${d.name}</div>
+                    <div class="text-xs text-slate-600">${d.min}–${d.max} ${d.unit}</div>
+                </div>
+
+                <div class="flex flex-col items-end gap-1">
+                    <span class="text-[11px] px-3 py-1 rounded-full ${
+                    d.schedulable
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : "bg-slate-100 text-slate-700"
+                    }">
+                    ${d.schedulable ? "ajastettava" : "jatkuva"}
+                    </span>
+
+                    <div class="flex items-center gap-1">
+                    <input
+                        type="number"
+                        name="qty"
+                        data-i="${i}"
+                        min="1"
+                        step="1"
+                        value="1"
+                        disabled
+                        class="w-16 rounded-lg border p-1 text-center text-sm disabled:bg-slate-100"
+                    />
+                    <span class="text-xs text-slate-600">${qtyLabel}</span>
+                    </div>
+                </div>
+                </label>
+            `;
+            }).join("");
+
+            return `
+            <div class="mt-4">
+                <button
+                type="button"
+                class="flex w-full items-center justify-between text-xs font-semibold uppercase text-slate-600 tracking-wide mb-2"
+                onclick="document.getElementById('${bodyId}').classList.toggle('hidden'); saveState();"
+                >
+                <span>${cat}</span>
+                <span>▾</span>
+                </button>
+
+                <div id="${bodyId}" data-cat-body class="grid gap-2 hidden">
+                ${rows}
+                </div>
+            </div>
+            `;
+        }).join("");
+
+    $("deviceList").innerHTML = html;
+
+    // checkbox → aktivoi qty
+    document.querySelectorAll('input[name="device"]').forEach(cb => {
+       cb.addEventListener("change", () => {
+        const i = Number(cb.value);
+        const qty = document.querySelector(`input[name="qty"][data-i="${i}"]`);
+        if (qty) qty.disabled = !cb.checked;
+
+        onSelectionChange();
+        saveState();
+        });
+    });
+
+    // qty muutos
+    document.querySelectorAll('input[name="qty"]').forEach(q => {
+        q.addEventListener("input", () => {
+            onSelectionChange();
+            saveState();
+        });
+    });
+
+    // oletus: eka laite aktiivinen
+    const first = document.querySelector('input[name="device"][value="0"]');
+    if (first) {
+        first.checked = true;
+        const q = document.querySelector(`input[name="qty"][data-i="0"]`);
+        if (q) q.disabled = false;
+    }
+
+    const st = loadState();
+
+    if (st) {
+    // pick
+    if (st.pick) $("pick").value = st.pick;
+
+    // kategoriat
+    if (st.cats) {
+        Object.entries(st.cats).forEach(([id, isHidden]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.classList.toggle("hidden", !!isHidden);
+        });
+    }
+
+    // qty
+    if (st.qty) {
+        Object.entries(st.qty).forEach(([i, v]) => {
+        const el = document.querySelector(`input[name="qty"][data-i="${i}"]`);
+        if (el) el.value = v;
+        });
+    }
+
+    // selected + enable qty
+    if (Array.isArray(st.selected)) {
+        document.querySelectorAll('input[name="device"]').forEach(cb => {
+        const i = Number(cb.value);
+        const checked = st.selected.includes(i);
+        cb.checked = checked;
+
+        const qtyEl = document.querySelector(`input[name="qty"][data-i="${i}"]`);
+        if (qtyEl) qtyEl.disabled = !checked;
+        });
+    }
+    } else {
+    // oletus kuten ennen
+    const first = document.querySelector('input[name="device"][value="0"]');
+    if (first) {
+        first.checked = true;
+        const q = document.querySelector(`input[name="qty"][data-i="0"]`);
+        if (q) q.disabled = false;
+    }
+    }
+
+    onSelectionChange();
+    }
+
+  function onSelectionChange() {
+    const idxs = getSelectedDeviceIndexes();
+    const pickMode = $("pick").value;
+
+    if (idxs.length === 0) {
+      $("unitBadge").textContent = "";
+      $("consumptionText").textContent = "Valitse vähintään yksi laite.";
+      $("note").classList.add("hidden");
+      return;
+    }
+
+    const selected = idxs.map(i => DEVICES[i]);
+
+    const totalKwh = selected.reduce((sum, d, idx) => {
+    const i = idxs[idx];
+    const qty = getQtyForIndex(i);
+    return sum + pickedKwh(d, pickMode) * qty;
+    }, 0);
+
+    const units = Array.from(new Set(selected.map(d => d.unit)));
+    $("unitBadge").textContent = units.length === 1 ? units[0] : "yhteensä";
+
+    const lines = idxs.map(i => {
+    const d = DEVICES[i];
+    const qty = getQtyForIndex(i);
+    const base = pickedKwh(d, pickMode);
+    const lbl = unitQtyLabel(d.unit);
+    return `${d.name} × ${qty} ${lbl} → ${(base * qty).toFixed(2)} kWh`;
+    }).join(" • ");
+
+    $("consumptionText").textContent = `${lines} | yhteensä ${totalKwh.toFixed(2)} kWh`;
+
+    const names = selected.map(d => d.name).join(", ");
+    $("consumptionText").textContent = `${names} → yhteensä ${totalKwh.toFixed(2)} (valitulla arvolla)`;
+
+    const hasNonSched = selected.some(d => !d.schedulable || d.unit.includes("kWh/vrk"));
+    const note = $("note");
+    if (hasNonSched) {
+      note.classList.remove("hidden");
+      note.textContent =
+        "Mukana on jatkuvaa kulutusta (kWh/vrk). Kellonajan vaihtaminen ei yleensä tuo selkeää säästöä samalla tavalla kuin 'kerta'-laitteissa, mutta laskenta näyttää silti hintojen erotuksen valitulla kulutusarvolla.";
+    } else {
+      note.classList.add("hidden");
+    }
+  }
+
+  async function fetchPriceCentsPerKwh(dateStr, hour) {
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const h = Number(hour);
+
+    if (!y || !m || !d || Number.isNaN(h)) {
+      throw new Error("Päivä tai tunti puuttuu/virheellinen");
+    }
+
+    const local = new Date(y, m - 1, d, h, 0, 0);
+    if (Number.isNaN(local.getTime())) {
+      throw new Error("Invalid Date (päivä/tunti)");
+    }
+
+    const isoUtc = local.toISOString();
+    const url = `${PRICE_ENDPOINT}?date=${encodeURIComponent(isoUtc)}`;
+
+    const res = await fetch(url, { cache: "no-store" });
+    const data = await res.json().catch(() => null);
+
+    if (!res.ok || !data || typeof data.price !== "number") {
+      throw new Error("API ei palauttanut data.price-numeroa");
+    }
+
+    return data.price; // snt/kWh
+  }
+
+  async function fetchDayPrices(dayStr) {
+    const url = `${PRICE_ENDPOINT}?day=${encodeURIComponent(dayStr)}`;
+    const res = await fetch(url, { cache: "no-store" });
+    const data = await res.json().catch(() => null);
+    if (!res.ok || !data || !Array.isArray(data.prices)) {
+      throw new Error("Päivähintojen haku epäonnistui");
+    }
+    return data;
+  }
+
+  function moneyEuro(centsPerKwh, kwh) {
+    return (centsPerKwh / 100) * kwh;
+  }
+
+  async function calculate() {
+    const idxs = getSelectedDeviceIndexes();
+    if (idxs.length === 0) {
+      $("out").textContent = "Valitse vähintään yksi laite.";
+      return;
+    }
+
+    const pickMode = $("pick").value;
+    const selected = idxs.map(i => DEVICES[i]);
+
+    const date1 = $("date1").value;
+    const date2 = $("date2").value;
+    const hour1 = $("hour1").value;
+    const hour2 = $("hour2").value;
+
+    const perDevice = selected.map((d, ix) => {
+    const i = idxs[ix];
+    const qty = getQtyForIndex(i);
+    const base = pickedKwh(d, pickMode);
+    return {
+        name: d.name,
+        unit: d.unit,
+        qty,
+        qtyLabel: unitQtyLabel(d.unit),
+        kwh: base * qty,
+    };
+    });
+
+    function parseHour(x, fallback = 0) {
+  const n = Number(x);
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(0, Math.min(23, Math.floor(n)));
+}
+
+function parseIntClamped(x, min, max, fallback) {
+  const n = Math.floor(Number(x));
+  if (!Number.isFinite(n)) return fallback;
+  return Math.max(min, Math.min(max, n));
+}
+
+function unitKind(unit) {
+  // karkea luokittelu optimointia varten
+  if (unit.includes("kWh/vrk")) return "daily";
+  if (unit.includes("kWh/h")) return "perHour";
+  return "perUse"; // kWh/kerta, kWh/30 min, kWh/10 min jne
+}
+
+function getSchedulableSelection(idxs, pickMode) {
+  // Palauttaa listan optimointiin sopivista riveistä + jatkuvat erikseen
+  const rows = [];
+  const daily = [];
+
+  idxs.forEach(i => {
+    const d = DEVICES[i];
+    const qty = getQtyForIndex(i);
+    const kwhBase = pickedKwh(d, pickMode) * qty;
+
+    const kind = unitKind(d.unit);
+    const row = { i, name: d.name, unit: d.unit, kind, kwhBase, schedulable: d.schedulable };
+
+    if (kind === "daily" || !d.schedulable) daily.push(row);
+    else rows.push(row);
+  });
+
+  return { rows, daily };
+}
+
+    // Etsii halvimman aloitustunnin (tai halvimman peräkkäisen jakson) annetussa ikkunassa.
+    function findCheapestStart(prices24, winStart, winEnd, durHours) {
+        const start = parseHour(winStart, 0);
+        const end = parseHour(winEnd, 23);
+        const dur = parseIntClamped(durHours, 1, 24, 1);
+
+        const s = Math.min(start, end);
+        const e = Math.max(start, end);
+
+        // mahdolliset aloitukset niin että [start, start+dur-1] mahtuu ikkunaan
+        const maxStart = e - (dur - 1);
+        if (maxStart < s) return null;
+
+        let best = { hour: s, avgPrice: Infinity, slice: [] };
+
+        for (let h = s; h <= maxStart; h++) {
+            const slice = prices24.slice(h, h + dur);
+            const avgPrice = slice.reduce((a, b) => a + b, 0) / slice.length;
+
+            if (avgPrice < best.avgPrice) {
+            best = { hour: h, avgPrice, slice };
+            }
+        }
+        return best;
+    }
+
+    const totalKwh = perDevice.reduce((s, x) => s + x.kwh, 0);
+
+    $("out").textContent = "Haetaan hintoja…";
+
+    try {
+      const [p1, p2] = await Promise.all([
+        fetchPriceCentsPerKwh(date1, hour1),
+        fetchPriceCentsPerKwh(date2, hour2),
+      ]);
+
+      const cost1 = moneyEuro(p1, totalKwh);
+      const cost2 = moneyEuro(p2, totalKwh);
+      const diff = cost1 - cost2;
+
+      const better = diff > 0 ? "Aika 2" : "Aika 1";
+      const abs = Math.abs(diff);
+
+      const rows = perDevice.map(x =>
+        `<div class="text-slate-700">• ${x.name}: ${x.qty} ${x.qtyLabel} → ${x.kwh.toFixed(2)} kWh</div>`
+      ).join("");
+
+      $("out").innerHTML = `
+        <div style="line-height:1.6">
+          <div><b>Valitut laitteet</b> (${idxs.length} kpl)</div>
+          <div class="mt-1">${rows}</div>
+
+          <div class="mt-2"><b>Yhteiskulutus:</b> ${totalKwh.toFixed(2)} kWh</div>
+
+          <div class="mt-2">Aika 1 (${date1} klo ${twoDigits(Number(hour1))}): <b>${p1.toFixed(2)} snt/kWh</b> → <b>${cost1.toFixed(3)} €</b></div>
+          <div>Aika 2 (${date2} klo ${twoDigits(Number(hour2))}): <b>${p2.toFixed(2)} snt/kWh</b> → <b>${cost2.toFixed(3)} €</b></div>
+
+          <div class="mt-2">Säästö yhteensä: <b>${abs.toFixed(3)} €</b> (edullisempi: <b>${better}</b>)</div>
+        </div>
+      `;
+    } catch (e) {
+      $("out").textContent = `Virhe: ${e.message}`;
+      console.error(e);
+    }
+  }
+
+  function clamp01(x) { return Math.max(0, Math.min(1, x)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  // Parempi väriskaala: vihreä (halpa) -> keltainen -> punainen (kallis)
+  function colorForT_Solid(t) {
+    t = clamp01(t);
+    let hue;
+    if (t < 0.5) {
+      const tt = t / 0.5;
+      hue = lerp(120, 50, tt);
+    } else {
+      const tt = (t - 0.5) / 0.5;
+      hue = lerp(50, 0, tt);
+    }
+    return `hsl(${hue.toFixed(0)} 75% 45%)`;
+  }
+
+  function ensureTooltip(canvas) {
+    const parent = canvas.parentElement;
+    if (getComputedStyle(parent).position === "static") {
+      parent.style.position = "relative";
+    }
+
+    let tip = parent.querySelector(".chart-tooltip");
+    if (!tip) {
+      tip = document.createElement("div");
+      tip.className = "chart-tooltip";
+      tip.style.position = "absolute";
+      tip.style.pointerEvents = "none";
+      tip.style.zIndex = "20";
+      tip.style.display = "none";
+      tip.style.minWidth = "160px";
+      tip.style.maxWidth = "240px";
+      tip.style.padding = "10px 12px";
+      tip.style.borderRadius = "12px";
+      tip.style.background = "rgba(15,23,42,0.92)";
+      tip.style.color = "white";
+      tip.style.font = "12px system-ui";
+      tip.style.boxShadow = "0 10px 25px rgba(0,0,0,0.18)";
+      tip.style.border = "1px solid rgba(255,255,255,0.12)";
+      parent.appendChild(tip);
+    }
+    return tip;
+  }
+
+  function drawBarChartSolidWithHover(canvas, hourlyPrices) {
+    const prices = (hourlyPrices || []).slice(0, 24);
+    const ctx = canvas.getContext("2d");
+
+    const cssW = canvas.clientWidth;
+    const cssH = canvas.getAttribute("height") ? Number(canvas.getAttribute("height")) : 220;
+
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(cssH * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    const w = cssW, h = cssH;
+    ctx.clearRect(0, 0, w, h);
+
+    const padL = 46, padR = 10, padT = 10, padB = 34;
+    const chartW = w - padL - padR;
+    const chartH = h - padT - padB;
+
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    const span = Math.max(1e-9, max - min);
+    const n = prices.length;
+    const barW = chartW / n;
+
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(15,23,42,0.20)";
+    ctx.beginPath();
+    ctx.moveTo(padL, padT);
+    ctx.lineTo(padL, padT + chartH);
+    ctx.lineTo(padL + chartW, padT + chartH);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(15,23,42,0.75)";
+    ctx.font = "12px system-ui";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+
+    const yForVal = (v) => padT + (1 - (v - min) / span) * chartH;
+
+    [max, (min + max) / 2, min].forEach((v) => {
+      const y = yForVal(v);
+      ctx.fillText(v.toFixed(2), padL - 8, y);
+
+      ctx.strokeStyle = "rgba(15,23,42,0.06)";
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(padL + chartW, y);
+      ctx.stroke();
+    });
+
+    for (let i = 0; i < n; i++) {
+      const v = prices[i];
+      const t = (v - min) / span;
+      const bh = ((v - min) / span) * chartH;
+
+      const x = padL + i * barW;
+      const y = padT + (chartH - bh);
+
+      ctx.fillStyle = colorForT_Solid(t);
+      ctx.fillRect(x, y, Math.max(1, barW), bh);
+
+      ctx.strokeStyle = "rgba(15,23,42,0.10)";
+      ctx.strokeRect(x + 0.5, y + 0.5, Math.max(1, barW) - 1, Math.max(0, bh - 1));
+    }
+
+    ctx.fillStyle = "rgba(15,23,42,0.75)";
+    ctx.font = "10px system-ui";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+
+    const approxLabelW = 10;
+    const step = Math.max(1, Math.ceil(approxLabelW / Math.max(1, barW)));
+
+    for (let hour = 0; hour < n; hour += step) {
+      const x = padL + hour * barW + barW / 2;
+      ctx.fillText(String(hour), x, padT + chartH + 6);
+    }
+
+    const tip = ensureTooltip(canvas);
+    canvas.__chartMeta = { padL, padT, chartW, chartH, barW, prices };
+
+    const onMove = (ev) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = ev.clientX - rect.left;
+      const my = ev.clientY - rect.top;
+
+      const meta = canvas.__chartMeta;
+      if (!meta) return;
+
+      const inside =
+        mx >= meta.padL && mx <= meta.padL + meta.chartW &&
+        my >= meta.padT && my <= meta.padT + meta.chartH;
+
+      if (!inside) {
+        tip.style.display = "none";
+        return;
+      }
+
+      const idx = Math.floor((mx - meta.padL) / meta.barW);
+      const hour = Math.max(0, Math.min(meta.prices.length - 1, idx));
+      const v = meta.prices[hour];
+
+      const hourLabel = `${String(hour).padStart(2,"0")}:00–${String(hour).padStart(2,"0")}:59`;
+      const q0 = v, q1 = v, q2 = v, q3 = v;
+
+      tip.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="font-weight:700">${hourLabel}</div>
+          <div style="font-weight:700">${v.toFixed(2)} <span style="font-weight:500; opacity:.85">snt/kWh</span></div>
+        </div>
+      `;
+
+      const parentRect = canvas.parentElement.getBoundingClientRect();
+      let left = (ev.clientX - parentRect.left) + 12;
+      let top  = (ev.clientY - parentRect.top) - 12;
+
+      tip.style.display = "block";
+      tip.style.left = left + "px";
+      tip.style.top = top + "px";
+
+      const tipRect = tip.getBoundingClientRect();
+      const maxLeft = parentRect.width - tipRect.width - 8;
+      const maxTop  = parentRect.height - tipRect.height - 8;
+      if (left > maxLeft) tip.style.left = Math.max(8, maxLeft) + "px";
+      if (top > maxTop) tip.style.top = Math.max(8, maxTop) + "px";
+    };
+
+    const onLeave = () => { tip.style.display = "none"; };
+
+    if (canvas.__hoverBound) {
+      canvas.removeEventListener("mousemove", canvas.__hoverBound.onMove);
+      canvas.removeEventListener("mouseleave", canvas.__hoverBound.onLeave);
+    }
+    canvas.__hoverBound = { onMove, onLeave };
+    canvas.addEventListener("mousemove", onMove);
+    canvas.addEventListener("mouseleave", onLeave);
+  }
+
+  async function loadDayAndDraw() {
+  const dayStr = $("date1").value;
+  $("chartTitle").textContent = dayStr;
+
+  try {
+    // Rakennetaan 24h sarja paikallisen päivän tunneista samalla tavalla kuin fetchPriceCentsPerKwh()
+    const [y, m, d] = dayStr.split("-").map(Number);
+
+    const pricesLocal = await Promise.all(
+      Array.from({ length: 24 }, async (_, h) => {
+        const local = new Date(y, m - 1, d, h, 0, 0);
+        const isoUtc = local.toISOString();
+        const url = `${PRICE_ENDPOINT}?date=${encodeURIComponent(isoUtc)}`;
+        const res = await fetch(url, { cache: "no-store" });
+        const data = await res.json().catch(() => null);
+        if (!res.ok || !data || typeof data.price !== "number") throw new Error("Päivähintojen haku epäonnistui");
+        return data.price; // snt/kWh
+      })
+    );
+
+    drawBarChartSolidWithHover($("dayChart"), pricesLocal);
+  } catch (e) {
+    drawBarChartSolidWithHover($("dayChart"), Array(24).fill(0));
+    $("chartTitle").textContent = `${dayStr} (ei hintadataa)`;
+  }
+}
+
+  $("loadDay").addEventListener("click", async () => {
+    try { await loadDayAndDraw(); }
+    catch (e) { $("chartTitle").textContent = `Virhe: ${e.message}`; }
+  });
+
+  $("date1").addEventListener("change", () => {
+    loadDayAndDraw().catch(() => {});
+  });
+
+  let resizeRaf = null;
+  window.addEventListener("resize", () => {
+    if (resizeRaf) cancelAnimationFrame(resizeRaf);
+    resizeRaf = requestAnimationFrame(() => {
+      loadDayAndDraw().catch(() => {});
+    });
+  });
+
+  $("pick").addEventListener("change", onSelectionChange);
+  $("calc").addEventListener("click", calculate);
+
+  setTodayDefaults();
+  renderDevices();
+  onSelectionChange();
+
+  loadDayAndDraw().catch(e => {
+    $("chartTitle").textContent = `Virhe: ${e.message}`;
+  });
+});
+</script>
+</body>
+</html>
