@@ -8,23 +8,19 @@ on:
 jobs:
   deploy:
     runs-on: self-hosted
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v3
+      - name: Verify docs folder
+        run: |
+          if (Test-Path docs/index.html) {
+            Write-Host "✓ index.html found"
+          } else {
+            Write-Host "✗ index.html not found"
+            exit 1
+          }
 
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: 'docs'
-
-      - name: Deploy to Pages
-        id: deployment
-        uses: actions/deploy-pages@v2
+      - name: Success
+        run: Write-Host "✓ Deployment ready"
