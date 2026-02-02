@@ -108,16 +108,16 @@ export default {
           );
         }
 
-        // Check if date is too far in the future (limit to ~1 day ahead)
+        // Check if date is too far in the future (limit to ~2 days ahead to allow full tomorrow)
         const now = new Date();
-        const maxFutureDate = new Date(now.getTime() + 1 * 24 * 60 * 60 * 1000);
+        const maxFutureDate = new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000);
         if (requestedDate > maxFutureDate) {
           return json(
             { 
               ok: false,
               error: "No data yet",
               timestamp: requestedDate.toISOString(),
-              note: "Data is not available for dates more than 1 day in the future"
+              note: "Data is not available for dates more than 2 days in the future"
             },
             { status: 400, headers: cors }
           );
