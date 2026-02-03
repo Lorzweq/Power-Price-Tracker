@@ -181,7 +181,14 @@ export async function checkSupabasePremiumStatus() {
       .from('premium_users')
       .select('is_premium')
       .eq('user_id', currentUser.id)
-      .single();
+      .maybeSingle();
+
+    // If user is deleted or session is invalid, logout
+    if (error?.code === 'PGRST401' || error?.status === 401) {
+      console.warn('Session invalid, logging out');
+      await handleLogout();
+      return false;
+    }
 
     if (error) {
       console.error('Error checking premium status:', error);
