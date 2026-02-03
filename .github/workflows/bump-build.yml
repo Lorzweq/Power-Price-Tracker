@@ -29,7 +29,8 @@ jobs:
 
           text = index_path.read_text(encoding='utf-8')
 
-          m = re.search(r'Build\s+(\d+)\.(\d{3})v', text)
+          # Match both "Build X.XXXv" and "<span>Build</span> X.XXXv" patterns
+          m = re.search(r'(?:Build|</span>)\s+(\d+)\.(\d{3})v', text)
           if not m:
             raise SystemExit('Build number not found in docs/Index.html')
 
@@ -42,7 +43,8 @@ jobs:
             minor += 1
 
           new_build = f'{major}.{minor:03d}v'
-          new_text = re.sub(r'Build\s+\d+\.\d{3}v', f'Build {new_build}', text, count=1)
+          # Replace the version number after "Build</span> " or "Build "
+          new_text = re.sub(r'((?:Build|</span>)\s+)\d+\.\d{3}v', rf'\g<1>{new_build}', text, count=1)
           index_path.write_text(new_text, encoding='utf-8')
 
           if updates_path.exists():
