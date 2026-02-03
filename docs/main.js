@@ -735,174 +735,178 @@ function ensureTooltip(canvas) {
 }
 
 function drawBarChartSolidWithHover(canvas, hourlyPrices, startHour = 0, quarterMinPrices = null) {
-  console.log("🟦 drawBarChartSolidWithHover called with canvas:", canvas, "prices:", hourlyPrices);
-  
-  if (!canvas) {
-    console.error("❌ Canvas element is null!");
-    return;
-  }
-
-  const prices = (hourlyPrices || []).slice(0, 24);
-  console.log("🟦 Prices array length:", prices.length, "values:", prices);
-  
-  const ctx = canvas.getContext("2d");
-  if (!ctx) {
-    console.error("❌ Could not get canvas context!");
-    return;
-  }
-
-  const parentWidth = canvas.parentElement?.clientWidth || 400;
-  const cssW = Math.min(parentWidth, window.innerWidth - 40);
-  const cssH = 220;
-
-  const dpr = window.devicePixelRatio || 1;
-  console.log("🟦 Setting canvas size: width=" + Math.floor(cssW * dpr) + " height=" + Math.floor(cssH * dpr) + " dpr=" + dpr);
-  
-  canvas.width = Math.floor(cssW * dpr);
-  canvas.height = Math.floor(cssH * dpr);
-  canvas.style.width = cssW + 'px';
-  canvas.style.height = cssH + 'px';
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-  const w = cssW, h = cssH;
-  ctx.clearRect(0, 0, w, h);
-
-  const padL = 46, padR = 10, padT = 10, padB = 34;
-  const chartW = w - padL - padR;
-  const chartH = h - padT - padB;
-
-  const min = Math.min(...prices);
-  const max = Math.max(...prices);
-  const span = Math.max(1e-9, max - min);
-  const n = prices.length;
-  const barW = chartW / n;
-
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = "rgba(15,23,42,0.20)";
-  ctx.beginPath();
-  ctx.moveTo(padL, padT);
-  ctx.lineTo(padL, padT + chartH);
-  ctx.lineTo(padL + chartW, padT + chartH);
-  ctx.stroke();
-
-  ctx.fillStyle = "rgba(15,23,42,0.75)";
-  ctx.font = "12px system-ui";
-  ctx.textAlign = "right";
-  ctx.textBaseline = "middle";
-
-  const yForVal = (v) => padT + (1 - (v - min) / span) * chartH;
-
-  [max, (min + max) / 2, min].forEach((v) => {
-    const y = yForVal(v);
-    ctx.fillText(v.toFixed(2), padL - 8, y);
-
-    ctx.strokeStyle = "rgba(15,23,42,0.06)";
-    ctx.beginPath();
-    ctx.moveTo(padL, y);
-    ctx.lineTo(padL + chartW, y);
-    ctx.stroke();
-  });
-
-  for (let i = 0; i < n; i++) {
-    const v = prices[i];
-    const t = (v - min) / span;
-    const bh = ((v - min) / span) * chartH;
-
-    const x = padL + i * barW;
-    const y = padT + (chartH - bh);
-
-    ctx.fillStyle = colorForT_Solid(t);
-    ctx.fillRect(x, y, Math.max(1, barW), bh);
-
-    ctx.strokeStyle = "rgba(15,23,42,0.10)";
-    ctx.strokeRect(x + 0.5, y + 0.5, Math.max(1, barW) - 1, Math.max(0, bh - 1));
-  }
-
-  ctx.fillStyle = "rgba(15,23,42,0.75)";
-  ctx.font = "10px system-ui";
-  ctx.textAlign = "center";
-  ctx.textBaseline = "top";
-
-  const approxLabelW = 10;
-  const step = Math.max(1, Math.ceil(approxLabelW / Math.max(1, barW)));
-
-  for (let i = 0; i < n; i += step) {
-    const displayHour = (startHour + i) % 24;
-    const x = padL + i * barW + barW / 2;
-    ctx.fillText(String(displayHour).padStart(2, "0"), x, padT + chartH + 6);
-  }
-
-  const tip = ensureTooltip(canvas);
-  canvas.__chartMeta = { padL, padT, chartW, chartH, barW, prices, startHour, quarterMinPrices };
-
-  const onMove = (ev) => {
-    const rect = canvas.getBoundingClientRect();
-    const mx = ev.clientX - rect.left;
-    const my = ev.clientY - rect.top;
-
-    const meta = canvas.__chartMeta;
-    if (!meta) return;
-
-    const inside =
-      mx >= meta.padL && mx <= meta.padL + meta.chartW &&
-      my >= meta.padT && my <= meta.padT + meta.chartH;
-
-    if (!inside) {
-      tip.style.display = "none";
+  try {
+    console.log("🟦 drawBarChartSolidWithHover called with canvas:", canvas, "prices:", hourlyPrices);
+    
+    if (!canvas) {
+      console.error("❌ Canvas element is null!");
       return;
     }
 
-    const idx = Math.floor((mx - meta.padL) / meta.barW);
-    const hour = Math.max(0, Math.min(meta.prices.length - 1, idx));
-    const v = meta.prices[hour];
-    const displayHour = (meta.startHour + hour) % 24;
-
-    const hourLabel = `${String(displayHour).padStart(2,"0")}:00–${String(displayHour).padStart(2,"0")}:59`;
-
-    let detailHTML = ``;
-    if (meta.quarterMinPrices && meta.quarterMinPrices[hour]) {
-      const qPrices = meta.quarterMinPrices[hour];
-      const details = [
-        `00–14 min: ${qPrices[0].toFixed(2)}`,
-        `15–29 min: ${qPrices[1].toFixed(2)}`,
-        `30–44 min: ${qPrices[2].toFixed(2)}`,
-        `45–59 min: ${qPrices[3].toFixed(2)}`
-      ].join(" | ");
-      detailHTML = `<div style="font-size:10px; opacity:0.8; margin-top:4px;">${details} snt/kWh</div>`;
+    const prices = (hourlyPrices || []).slice(0, 24);
+    console.log("🟦 Prices array length:", prices.length, "values:", prices);
+    
+    const ctx = canvas.getContext("2d");
+    if (!ctx) {
+      console.error("❌ Could not get canvas context!");
+      return;
     }
 
-    tip.innerHTML = `
-      <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-        <div style="font-weight:700">${hourLabel}</div>
-        <div style="font-weight:700">${v.toFixed(2)} <span style="font-weight:500; opacity:.85">snt/kWh</span></div>
-      </div>
-      ${detailHTML}
-    `;
+    const parentWidth = canvas.parentElement?.clientWidth || 400;
+    const cssW = Math.min(parentWidth, window.innerWidth - 40);
+    const cssH = 220;
 
-    const parentRect = canvas.parentElement.getBoundingClientRect();
-    let left = (ev.clientX - parentRect.left) + 12;
-    let top  = (ev.clientY - parentRect.top) - 12;
+    const dpr = window.devicePixelRatio || 1;
+    console.log("🟦 Setting canvas size: width=" + Math.floor(cssW * dpr) + " height=" + Math.floor(cssH * dpr) + " dpr=" + dpr);
+    
+    canvas.width = Math.floor(cssW * dpr);
+    canvas.height = Math.floor(cssH * dpr);
+    canvas.style.width = cssW + 'px';
+    canvas.style.height = cssH + 'px';
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-    tip.style.display = "block";
-    tip.style.left = left + "px";
-    tip.style.top = top + "px";
+    const w = cssW, h = cssH;
+    ctx.clearRect(0, 0, w, h);
 
-    const tipRect = tip.getBoundingClientRect();
-    const maxLeft = parentRect.width - tipRect.width - 8;
-    const maxTop  = parentRect.height - tipRect.height - 8;
-    if (left > maxLeft) tip.style.left = Math.max(8, maxLeft) + "px";
-    if (top > maxTop) tip.style.top = Math.max(8, maxTop) + "px";
-  };
+    const padL = 46, padR = 10, padT = 10, padB = 34;
+    const chartW = w - padL - padR;
+    const chartH = h - padT - padB;
 
-  const onLeave = () => { tip.style.display = "none"; };
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    const span = Math.max(1e-9, max - min);
+    const n = prices.length;
+    const barW = chartW / n;
 
-  if (canvas.__hoverBound) {
-    canvas.removeEventListener("mousemove", canvas.__hoverBound.onMove);
-    canvas.removeEventListener("mouseleave", canvas.__hoverBound.onLeave);
+    ctx.lineWidth = 1;
+    ctx.strokeStyle = "rgba(15,23,42,0.20)";
+    ctx.beginPath();
+    ctx.moveTo(padL, padT);
+    ctx.lineTo(padL, padT + chartH);
+    ctx.lineTo(padL + chartW, padT + chartH);
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(15,23,42,0.75)";
+    ctx.font = "12px system-ui";
+    ctx.textAlign = "right";
+    ctx.textBaseline = "middle";
+
+    const yForVal = (v) => padT + (1 - (v - min) / span) * chartH;
+
+    [max, (min + max) / 2, min].forEach((v) => {
+      const y = yForVal(v);
+      ctx.fillText(v.toFixed(2), padL - 8, y);
+
+      ctx.strokeStyle = "rgba(15,23,42,0.06)";
+      ctx.beginPath();
+      ctx.moveTo(padL, y);
+      ctx.lineTo(padL + chartW, y);
+      ctx.stroke();
+    });
+
+    for (let i = 0; i < n; i++) {
+      const v = prices[i];
+      const t = (v - min) / span;
+      const bh = ((v - min) / span) * chartH;
+
+      const x = padL + i * barW;
+      const y = padT + (chartH - bh);
+
+      ctx.fillStyle = colorForT_Solid(t);
+      ctx.fillRect(x, y, Math.max(1, barW), bh);
+
+      ctx.strokeStyle = "rgba(15,23,42,0.10)";
+      ctx.strokeRect(x + 0.5, y + 0.5, Math.max(1, barW) - 1, Math.max(0, bh - 1));
+    }
+
+    ctx.fillStyle = "rgba(15,23,42,0.75)";
+    ctx.font = "10px system-ui";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+
+    const approxLabelW = 10;
+    const step = Math.max(1, Math.ceil(approxLabelW / Math.max(1, barW)));
+
+    for (let i = 0; i < n; i += step) {
+      const displayHour = (startHour + i) % 24;
+      const x = padL + i * barW + barW / 2;
+      ctx.fillText(String(displayHour).padStart(2, "0"), x, padT + chartH + 6);
+    }
+
+    const tip = ensureTooltip(canvas);
+    canvas.__chartMeta = { padL, padT, chartW, chartH, barW, prices, startHour, quarterMinPrices };
+
+    const onMove = (ev) => {
+      const rect = canvas.getBoundingClientRect();
+      const mx = ev.clientX - rect.left;
+      const my = ev.clientY - rect.top;
+
+      const meta = canvas.__chartMeta;
+      if (!meta) return;
+
+      const inside =
+        mx >= meta.padL && mx <= meta.padL + meta.chartW &&
+        my >= meta.padT && my <= meta.padT + meta.chartH;
+
+      if (!inside) {
+        tip.style.display = "none";
+        return;
+      }
+
+      const idx = Math.floor((mx - meta.padL) / meta.barW);
+      const hour = Math.max(0, Math.min(meta.prices.length - 1, idx));
+      const v = meta.prices[hour];
+      const displayHour = (meta.startHour + hour) % 24;
+
+      const hourLabel = `${String(displayHour).padStart(2,"0")}:00–${String(displayHour).padStart(2,"0")}:59`;
+
+      let detailHTML = ``;
+      if (meta.quarterMinPrices && meta.quarterMinPrices[hour]) {
+        const qPrices = meta.quarterMinPrices[hour];
+        const details = [
+          `00–14 min: ${qPrices[0].toFixed(2)}`,
+          `15–29 min: ${qPrices[1].toFixed(2)}`,
+          `30–44 min: ${qPrices[2].toFixed(2)}`,
+          `45–59 min: ${qPrices[3].toFixed(2)}`
+        ].join(" | ");
+        detailHTML = `<div style="font-size:10px; opacity:0.8; margin-top:4px;">${details} snt/kWh</div>`;
+      }
+
+      tip.innerHTML = `
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
+          <div style="font-weight:700">${hourLabel}</div>
+          <div style="font-weight:700">${v.toFixed(2)} <span style="font-weight:500; opacity:.85">snt/kWh</span></div>
+        </div>
+        ${detailHTML}
+      `;
+
+      const parentRect = canvas.parentElement.getBoundingClientRect();
+      let left = (ev.clientX - parentRect.left) + 12;
+      let top  = (ev.clientY - parentRect.top) - 12;
+
+      tip.style.display = "block";
+      tip.style.left = left + "px";
+      tip.style.top = top + "px";
+
+      const tipRect = tip.getBoundingClientRect();
+      const maxLeft = parentRect.width - tipRect.width - 8;
+      const maxTop  = parentRect.height - tipRect.height - 8;
+      if (left > maxLeft) tip.style.left = Math.max(8, maxLeft) + "px";
+      if (top > maxTop) tip.style.top = Math.max(8, maxTop) + "px";
+    };
+
+    const onLeave = () => { tip.style.display = "none"; };
+
+    if (canvas.__hoverBound) {
+      canvas.removeEventListener("mousemove", canvas.__hoverBound.onMove);
+      canvas.removeEventListener("mouseleave", canvas.__hoverBound.onLeave);
+    }
+    canvas.__hoverBound = { onMove, onLeave };
+    canvas.addEventListener("mousemove", onMove);
+    canvas.addEventListener("mouseleave", onLeave);
+  } catch (e) {
+    console.error("❌ Error in drawBarChartSolidWithHover:", e);
   }
-  canvas.__hoverBound = { onMove, onLeave };
-  canvas.addEventListener("mousemove", onMove);
-  canvas.addEventListener("mouseleave", onLeave);
 }
 
 async function loadDayAndDraw(hoursOffset = 0) {
@@ -1409,9 +1413,29 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Initialize
-  setTodayDefaults();
-  renderDevices();
-  onSelectionChange();
+  console.log("🟦 DOMContentLoaded initialization starting");
+  
+  try {
+    console.log("🟦 Setting today defaults...");
+    setTodayDefaults();
+    console.log("🟦 Today defaults set");
+  } catch (e) {
+    console.error("❌ Error in setTodayDefaults:", e);
+  }
+  
+  try {
+    console.log("🟦 Rendering devices...");
+    renderDevices();
+    console.log("🟦 Devices rendered");
+  } catch (e) {
+    console.error("❌ Error in renderDevices:", e);
+  }
+  
+  try {
+    onSelectionChange();
+  } catch (e) {
+    console.error("❌ Error in onSelectionChange:", e);
+  }
 
   // Load chart
   loadDayAndDraw(0).catch(e => {
