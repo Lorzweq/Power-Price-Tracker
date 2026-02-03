@@ -229,7 +229,7 @@
                 step="0.01"
                 min="0"
               />
-              <button id="startPriceWatch" class="rounded-xl bg-blue-600 text-white py-2 px-3 font-medium hover:bg-blue-500 text-xs sm:text-sm" title="Käynnistä hinnan seuranta">
+              <button id="startPriceWatch" class="rounded-xl bg-slate-600 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Käynnistä hinnan seuranta">
                 Käynnistä
               </button>
               <button id="stopPriceWatch" class="hidden rounded-xl bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Pysäytä hinnan seuranta">
@@ -1603,6 +1603,14 @@ function addSavings(euro) {
         $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - ${hoursOffset}h ⏳`;
       }
 
+      const dayChartElement = $("dayChart");
+      console.log("dayChart element:", dayChartElement);
+      if (!dayChartElement) {
+        console.error("dayChart element not found!");
+        chartLoading = false;
+        return;
+      }
+
       try {
         // Fetch latest prices if not cached
         if (!cachedPrices) {
@@ -1695,7 +1703,7 @@ function addSavings(euro) {
 
         console.log("About to draw chart with prices:", pricesLocal);
         console.log("quarterMinPrices count:", quarterMinPrices.length);
-        drawBarChartSolidWithHover($("dayChart"), pricesLocal, startHour, quarterMinPrices);
+        drawBarChartSolidWithHover(dayChartElement, pricesLocal, startHour, quarterMinPrices);
         console.log("Chart drawn successfully");
         
         // Update title with final text (no loading indicator)
