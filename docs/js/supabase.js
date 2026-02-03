@@ -88,12 +88,12 @@ export async function activatePremium() {
 
   const premiumKey = keyInput.value.trim().toUpperCase();
   if (!premiumKey) {
-    alert('Anna premium-avain!');
+    showToast('Anna premium-avain');
     return;
   }
 
   if (!supabase) {
-    alert('Supabase ei ole konfiguroitu');
+    showToast('Supabase ei ole konfiguroitu');
     return;
   }
 
@@ -107,13 +107,13 @@ export async function activatePremium() {
       .single();
 
     if (keyError || !keyData) {
-      alert('Virheellinen tai jo käytetty premium-avain!');
+      showToast('Virheellinen tai jo käytetty premium-avain');
       return;
     }
 
     // Check if key has expired
     if (keyData.expires_at && new Date(keyData.expires_at) < new Date()) {
-      alert('Premium-avain on vanhentunut!');
+      showToast('Premium-avain on vanhentunut');
       return;
     }
 
@@ -137,11 +137,11 @@ export async function activatePremium() {
     isPremium = true;
     localStorage.setItem('isPremium', 'true');
     updatePremiumUI();
-    alert('Premium aktivoitu onnistuneesti!');
+    showToast('Premium aktivoitu onnistuneesti');
     keyInput.value = '';
   } catch (error) {
     console.error('Premium activation error:', error);
-    alert('Virhe premium-aktivoinnissa: ' + error.message);
+    showToast('Virhe premium-aktivoinnissa: ' + error.message);
   }
 }
 
@@ -149,10 +149,13 @@ async function activatePremiumInSupabase(premiumKey) {
   if (!supabase || !currentUser) return;
 
   try {
+    const deviceId = await generateDeviceId();
+    
     const { error } = await supabase
       .from('premium_users')
       .upsert({
         user_id: currentUser.id,
+        device_id: deviceId,
         premium_key: premiumKey,
         is_premium: true,
         activated_at: new Date().toISOString()
