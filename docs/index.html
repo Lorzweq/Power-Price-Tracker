@@ -17,6 +17,46 @@
       display: inline-block;
       transition: transform 0.3s ease;
     }
+
+    html.dark {
+      color-scheme: dark;
+    }
+
+    html.dark body {
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    html.dark .bg-white { background: #0b1220 !important; }
+    html.dark .bg-slate-50 { background: #0f172a !important; }
+    html.dark .bg-slate-100 { background: #111827 !important; }
+    html.dark .bg-slate-200 { background: #1f2937 !important; }
+    html.dark .bg-slate-300 { background: #253043 !important; }
+    html.dark .bg-slate-400 { background: #334155 !important; }
+    html.dark .bg-slate-600 { background: #334155 !important; }
+    html.dark .bg-slate-700 { background: #334155 !important; }
+    html.dark .bg-slate-900 { background: #0b1220 !important; }
+    html.dark .text-slate-900 { color: #e2e8f0 !important; }
+    html.dark .text-slate-700 { color: #cbd5e1 !important; }
+    html.dark .text-slate-600 { color: #94a3b8 !important; }
+    html.dark .text-slate-500 { color: #94a3b8 !important; }
+    html.dark .text-slate-400 { color: #94a3b8 !important; }
+    html.dark .border { border-color: #1f2937 !important; }
+    html.dark .shadow { box-shadow: 0 10px 25px rgba(0,0,0,0.4) !important; }
+    html.dark .bg-gradient-to-r { background: #0b1220 !important; }
+    html.dark .bg-blue-50 { background: #0f1a2e !important; }
+    html.dark .border-blue-200 { border-color: #1e293b !important; }
+    html.dark .text-blue-900 { color: #e2e8f0 !important; }
+    html.dark .text-blue-800 { color: #cbd5e1 !important; }
+    html.dark .hover\:bg-slate-50:hover { background: #0f1a2e !important; }
+    html.dark label.border { background: #0b1220 !important; }
+    html.dark input, html.dark select, html.dark textarea { background: #0b1220 !important; color: #e2e8f0 !important; border-color: #1f2937 !important; }
+    html.dark input::placeholder, html.dark textarea::placeholder { color: #94a3b8 !important; }
+    html.dark input:disabled { background: #111827 !important; color: #94a3b8 !important; }
+    html.dark input[type="checkbox"] { accent-color: #38bdf8; }
+    html.dark .bg-amber-50 { background: #3b2f1a !important; }
+    html.dark .border-amber-200 { border-color: #7c5a2b !important; }
+    html.dark .text-amber-700 { color: #f8c27a !important; }
     
     /* Modal Blur Overlay */
     .modal-overlay {
@@ -98,8 +138,16 @@
 
 <body class="bg-slate-50 text-slate-900">
   <main class="w-full mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 max-w-7xl">
-    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-center">Pörssisähkö - säästö laitteella ja kellonajalla</h1>
-    <p class="mt-2 text-xs sm:text-sm text-slate-600 text-center max-w-2xl mx-auto">
+    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-center" data-i18n="mainTitle">Pörssisähkö - säästö laitteella ja kellonajalla</h1>
+    <div class="mt-3 flex justify-center gap-2">
+      <button id="themeToggle" class="rounded-xl border px-3 py-2 text-xs sm:text-sm bg-slate-200 text-slate-700 hover:bg-slate-300" data-i18n="darkMode">
+        Tumma tila
+      </button>
+      <button id="languageToggle" class="rounded-xl border px-3 py-2 text-xs sm:text-sm bg-slate-200 text-slate-700 hover:bg-slate-300" data-i18n="languageToggle">
+        English
+      </button>
+    </div>
+    <p class="mt-2 text-xs sm:text-sm text-slate-600 text-center max-w-2xl mx-auto" data-i18n="subtitle">
       Laske, kuinka paljon voit säästää siirtämällä sähkölaitteiden käyttöä edullisempaan aikaan päivän aikana.
       Valitse laitteet, määritä päivät ja kellonajat ja paina "Laske säästö".
     </p>
@@ -109,35 +157,37 @@
       <div class="flex items-center justify-between cursor-pointer" id="authHeader">
         <div class="flex items-center gap-2">
           <span id="authToggle" class="text-slate-900 transition-transform">▼</span>
-          <div class="text-sm font-semibold text-slate-900">👤 Kirjautuminen</div>
+          <div class="text-sm font-semibold text-slate-900" data-i18n="authentication">👤 Kirjautuminen</div>
         </div>
-        <span id="authStatusBadge" class="text-xs px-2 py-1 rounded-lg bg-slate-200 text-slate-700">Ei kirjautunut</span>
+        <span id="authStatusBadge" class="text-xs px-2 py-1 rounded-lg bg-slate-200 text-slate-700" data-i18n="notLoggedIn">Ei kirjautunut</span>
       </div>
       
       <div id="authContent" class="mt-3 hidden">
         <div id="loginForm" class="p-3 rounded-lg bg-white border border-slate-300">
-          <p class="text-xs font-semibold text-slate-900 mb-2">Kirjaudu sisään</p>
+          <p class="text-xs font-semibold text-slate-900 mb-2" data-i18n="loginTitle">Kirjaudu sisään</p>
           <div class="flex flex-col gap-2">
             <input
               id="authEmail"
               type="email"
               placeholder="Sähköposti"
+              data-i18n="email"
               class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
             />
             <input
               id="authPassword"
               type="password"
               placeholder="Salasana"
+              data-i18n="password"
               class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
             />
-            <button id="forgotPasswordLink" class="text-xs text-slate-500 hover:text-slate-700 underline mb-2 text-left w-full">
+            <button id="forgotPasswordLink" class="text-xs text-slate-500 hover:text-slate-700 underline mb-2 text-left w-full" data-i18n="forgotPassword">
               Unohditko salasanan?
             </button>
             <div class="flex gap-2">
-              <button id="loginBtn" class="flex-1 rounded-lg bg-slate-600 text-white py-2 px-3 font-bold hover:bg-slate-500 text-xs">
+              <button id="loginBtn" class="flex-1 rounded-lg bg-slate-600 text-white py-2 px-3 font-bold hover:bg-slate-500 text-xs" data-i18n="loginBtn">
                 Kirjaudu
               </button>
-              <button id="openSignupModal" class="flex-1 rounded-lg bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-300 text-xs">
+              <button id="openSignupModal" class="flex-1 rounded-lg bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-300 text-xs" data-i18n="signupBtn">
                 Rekisteröidy
               </button>
             </div>
@@ -148,10 +198,10 @@
           <div class="flex items-center justify-between mb-3">
             <p class="text-xs font-semibold text-slate-900">👤 <span id="userEmail"></span></p>
             <div class="flex gap-2">
-              <button id="changePasswordBtn" class="rounded-lg bg-slate-300 text-slate-700 py-1 px-2 font-medium hover:bg-slate-400 text-xs">
+              <button id="changePasswordBtn" class="rounded-lg bg-slate-300 text-slate-700 py-1 px-2 font-medium hover:bg-slate-400 text-xs" data-i18n="changePassword">
                 Vaihda salasana
               </button>
-              <button id="logoutBtn" class="rounded-lg bg-slate-400 text-white py-1 px-2 font-medium hover:bg-slate-300 text-xs">
+              <button id="logoutBtn" class="rounded-lg bg-slate-400 text-white py-1 px-2 font-medium hover:bg-slate-300 text-xs" data-i18n="logout">
                 Kirjaudu ulos
               </button>
             </div>
@@ -159,19 +209,20 @@
 
           <!-- Premium Key Activation -->
           <div id="premiumKeySection" class="p-3 rounded-lg bg-yellow-50 border border-yellow-300">
-            <p class="text-xs font-semibold text-yellow-900 mb-2">Aktivoi Premium</p>
+            <p class="text-xs font-semibold text-yellow-900 mb-2" data-i18n="activatePremium">Aktivoi Premium</p>
             <div class="flex gap-2">
               <input
                 id="premiumKeyInput"
                 type="text"
                 placeholder="Syötä premium-avain"
+                data-i18n="premiumKeyPlaceholder"
                 class="flex-1 h-9 rounded-lg border border-yellow-300 p-2 text-xs"
               />
-              <button id="activatePremium" class="rounded-lg bg-yellow-500 text-slate-900 py-2 px-3 font-bold hover:bg-yellow-400 text-xs">
+              <button id="activatePremium" class="rounded-lg bg-yellow-500 text-slate-900 py-2 px-3 font-bold hover:bg-yellow-400 text-xs" data-i18n="activateBtn">
                 Aktivoi
               </button>
             </div>
-            <p class="mt-2 text-xs text-yellow-800">Laite ID: <span id="deviceIdDisplay" class="font-mono"></span></p>
+            <p class="mt-2 text-xs text-yellow-800" data-i18n="deviceId">Laite ID: <span id="deviceIdDisplay" class="font-mono"></span></p>
           </div>
         </div>
       </div>
@@ -180,10 +231,10 @@
      <div id="installSection" class="mt-4 rounded-2xl bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 p-3 sm:p-4">
         <div class="mt-4 rounded-2xl bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 p-3 sm:p-4">
           <div class="flex items-center justify-between mb-2">
-            <div class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+            <div class="text-sm font-semibold text-slate-900 flex items-center gap-2" data-i18n="installation">
               Asennus
             </div>
-            <span class="text-xs px-2 py-1 rounded-lg bg-slate-200 text-slate-700">
+            <span class="text-xs px-2 py-1 rounded-lg bg-slate-200 text-slate-700" data-i18n="application">
               Sovellus
             </span>
           </div>
@@ -192,11 +243,12 @@
             id="installPromptBtn"
             class="hidden w-full rounded-lg bg-slate-600 text-white py-2 px-4 font-bold hover:bg-slate-500 transition text-sm"
             title="Asenna sovellus puhelimeesi"
+            data-i18n="installApp"
           >
             Asenna sovellus
           </button>
 
-          <p class="mt-2 text-xs text-slate-600">
+          <p class="mt-2 text-xs text-slate-600" data-i18n="installDescription">
             Asenna sovellus puhelimeesi nopeampaa käyttöä varten
           </p>
         </div>
@@ -208,28 +260,28 @@
     <div class="mt-6 grid gap-3 sm:gap-4 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
       <div class="bg-white rounded-2xl shadow p-3 sm:p-4 md:p-5 lg:col-span-2 xl:col-span-2">
         <div class="flex items-center justify-between">
-          <label class="block text-xs sm:text-sm font-medium">Laitteet</label>
-          <button id="closeAllCategories" class="text-xs px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 text-slate-700" title="Sulje kaikki kategoriat">Sulje kaikki</button>
+          <label class="block text-xs sm:text-sm font-medium" data-i18n="devices">Laitteet</label>
+          <button id="closeAllCategories" class="text-xs px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 text-slate-700" title="Sulje kaikki kategoriat" data-i18n="closeAllCategories">Sulje kaikki</button>
         </div>
 
         <div id="deviceList" class="mt-2 grid gap-2"></div>
 
-        <p class="mt-2 text-xs text-slate-500">
+        <p class="mt-2 text-xs text-slate-500" data-i18n="selectDevices">
           Valitse yksi tai useampi laite.
         </p>
 
         <div class="mt-4">
           <div class="flex items-center justify-between">
-            <span class="text-xs sm:text-sm font-medium">Kulutus</span>
+            <span class="text-xs sm:text-sm font-medium" data-i18n="consumption">Kulutus</span>
             <span id="unitBadge" class="text-xs bg-slate-100 px-2 py-1 rounded-full"></span>
           </div>
           <p class="mt-1 text-xs sm:text-sm text-slate-600" id="consumptionText"></p>
 
-          <label class="block mt-3 text-xs sm:text-sm font-medium">Käytettävä arvo</label>
+          <label class="block mt-3 text-xs sm:text-sm font-medium" data-i18n="valueToUse">Käytettävä arvo</label>
           <select id="pick" class="mt-2 w-full rounded-xl border p-2 text-xs sm:text-sm">
-            <option value="min">Min</option>
-            <option value="avg" selected>Keskiarvo</option>
-            <option value="max">Max</option>
+            <option value="min" data-i18n="min">Min</option>
+            <option value="avg" selected data-i18n="avg">Keskiarvo</option>
+            <option value="max" data-i18n="max">Max</option>
           </select>
 
           <p id="note" class="mt-3 text-xs sm:text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3 hidden"></p>
@@ -239,7 +291,7 @@
       <div class="bg-white rounded-2xl shadow p-3 sm:p-4 md:p-5 lg:col-span-1 xl:col-span-2">
         <div class="grid gap-2 sm:gap-3">
           <div>
-            <label class="block text-xs sm:text-sm font-medium">Aika 1 (päivä + tunti)</label>
+            <label class="block text-xs sm:text-sm font-medium" data-i18n="time1">Aika 1 (päivä + tunti)</label>
 
             <div class="flex items-end gap-2 flex-wrap">
               <input
@@ -249,7 +301,7 @@
               >
 
               <div class="flex flex-col">
-                <label class="text-xs sm:text-sm text-slate-600 mb-1">Klo</label>
+                <label class="text-xs sm:text-sm text-slate-600 mb-1" data-i18n="hour">Klo</label>
                 <input
                   id="hour1"
                   type="number"
@@ -263,7 +315,7 @@
           </div>
 
           <div>
-            <label class="block text-xs sm:text-sm font-medium">Aika 2 (vertailu)</label>
+            <label class="block text-xs sm:text-sm font-medium" data-i18n="time2">Aika 2 (vertailu)</label>
 
             <div class="flex items-end gap-2 flex-wrap">
               <input
@@ -273,7 +325,7 @@
               >
 
               <div class="flex flex-col">
-                <label class="text-xs sm:text-sm text-slate-600 mb-1">Klo</label>
+                <label class="text-xs sm:text-sm text-slate-600 mb-1" data-i18n="hour">Klo</label>
                 <input
                   id="hour2"
                   type="number"
@@ -288,11 +340,11 @@
         </div>
 
         <div class="mt-4 rounded-2xl border bg-slate-50 p-3 sm:p-4">
-          <div class="text-xs sm:text-sm font-medium">Ehdota halvin aika</div>
+          <div class="text-xs sm:text-sm font-medium" data-i18n="suggestCheapest">Ehdota halvin aika</div>
 
           <div class="mt-2 grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-4 items-start auto-rows-max">
             <div>
-              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Aikaväli alkaa</label>
+              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis" data-i18n="timeWindowStart">Aikaväli alkaa</label>
               <input
                 id="winStart"
                 type="number"
@@ -304,7 +356,7 @@
             </div>
 
             <div>
-              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Aikaväli päättyy</label>
+              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis" data-i18n="timeWindowEnd">Aikaväli päättyy</label>
               <input
                 id="winEnd"
                 type="number"
@@ -316,7 +368,7 @@
             </div>
 
             <div>
-              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Kesto (h)</label>
+              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis" data-i18n="duration">Kesto (h)</label>
               <input
                 id="durHours"
                 type="number"
@@ -328,7 +380,7 @@
             </div>
 
             <div>
-              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Päivä</label>
+              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis" data-i18n="day">Päivä</label>
               <input
                 id="date3"
                 type="date"
@@ -338,41 +390,41 @@
           </div>
 
           <div class="my-4 grid grid-cols-2 gap-2">
-            <button id="saveFavorites" class="rounded-xl bg-slate-700 text-white py-2 px-2 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Tallenna nykyiset valinnat suosikeiksi">
+            <button id="saveFavorites" class="rounded-xl bg-slate-700 text-white py-2 px-2 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Tallenna nykyiset valinnat suosikeiksi" data-i18n="saveFavorites">
               Tallenna suosikit
             </button>
-            <button id="loadFavorites" class="rounded-xl bg-slate-700 text-white py-2 px-2 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Lataa aiemmin tallennetut suosikit">
+            <button id="loadFavorites" class="rounded-xl bg-slate-700 text-white py-2 px-2 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Lataa aiemmin tallennetut suosikit" data-i18n="loadFavorites">
               Lataa suosikit
             </button>
           </div>
 
           <div class="mb-3">
-            <label class="block text-xs sm:text-sm text-slate-600 mb-1">Esiasetukset</label>
+            <label class="block text-xs sm:text-sm text-slate-600 mb-1" data-i18n="presets">Esiasetukset</label>
             <div class="flex gap-2">
               <select id="presetSelect" class="flex-1 h-10 rounded-xl border p-2 text-xs sm:text-sm">
-                <option value="">Valitse esiasetus…</option>
-                <option value="basic">Peruskoti</option>
-                <option value="laundry">Pyykkipäivä</option>
-                <option value="kitchen">Keittiöilta</option>
-                <option value="evening">Viihdeilta</option>
+                <option value="" data-i18n="selectPreset">Valitse esiasetus…</option>
+                <option value="basic" data-i18n="basicHome">Peruskoti</option>
+                <option value="laundry" data-i18n="laundryDay">Pyykkipäivä</option>
+                <option value="kitchen" data-i18n="kitchenEvening">Keittiöilta</option>
+                <option value="evening" data-i18n="entertainmentEvening">Viihdeilta</option>
               </select>
-              <button id="applyPreset" class="rounded-xl bg-slate-700 text-white py-2 px-3 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Aseta laitevalinnat esiasetuksen mukaan">
+              <button id="applyPreset" class="rounded-xl bg-slate-700 text-white py-2 px-3 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Aseta laitevalinnat esiasetuksen mukaan" data-i18n="usePreset">
                 Käytä
               </button>
             </div>
-            <div class="mt-1 text-xs text-slate-500">
+            <div class="mt-1 text-xs text-slate-500" data-i18n="presetDescription">
               Valitse esiasetus ja muokkaa laitteita tai määriä tarvittaessa.
             </div>
           </div>
 
-          <button id="autoOptimize" class="mb-2 rounded-xl w-full bg-slate-700 text-white py-2 px-2 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Laskee halvimman aloitusajan valituille laitteille ja päivittää ajan automaattisesti">
+          <button id="autoOptimize" class="mb-2 rounded-xl w-full bg-slate-700 text-white py-2 px-2 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Laskee halvimman aloitusajan valituille laitteille ja päivittää ajan automaattisesti" data-i18n="autoOptimize">
             Optimoi automaattisesti
           </button>
-          <div class="mb-3 text-xs text-slate-500">
+          <div class="mb-3 text-xs text-slate-500" data-i18n="autoOptimizeDescription">
             Laskee valituille laitteille halvimman aloitusajan ja asettaa sen automaattisesti.
           </div>
 
-          <button id="suggest" class="mb-4 rounded-xl w-full bg-slate-600 text-white py-2 px-2 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Ehdottaa halvinta aloitusaikaa valinnoille">
+          <button id="suggest" class="mb-4 rounded-xl w-full bg-slate-600 text-white py-2 px-2 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Ehdottaa halvinta aloitusaikaa valinnoille" data-i18n="suggestCheapestTime">
             Ehdota halvin aloitusaika
           </button>
 
@@ -382,13 +434,13 @@
             <div class="flex items-center justify-between cursor-pointer" id="priceWatchHeader">
               <div class="flex items-center gap-2">
                 <span id="priceWatchToggle" class="text-blue-900 transition-transform">▼</span>
-                <div class="text-sm font-semibold text-blue-900">Price Watch</div>
+                <div class="text-sm font-semibold text-blue-900" data-i18n="priceWatch">Price Watch</div>
               </div>
-              <span id="premiumBadge" class="hidden px-2 py-1 text-xs font-bold rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-slate-900">PREMIUM</span>
+              <span id="premiumBadge" class="hidden px-2 py-1 text-xs font-bold rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-slate-900" data-i18n="premiumActive">PREMIUM</span>
             </div>
             
             <div id="priceWatchContent">
-              <p class="mt-1 text-xs text-blue-800">
+              <p class="mt-1 text-xs text-blue-800" data-i18n="priceWatchDescription">
                 Saa ilmoitus, kun sähköhinta laskee alle asetetun rajan.
               </p>
 
@@ -398,15 +450,16 @@
                   <input
                     id="priceWatchThreshold"
                     type="number"
-                    placeholder="Hinta snt/kWh"
+                    placeholder="Hinta €/kWh"
+                    data-i18n="priceThreshold"
                     class="flex-1 h-10 rounded-xl border p-2 text-xs sm:text-sm"
                     step="0.01"
                     min="0"
                   />
-                  <button id="startPriceWatch" class="rounded-xl bg-slate-600 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Käynnistä hinnan seuranta">
+                  <button id="startPriceWatch" class="rounded-xl bg-slate-600 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Käynnistä hinnan seuranta" data-i18n="startWatch">
                     Käynnistä
                   </button>
-                  <button id="stopPriceWatch" class="hidden rounded-xl bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Pysäytä hinnan seuranta">
+                  <button id="stopPriceWatch" class="hidden rounded-xl bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Pysäytä hinnan seuranta" data-i18n="stopWatch">
                     Pysäytä
                   </button>
                 </div>
@@ -417,23 +470,23 @@
         </div>
 
         <div class="my-4 grid grid-cols-2 gap-2">
-          <button id="calc" class="rounded-xl bg-slate-900 text-white py-2 px-2 font-medium hover:bg-slate-800 text-xs sm:text-sm" title="Laske säästö valituille laitteille">
+          <button id="calc" class="rounded-xl bg-slate-900 text-white py-2 px-2 font-medium hover:bg-slate-800 text-xs sm:text-sm" title="Laske säästö valituille laitteille" data-i18n="calculate">
             Laske säästö
           </button>
-          <button id="resetBtn" class="rounded-xl bg-slate-200 text-slate-700 py-2 px-2 font-medium hover:bg-slate-300 text-xs sm:text-sm" title="Tyhjennä kaikki valinnat">
+          <button id="resetBtn" class="rounded-xl bg-slate-200 text-slate-700 py-2 px-2 font-medium hover:bg-slate-300 text-xs sm:text-sm" title="Tyhjennä kaikki valinnat" data-i18n="resetSelections">
             Tyhjennä valinnat
           </button>
         </div>
 
         <div class="mt-2 rounded-2xl bg-slate-50 border p-3 sm:p-4">
           <div class="flex items-center justify-between">
-            <div class="text-xs sm:text-sm text-slate-600">Tulos</div>
+            <div class="text-xs sm:text-sm text-slate-600" data-i18n="result">Tulos</div>
             <div class="flex gap-2">
-              <button id="priceToggle" class="text-xs px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 text-slate-700" title="Vaihda hintojen esitystapaa">€ / snt</button>
-              <button id="copyResults" class="hidden text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-white" title="Kopioi tulos leikepöydälle">Kopioi</button>
+              <button id="priceToggle" class="text-xs px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 text-slate-700" title="Vaihda hintojen esitystapaa" data-i18n="priceToggle">€ / snt</button>
+              <button id="copyResults" class="hidden text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-white" title="Kopioi tulos leikepöydälle" data-i18n="copy">Kopioi</button>
             </div>
           </div>
-          <div id="out" class="mt-2 text-xs sm:text-sm">Valitse laite ja paina "Laske säästö".</div>
+          <div id="out" class="mt-2 text-xs sm:text-sm" data-i18n="defaultResult">Valitse laite ja paina "Laske säästö".</div>
         </div>
       </div>
     </div>
@@ -442,24 +495,24 @@
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-1 sm:gap-3">
           <button id="chartPrev" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-100" title="Aiemmat hinnat">
-            <span class="hidden sm:inline">← Aiemmin</span>
+            <span class="hidden sm:inline" data-i18n="previous">← Aiemmin</span>
             <span class="sm:hidden">←</span>
           </button>
           <div class="min-w-0">
-            <div class="text-xs sm:text-sm text-slate-600">Päivän pörssisähkö (snt/kWh)</div>
+            <div class="text-xs sm:text-sm text-slate-600" data-i18n="chartTitle">Päivän pörssisähkö (snt/kWh)</div>
             <div id="chartTitle" class="text-xs sm:text-sm font-medium truncate"></div>
           </div>
           <button id="chartNext" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-100" title="Tulevat hinnat">
-            <span class="hidden sm:inline">Myöhemmin →</span>
+            <span class="hidden sm:inline" data-i18n="next">Myöhemmin →</span>
             <span class="sm:hidden">→</span>
           </button>
         </div>
         <button id="loadDay" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50" title="Palaa nykyhetken hintoihin">
-          <span class="hidden sm:inline">Nykyhetki</span>
+          <span class="hidden sm:inline" data-i18n="now">Nykyhetki</span>
           <span class="sm:hidden">Nyt</span>
         </button>
         <button id="refreshChart" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50 bg-blue-50 border-blue-300" title="Päivitä chart">
-          <span class="hidden sm:inline">🔄 Päivitä</span>
+          <span class="hidden sm:inline" data-i18n="refresh">🔄 Päivitä</span>
           <span class="sm:hidden">🔄</span>
         </button>
       </div>
@@ -467,37 +520,33 @@
       <div class="overflow-x-auto">
         <canvas id="dayChart" class="mt-3 sm:mt-4 w-full" height="220" style="display: block; max-width: 100%;"></canvas>
       </div>
-
-      <button id="showTop3" class="mt-3 rounded-xl bg-slate-700 text-white py-2 px-3 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Näytä kolme halvinta tuntia tästä näkymästä">
-        Näytä 3 halvinta tuntia
-      </button>
-      <div id="top3Out" class="mt-3 text-xs sm:text-sm text-slate-700 hidden"></div>
     </div>
 
     <section class="mt-6 bg-white rounded-2xl shadow p-4">
-      <h2 class="text-lg font-semibold">Palaute</h2>
-      <p class="text-sm text-slate-600">
+      <h2 class="text-lg font-semibold" data-i18n="feedback">Palaute</h2>
+      <p class="text-sm text-slate-600" data-i18n="feedbackDescription">
         Lähetä palautetta sovelluksesta.
       </p>
 
       <div class="mt-4 grid gap-3 md:grid-cols-2">
         <div>
-          <label class="block text-xs sm:text-sm font-medium">Nimi (valinnainen)</label>
+          <label class="block text-xs sm:text-sm font-medium" data-i18n="name">Nimi (valinnainen)</label>
           <input
             id="fbName"
             type="text"
             class="mt-1 w-full rounded-xl border p-2 text-xs sm:text-sm"
             placeholder="Maija Meikäläinen"
+            data-i18n="namePlaceholder"
           />
         </div>
 
         <div>
-          <label class="block text-xs sm:text-sm font-medium">Arvosana</label>
+          <label class="block text-xs sm:text-sm font-medium" data-i18n="rating">Arvosana</label>
           <select
             id="fbRating"
             class="mt-1 w-full rounded-xl border p-2 text-xs sm:text-sm"
           >
-            <option value="">Valitse</option>
+            <option value="" data-i18n="selectRating">Valitse</option>
             <option value="5">⭐⭐⭐⭐⭐ 5</option>
             <option value="4">⭐⭐⭐⭐ 4</option>
             <option value="3">⭐⭐⭐ 3</option>
@@ -508,12 +557,13 @@
       </div>
 
       <div class="mt-3">
-        <label class="block text-xs sm:text-sm font-medium">Palaute</label>
+        <label class="block text-xs sm:text-sm font-medium" data-i18n="feedbackMessage">Palaute</label>
         <textarea
           id="fbMessage"
           rows="4"
           class="mt-1 w-full rounded-xl border p-2 text-xs sm:text-sm"
           placeholder="Mikä toimi hyvin? Mitä parantaisit?"
+          data-i18n="feedbackPlaceholder"
           required
         ></textarea>
       </div>
@@ -521,6 +571,7 @@
       <button
         id="sendFeedback"
         class="mt-3 sm:mt-4 rounded-xl bg-slate-600 text-white px-3 sm:px-4 py-2 font-medium hover:bg-slate-700 text-xs sm:text-sm"
+        data-i18n="sendFeedback"
       >
         Lähetä palaute
       </button>
@@ -528,13 +579,15 @@
 
     <!-- Footer: evästeasetukset + policy linkit -->
     <footer class="mt-8 pb-10 text-xs sm:text-sm text-slate-500 flex flex-col gap-2 sm:gap-3 items-center">
-      <button id="openConsent" class="rounded-xl border px-2 sm:px-3 py-1 sm:py-2 hover:bg-slate-50 text-xs sm:text-sm">
+      <button id="openConsent" class="rounded-xl border px-2 sm:px-3 py-1 sm:py-2 hover:bg-slate-50 text-xs sm:text-sm" data-i18n="changeConsent">
         Muuta evästeasetuksia
       </button>
       <div class="flex gap-3 text-xs sm:text-sm">
-        <a class="underline hover:no-underline" href="./privacy.html">Tietosuoja</a>
-        <a class="underline hover:no-underline" href="./cookies.html">Evästeet</a>
+        <a class="underline hover:no-underline" href="./privacy.html" data-i18n="privacy">Tietosuoja</a>
+        <a class="underline hover:no-underline" href="./cookies.html" data-i18n="cookies">Evästeet</a>
+        <a class="underline hover:no-underline" href="./updates.html" data-i18n="updates">Päivitykset</a>
       </div>
+      <div class="text-xs text-slate-400"><span data-i18n="build">Build</span> 0.003v</div>
     </footer>
 
     <!-- Toast / popup -->
@@ -547,16 +600,16 @@
 
     <!-- Cookie consent -->
     <div id="consentBanner" class="fixed bottom-4 left-1/2 z-[50] hidden -translate-x-1/2 transform max-w-xl w-[92%] rounded-2xl bg-white border shadow p-4">
-      <div class="text-sm font-semibold">Evästeet</div>
-      <p class="mt-1 text-sm text-slate-600">
+      <div class="text-sm font-semibold" data-i18n="cookieTitle">Evästeet</div>
+      <p class="mt-1 text-sm text-slate-600" data-i18n="cookieMessage">
         Käytämme evästeitä/analytiikkaa ja (valinnaisesti) mainoksia käyttökokemuksen ja rahoituksen vuoksi.
-        Voit hyväksyä tai hylätä ei-välttämättömät.
+        Voit hyväksyä tai hyljätä ei-välttämättömät.
       </p>
       <div class="mt-3 flex gap-2 justify-end">
-        <button id="consentReject" class="rounded-xl border px-3 py-2 text-sm hover:bg-slate-50">
+        <button id="consentReject" class="rounded-xl border px-3 py-2 text-sm hover:bg-slate-50" data-i18n="reject">
           Hylkää
         </button>
-        <button id="consentAccept" class="rounded-xl bg-slate-900 text-white px-3 py-2 text-sm hover:bg-slate-800">
+        <button id="consentAccept" class="rounded-xl bg-slate-900 text-white px-3 py-2 text-sm hover:bg-slate-800" data-i18n="accept">
           Hyväksy
         </button>
       </div>

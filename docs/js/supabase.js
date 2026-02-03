@@ -348,23 +348,23 @@ export function showSignupModal() {
     const confirm = confirmInput.value;
     
     if (!email || !password || !confirm) {
-      showToast('⚠️ Täytä kaikki kentät');
+      showToast(' Täytä kaikki kentät');
       return;
     }
     
     if (password !== confirm) {
-      showToast('⚠️ Salasanat eivät täsmää');
+      showToast(' Salasanat eivät täsmää');
       return;
     }
     
     if (password.length < 6) {
-      showToast('⚠️ Salasana on liian lyhyt (vähintään 6 merkkiä)');
+      showToast(' Salasana on liian lyhyt (vähintään 6 merkkiä)');
       return;
     }
     
     // Perform signup
     if (!supabase) {
-      showToast('❌ Supabase ei ole konfiguroitu');
+      showToast(' Supabase ei ole konfiguroitu');
       return;
     }
     
@@ -392,7 +392,7 @@ export function showSignupModal() {
       
       showSignupSuccessModal(email);
     } catch (error) {
-      showToast('❌ Rekisteröinti epäonnistui: ' + error.message);
+      showToast(' Rekisteröinti epäonnistui: ' + error.message);
       submitBtn.disabled = false;
       submitBtn.textContent = 'Rekisteröidy';
     }
@@ -464,12 +464,12 @@ export function showPasswordResetModal() {
     const email = emailInput.value.trim();
     
     if (!email) {
-      showToast('⚠️ Anna sähköpostiosoite');
+      showToast(' Anna sähköpostiosoite');
       return;
     }
     
     if (!supabase) {
-      showToast('❌ Supabase ei ole konfiguroitu');
+      showToast(' Supabase ei ole konfiguroitu');
       return;
     }
     
@@ -491,7 +491,7 @@ export function showPasswordResetModal() {
       
       showToast('✅ Palautuslinkki lähetetty! Tarkista sähköpostisi');
     } catch (error) {
-      showToast('❌ Virhe: ' + error.message);
+      showToast(' Virhe: ' + error.message);
       submitBtn.disabled = false;
       submitBtn.textContent = 'Lähetä palautuslinkki';
     }
@@ -559,22 +559,22 @@ export function showNewPasswordModal() {
     const confirm = confirmInput.value;
     
     if (!password || !confirm) {
-      showToast('⚠️ Täytä molemmat kentät');
+      showToast(' Täytä molemmat kentät');
       return;
     }
     
     if (password !== confirm) {
-      showToast('⚠️ Salasanat eivät täsmää');
+      showToast(' Salasanat eivät täsmää');
       return;
     }
     
     if (password.length < 6) {
-      showToast('⚠️ Salasana on liian lyhyt (vähintään 6 merkkiä)');
+      showToast(' Salasana on liian lyhyt (vähintään 6 merkkiä)');
       return;
     }
     
     if (!supabase) {
-      showToast('❌ Supabase ei ole konfiguroitu');
+      showToast(' Supabase ei ole konfiguroitu');
       return;
     }
     
@@ -597,7 +597,7 @@ export function showNewPasswordModal() {
       // Clean up URL
       window.history.replaceState({}, document.title, window.location.pathname);
     } catch (error) {
-      showToast('❌ Virhe: ' + error.message);
+      showToast(' Virhe: ' + error.message);
       submitBtn.disabled = false;
       submitBtn.textContent = 'Vaihda salasana';
     }
@@ -663,7 +663,7 @@ export async function handleLogout() {
     updatePremiumUI();
     showToast('👋 Kirjauduttu ulos');
   } catch (error) {
-    showToast('❌ Uloskirjautuminen epäonnistui: ' + error.message);
+    showToast(' Uloskirjautuminen epäonnistui: ' + error.message);
   }
 }
 

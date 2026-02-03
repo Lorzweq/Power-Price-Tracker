@@ -16,6 +16,7 @@ import {
   showNewPasswordModal,
   isPremium
 } from './js/supabase.js';
+import { getCurrentLanguage, setLanguage, t, translateCategory, translateDeviceName } from './js/translations.js';
 
 // ========== SERVICE WORKER REGISTRATION ==========
 if ('serviceWorker' in navigator) {
@@ -42,6 +43,9 @@ let priceWatchInterval = null;
 let chartOffset = 0;
 let chartLoading = false;
 let resizeRaf = null;
+let lastPricesSignature = "";
+let chartBaseDate = null;
+let chartStartHour = 0;
 
 const STORAGE_KEY = "psl_state_v1";
 const SAVINGS_KEY = "psl_savings_v1";
@@ -202,7 +206,7 @@ function renderDevices() {
           <input type="checkbox" name="device" value="${i}" class="h-4 w-4">
 
           <div class="flex-1">
-            <div class="text-sm font-medium">${d.name}</div>
+            <div class="text-sm font-medium">${translateDeviceName(d.name)}</div>
             <div class="text-xs text-slate-600">${d.min}–${d.max} ${d.unit}</div>
           </div>
 
@@ -212,7 +216,7 @@ function renderDevices() {
                 ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                 : "bg-slate-100 text-slate-700"
             }">
-              ${d.schedulable ? "ajastettava" : "jatkuva"}
+              ${d.schedulable ? translateCategory("ajastettava") : translateCategory("jatkuva")}
             </span>
 
             <div class="flex items-center gap-1">
@@ -240,7 +244,7 @@ function renderDevices() {
           class="flex w-full items-center justify-between text-xs font-semibold uppercase text-slate-600 tracking-wide mb-2"
           onclick="document.getElementById('${bodyId}').classList.toggle('hidden'); saveState();"
         >
-          <span>${cat}</span>
+          <span>${translateCategory(cat)}</span>
           <span>▾</span>
         </button>
 
@@ -695,6 +699,21 @@ async function suggest() {
 function clamp01(x) { return Math.max(0, Math.min(1, x)); }
 function lerp(a, b, t) { return a + (b - a) * t; }
 
+function getPricesSignature(prices) {
+  if (!Array.isArray(prices) || prices.length === 0) return "";
+  const first = prices[0] || {};
+  const last = prices[prices.length - 1] || {};
+  return [
+    prices.length,
+    first.startDate || "",
+    first.endDate || "",
+    first.price ?? "",
+    last.startDate || "",
+    last.endDate || "",
+    last.price ?? "",
+  ].join("|");
+}
+
 function colorForT_Solid(t) {
   t = clamp01(t);
   let hue;
@@ -780,15 +799,20 @@ function drawBarChartSolidWithHover(canvas, hourlyPrices, startHour = 0, quarter
     const n = prices.length;
     const barW = chartW / n;
 
+    const isDark = document.documentElement.classList.contains("dark");
+    const axisColor = isDark ? "rgba(226,232,240,0.85)" : "rgba(15,23,42,0.45)";
+    const gridColor = isDark ? "rgba(226,232,240,0.18)" : "rgba(15,23,42,0.12)";
+    const textColor = isDark ? "#e2e8f0" : "#0f172a";
+
     ctx.lineWidth = 1;
-    ctx.strokeStyle = "rgba(15,23,42,0.20)";
+    ctx.strokeStyle = axisColor;
     ctx.beginPath();
     ctx.moveTo(padL, padT);
     ctx.lineTo(padL, padT + chartH);
     ctx.lineTo(padL + chartW, padT + chartH);
     ctx.stroke();
 
-    ctx.fillStyle = "rgba(15,23,42,0.75)";
+    ctx.fillStyle = textColor;
     ctx.font = "12px system-ui";
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
@@ -799,7 +823,7 @@ function drawBarChartSolidWithHover(canvas, hourlyPrices, startHour = 0, quarter
       const y = yForVal(v);
       ctx.fillText(v.toFixed(2), padL - 8, y);
 
-      ctx.strokeStyle = "rgba(15,23,42,0.06)";
+      ctx.strokeStyle = gridColor;
       ctx.beginPath();
       ctx.moveTo(padL, y);
       ctx.lineTo(padL + chartW, y);
@@ -821,7 +845,7 @@ function drawBarChartSolidWithHover(canvas, hourlyPrices, startHour = 0, quarter
       ctx.strokeRect(x + 0.5, y + 0.5, Math.max(1, barW) - 1, Math.max(0, bh - 1));
     }
 
-    ctx.fillStyle = "rgba(15,23,42,0.75)";
+    ctx.fillStyle = textColor;
     ctx.font = "10px system-ui";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
@@ -927,15 +951,17 @@ async function loadDayAndDraw(hoursOffset = 0) {
 
   const displayDate = new Date(currentDate);
   displayDate.setDate(displayDate.getDate() + dayOffset);
+  chartBaseDate = new Date(displayDate);
+  chartStartHour = startHour;
 
   const dateStr = `${displayDate.getFullYear()}-${String(displayDate.getMonth() + 1).padStart(2, '0')}-${String(displayDate.getDate()).padStart(2, '0')}`;
   
   if (hoursOffset === 0) {
-    $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - Nyt ⏳`;
+    $("chartTitle").textContent = `${t('next22Hours')} (${t('starting')} ${String(startHour).padStart(2, "0")}:00) - ${t('currentTime')} ⏳`;
   } else if (hoursOffset > 0) {
-    $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - +${hoursOffset}h ⏳`;
+    $("chartTitle").textContent = `${t('next22Hours')} (${t('starting')} ${String(startHour).padStart(2, "0")}:00) - +${hoursOffset}h ⏳`;
   } else {
-    $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - ${hoursOffset}h ⏳`;
+    $("chartTitle").textContent = `${t('next22Hours')} (${t('starting')} ${String(startHour).padStart(2, "0")}:00) - ${hoursOffset}h ⏳`;
   }
 
   const dayChartElement = $("dayChart");
@@ -950,12 +976,13 @@ async function loadDayAndDraw(hoursOffset = 0) {
     if (!cachedPrices) {
       console.log("🟦 Fetching prices from CONFIG.LATEST_PRICES_ENDPOINT");
       try {
-        const res = await fetch(CONFIG.LATEST_PRICES_ENDPOINT);
+        const res = await fetch(CONFIG.LATEST_PRICES_ENDPOINT, { cache: "no-store" });
         console.log("🟦 Fetch response status:", res.status);
         if (res.ok) {
           const data = await res.json();
           console.log("🟦 Fetched data:", data);
           cachedPrices = data.prices || data || [];
+          lastPricesSignature = getPricesSignature(cachedPrices);
         } else {
           console.log("🟦 Response not ok, status:", res.status);
           cachedPrices = [];
@@ -973,6 +1000,7 @@ async function loadDayAndDraw(hoursOffset = 0) {
           endDate: new Date(Date.now() - 96*15*60*1000 + (i+1)*15*60*1000).toISOString(),
           price: 3.5 + Math.sin(i/10) * 2
         }));
+        lastPricesSignature = getPricesSignature(cachedPrices);
       }
     }
 
@@ -1036,20 +1064,40 @@ async function loadDayAndDraw(hoursOffset = 0) {
     console.log("🟦 drawBarChartSolidWithHover completed");
     
     if (hoursOffset === 0) {
-      $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - Nyt`;
+      $("chartTitle").textContent = `${t('next22Hours')} (${t('starting')} ${String(startHour).padStart(2, "0")}:00) - ${t('currentTime')} ⏳`;
     } else if (hoursOffset > 0) {
-      $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - +${hoursOffset}h`;
+      $("chartTitle").textContent = `${t('next22Hours')} (${t('starting')} ${String(startHour).padStart(2, "0")}:00) - +${hoursOffset}h ⏳`;
     } else {
-      $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - ${hoursOffset}h`;
+      $("chartTitle").textContent = `${t('next22Hours')} (${t('starting')} ${String(startHour).padStart(2, "0")}:00) - ${hoursOffset}h ⏳`;
     }
   } catch (e) {
     console.error("❌ Error in loadDayAndDraw:", e);
     console.log("🟦 Drawing fallback chart");
     drawBarChartSolidWithHover($("dayChart"), Array(22).fill(5.0), startHour);
-    $("chartTitle").textContent = `Virhe hintojen haussa: ${e.message}`;
+    $("chartTitle").textContent = `${t('errorFetchingPrices')}: ${e.message}`;
   } finally {
     chartLoading = false;
     console.log("🟦 loadDayAndDraw finished");
+  }
+}
+
+async function refreshLatestPricesIfChanged() {
+  if (chartLoading) return;
+  try {
+    const res = await fetch(CONFIG.LATEST_PRICES_ENDPOINT, { cache: "no-store" });
+    if (!res.ok) return;
+    const data = await res.json().catch(() => null);
+    const nextPrices = data?.prices || data || [];
+    if (!Array.isArray(nextPrices) || nextPrices.length === 0) return;
+
+    const nextSig = getPricesSignature(nextPrices);
+    if (nextSig && nextSig !== lastPricesSignature) {
+      cachedPrices = nextPrices;
+      lastPricesSignature = nextSig;
+      await loadDayAndDraw(chartOffset);
+    }
+  } catch (e) {
+    console.error("❌ Error in refreshLatestPricesIfChanged:", e);
   }
 }
 
@@ -1120,6 +1168,96 @@ if (installBtn) {
 
 // ========== EVENT HANDLERS ==========
 document.addEventListener("DOMContentLoaded", async () => {
+  // Translation System
+  function applyTranslations() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      const translation = t(key);
+      
+      if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+        if (el.hasAttribute('placeholder')) {
+          el.placeholder = translation;
+        } else {
+          el.value = translation;
+        }
+      } else if (el.tagName === 'OPTION') {
+        el.textContent = translation;
+      } else {
+        el.textContent = translation;
+      }
+    });
+    
+    // Update page title
+    document.title = t('pageTitle');
+    
+    // Update meta description
+    const metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) metaDesc.setAttribute('content', t('metaDescription'));
+  }
+  
+  const toggleLanguage = () => {
+    const currentLang = getCurrentLanguage();
+    const newLang = currentLang === 'fi' ? 'en' : 'fi';
+    setLanguage(newLang);
+    applyTranslations();
+    
+    // Update theme button text separately since it changes based on theme
+    const isDark = document.documentElement.classList.contains("dark");
+    const btn = $("themeToggle");
+    if (btn) btn.textContent = isDark ? t("lightMode") : t("darkMode");
+    
+    // Redraw chart with new language
+    if ($("dayChart") && currentDayPrices && currentDayPrices.length > 0) {
+      loadDayAndDraw(chartOffset).catch(() => {});
+    }
+    
+    // Re-render devices to update category names
+    renderDevices();
+    const st = loadState();
+    if (st) {
+      st.selected?.forEach(i => {
+        const cb = document.querySelector(`input[name="device"][value="${i}"]`);
+        if (cb) cb.checked = true;
+      });
+      Object.keys(st.qty || {}).forEach(i => {
+        const inp = document.querySelector(`input[name="qty"][data-i="${i}"]`);
+        if (inp) inp.value = st.qty[i];
+      });
+      Object.keys(st.cats || {}).forEach(catId => {
+        const div = document.getElementById(catId);
+        if (div && st.cats[catId]) div.classList.add("hidden");
+      });
+    }
+    onSelectionChange();
+  };
+  
+  // Apply translations on load
+  applyTranslations();
+  
+  // Language toggle button
+  $("languageToggle")?.addEventListener("click", toggleLanguage);
+  
+  // Theme
+  const applyTheme = (mode) => {
+    const isDark = mode === "dark";
+    document.documentElement.classList.toggle("dark", isDark);
+    const btn = $("themeToggle");
+    if (btn) btn.textContent = isDark ? t("lightMode") : t("darkMode");
+    if ($("dayChart") && currentDayPrices && currentDayPrices.length > 0) {
+      loadDayAndDraw(chartOffset).catch(() => {});
+    }
+  };
+
+  const storedTheme = localStorage.getItem("theme");
+  const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+  applyTheme(storedTheme || (prefersDark ? "dark" : "light"));
+
+  $("themeToggle")?.addEventListener("click", () => {
+    const isDarkNow = !document.documentElement.classList.contains("dark");
+    localStorage.setItem("theme", isDarkNow ? "dark" : "light");
+    applyTheme(isDarkNow ? "dark" : "light");
+  });
+
   // Initialize Supabase
   await initSupabase();
 
@@ -1224,6 +1362,22 @@ document.addEventListener("DOMContentLoaded", async () => {
   $("date3")?.addEventListener("change", () => {
     updateDateAvgPrice("date3");
   });
+
+  // Clamp hour inputs to 0–23
+  const clampHourInput = (el) => {
+    if (!el) return;
+    const n = Math.floor(Number(el.value));
+    if (!Number.isFinite(n)) return;
+    el.value = Math.max(0, Math.min(23, n));
+  };
+  $("hour1")?.addEventListener("input", (e) => clampHourInput(e.target));
+  $("hour1")?.addEventListener("change", (e) => clampHourInput(e.target));
+  $("hour2")?.addEventListener("input", (e) => clampHourInput(e.target));
+  $("hour2")?.addEventListener("change", (e) => clampHourInput(e.target));
+  $("winStart")?.addEventListener("input", (e) => clampHourInput(e.target));
+  $("winStart")?.addEventListener("change", (e) => clampHourInput(e.target));
+  $("winEnd")?.addEventListener("input", (e) => clampHourInput(e.target));
+  $("winEnd")?.addEventListener("change", (e) => clampHourInput(e.target));
 
   // Window resize
   window.addEventListener("resize", () => {
@@ -1343,7 +1497,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const today = new Date();
     $("date3").value = today.toISOString().split('T')[0];
-    $("winStart").value = 0;
+    const h1 = $("hour1")?.value;
+    if (h1 !== undefined && h1 !== null && h1 !== "") {
+      $("winStart").value = h1;
+    } else {
+      $("winStart").value = 0;
+    }
     $("winEnd").value = 23;
     $("durHours").value = 1;
 
@@ -1373,50 +1532,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (lastResultText) {
       calculate();
     }
-  });
-
-  // Show Top 3
-  $("showTop3")?.addEventListener("click", () => {
-    if (!currentDayPrices || currentDayPrices.length === 0) {
-      showToast("Ei hintadataa saatavilla");
-      return;
-    }
-
-    const allQuarterHours = [];
-    currentDayPrices.forEach((item, idx) => {
-      if (item && item.price !== null && item.price !== undefined && quarterMinPrices && quarterMinPrices[idx]) {
-        quarterMinPrices[idx].forEach((qPrice, qIdx) => {
-          allQuarterHours.push({
-            hour: item.hour,
-            hourIdx: idx,
-            quarter: qIdx,
-            startMin: qIdx * 15,
-            price: qPrice
-          });
-        });
-      }
-    });
-
-    if (allQuarterHours.length === 0) {
-      $("top3Out").innerHTML = "Ei dataa saatavilla";
-      $("top3Out").classList.remove("hidden");
-      return;
-    }
-
-    const cheapest3 = allQuarterHours
-      .sort((a, b) => a.price - b.price)
-      .slice(0, 3);
-    
-    const html = `<strong>3 halvinta 15 min jaksoa:</strong><br>` +
-      cheapest3.map((item, idx) => {
-        const startMin = item.startMin;
-        const endMin = startMin + 15;
-        return `${idx + 1}. klo ${item.hour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')}–${endMin.toString().padStart(2, '0')} – <strong>${item.price.toFixed(2)} snt/kWh</strong>`;
-      }).join('<br>');
-    
-    $("top3Out").innerHTML = html;
-    $("top3Out").classList.remove("hidden");
-    showToast("3 halvinta 15 min jaksoa näytetty");
   });
 
   // Initialize
@@ -1453,8 +1568,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Load chart
   loadDayAndDraw(0).catch(e => {
-    $("chartTitle").textContent = `Virhe: ${e.message}`;
+    $("chartTitle").textContent = `${t('error')}: ${e.message}`;
   });
+
+  // Auto-update chart every 15 minutes if new data is available
+  setInterval(() => {
+    refreshLatestPricesIfChanged();
+  }, 15 * 60 * 1000);
 
   // Auto-refresh chart every hour
   setInterval(() => {

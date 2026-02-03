@@ -26,7 +26,8 @@ export const DEVICES = [
   { category: "Keittiö", name: "Leivänpaahtin", min: 0.1, max: 0.1, unit: "kWh/5 min", schedulable: true },
   { category: "Keittiö", name: "Parila / vohvelirauta", min: 0.2, max: 0.2, unit: "kWh/10 min", schedulable: true },
   { category: "Keittiö", name: "Mikroaaltouuni", min: 0.12, max: 0.20, unit: "kWh/10 min", schedulable: true },
-  { category: "Keittiö", name: "Vedenkeitin", min: 0.10, max: 0.10, unit: "kWh/5 min", schedulable: true },
+  { category: "Keittiö", name: "Uuni (1 h/vrk)", min: 0.4, max: 0.5, unit: "kWh/vrk", schedulable: true },
+  { category: "Keittiö", name: "Vedenkeitin", min: 0.20, max: 0.20, unit: "kWh/10 min", schedulable: true },
   { category: "Keittiö", name: "Kahvinkeitin", min: 0.10, max: 0.10, unit: "kWh/10 min", schedulable: true },
   { category: "Keittiö", name: "Liesituuletin", min: 0.2, max: 0.2, unit: "kWh/h", schedulable: true },
   { category: "Kodinhoito", name: "Astianpesukone", min: 0.6, max: 1.6, unit: "kWh/kerta", schedulable: true },
@@ -44,6 +45,9 @@ export const DEVICES = [
   { category: "Tietotekniikka", name: "Laajakaistamodeemi", min: 0.14, max: 0.14, unit: "kWh/vrk", schedulable: false },
   { category: "Toimisto", name: "Monitoimilaite", min: 0.09, max: 0.09, unit: "kWh/vrk", schedulable: false },
   { category: "Toimisto", name: "Tulostin", min: 0.05, max: 0.05, unit: "kWh/vrk", schedulable: false },
+  { category: "Kodinhoito", name: "Tuuletin", min: 0.035, max: 0.035, unit: "kWh/h", schedulable: true },
+  { category: "Kodinhoito", name: "Ilmanviilennin (65 W)", min: 0.065, max: 0.065, unit: "kWh/h", schedulable: true },
+  { category: "Tietotekniikka", name: "Kännykän lataus", min: 0.02, max: 0.04, unit: "kWh/vrk", schedulable: true },
 ];
 
 export const PRESETS = {

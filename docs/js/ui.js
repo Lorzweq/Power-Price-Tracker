@@ -92,4 +92,8 @@ export function setTodayDefaults() {
   $("date1").value = iso;
   $("date2").value = iso;
   $("date3").value = iso;
+  const h = today.getHours();
+  const h2 = (h + 1) % 24;
+  if ($("hour1")) $("hour1").value = h;
+  if ($("hour2")) $("hour2").value = h2;
 }

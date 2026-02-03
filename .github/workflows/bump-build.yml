@@ -1,0 +1,65 @@
+name: Bump build number
+
+on:
+  push:
+    branches: ["main", "master"]
+
+permissions:
+  contents: write
+
+jobs:
+  bump-build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Bump build number
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+
+          index_path = Path('docs/Index.html')
+          updates_path = Path('docs/updates.html')
+
+          text = index_path.read_text(encoding='utf-8')
+
+          m = re.search(r'Build\s+(\d+)\.(\d{3})v', text)
+          if not m:
+            raise SystemExit('Build number not found in docs/Index.html')
+
+          major = int(m.group(1))
+          minor = int(m.group(2))
+          if minor >= 999:
+            major += 1
+            minor = 0
+          else:
+            minor += 1
+
+          new_build = f'{major}.{minor:03d}v'
+          new_text = re.sub(r'Build\s+\d+\.\d{3}v', f'Build {new_build}', text, count=1)
+          index_path.write_text(new_text, encoding='utf-8')
+
+          if updates_path.exists():
+            updates_text = updates_path.read_text(encoding='utf-8')
+            updates_text = re.sub(r'\b\d+\.\d{3}v\b', new_build, updates_text, count=1)
+            updates_path.write_text(updates_text, encoding='utf-8')
+          print('Updated build to', new_build)
+          PY
+
+      - name: Commit and push
+        run: |
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/Index.html docs/updates.html
+          git commit -m "chore: bump build [skip ci]"
+          git push
