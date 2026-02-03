@@ -1075,6 +1075,32 @@ function checkPricesForWatch() {
   }
 }
 
+// ========== PWA INSTALLATION ==========
+let installPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (event) => {
+  event.preventDefault();
+  installPrompt = event;
+  const installBtn = $('installPromptBtn');
+  if (installBtn) {
+    installBtn.classList.remove('hidden');
+  }
+});
+
+const installBtn = $('installPromptBtn');
+if (installBtn) {
+  installBtn.addEventListener('click', async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const result = await installPrompt.userChoice;
+    if (result.outcome === 'accepted') {
+      showToast('Kiitos sovelluksen asentamisesta!');
+      installBtn.classList.add('hidden');
+    }
+    installPrompt = null;
+  });
+}
+
 // ========== EVENT HANDLERS ==========
 document.addEventListener("DOMContentLoaded", async () => {
   // Initialize Supabase
@@ -1136,6 +1162,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Setup chart navigation
   const loadDayBtn = $("loadDay");
   if (loadDayBtn) loadDayBtn.addEventListener("click", () => loadDayAndDraw(0));
+
+  const refreshChartBtn = $("refreshChart");
+  if (refreshChartBtn) {
+    refreshChartBtn.addEventListener("click", async () => {
+      showToast("Päivitetään...");
+      await loadDayAndDraw(chartOffset);
+      showToast("Päivitetty");
+    });
+  }
 
   const chartPrevBtn = $("chartPrev");
   if (chartPrevBtn) {
@@ -1403,6 +1438,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   loadDayAndDraw(0).catch(e => {
     $("chartTitle").textContent = `Virhe: ${e.message}`;
   });
+
+  // Auto-refresh chart every hour
+  setInterval(() => {
+    loadDayAndDraw(chartOffset).catch(e => {
+      console.error('Auto-refresh chart error:', e);
+    });
+  }, 60 * 60 * 1000); // 1 hour
 
   // Update average prices
   updateDateAvgPrice("date1");

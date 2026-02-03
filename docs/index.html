@@ -177,6 +177,13 @@
       </div>
     </div>
 
+    <!-- PWA Install Button -->
+    <div class="fixed top-4 left-4 right-4 z-50">
+      <button id="installPromptBtn" class="hidden w-full rounded-lg bg-blue-600 text-white py-2 px-4 font-bold hover:bg-blue-500 text-sm" title="Asenna sovellus puhelimeesi">
+        📱 Asenna sovellus
+      </button>
+    </div>
+
     <div class="mt-6 grid gap-3 sm:gap-4 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
       <div class="bg-white rounded-2xl shadow p-3 sm:p-4 md:p-5 lg:col-span-2 xl:col-span-2">
         <div class="flex items-center justify-between">
@@ -429,6 +436,10 @@
         <button id="loadDay" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50" title="Palaa nykyhetken hintoihin">
           <span class="hidden sm:inline">Nykyhetki</span>
           <span class="sm:hidden">Nyt</span>
+        </button>
+        <button id="refreshChart" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50 bg-blue-50 border-blue-300" title="Päivitä chart">
+          <span class="hidden sm:inline">🔄 Päivitä</span>
+          <span class="sm:hidden">🔄</span>
         </button>
       </div>
 
