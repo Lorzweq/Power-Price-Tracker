@@ -120,6 +120,10 @@ export const translations = {
     feedbackMessage: "Palaute",
     feedbackPlaceholder: "Mikä toimi hyvin? Mitä parantaisit?",
     sendFeedback: "Lähetä palaute",
+    feedbackMissingMessage: "Kirjoita palaute ennen lähettämistä",
+    feedbackNotAvailable: "Palaute ei ole käytettävissä juuri nyt",
+    feedbackSendSuccess: "Kiitos palautteesta!",
+    feedbackSendError: "Palautteen lähetys epäonnistui",
     
     // Footer
     changeConsent: "Muuta evästeasetuksia",
@@ -265,6 +269,10 @@ export const translations = {
     feedbackMessage: "Feedback",
     feedbackPlaceholder: "What worked well? What would you improve?",
     sendFeedback: "Send feedback",
+    feedbackMissingMessage: "Please enter feedback before sending",
+    feedbackNotAvailable: "Feedback is not available right now",
+    feedbackSendSuccess: "Thanks for your feedback!",
+    feedbackSendError: "Failed to send feedback",
     
     // Footer
     changeConsent: "Change cookie settings",

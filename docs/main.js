@@ -14,7 +14,9 @@ import {
   showSignupModal,
   showPasswordResetModal,
   showNewPasswordModal,
-  isPremium
+  isPremium,
+  supabase,
+  currentUser
 } from './js/supabase.js';
 import { getCurrentLanguage, setLanguage, t, translateCategory, translateDeviceName } from './js/translations.js';
 
@@ -1305,6 +1307,49 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Premium activation
   const activatePremiumBtn = $('activatePremium');
   if (activatePremiumBtn) activatePremiumBtn.addEventListener('click', activatePremium);
+
+  // Feedback submission
+  const sendFeedbackBtn = $('sendFeedback');
+  if (sendFeedbackBtn) {
+    sendFeedbackBtn.addEventListener('click', async () => {
+      const name = $('fbName')?.value?.trim() || '';
+      const ratingRaw = $('fbRating')?.value || '';
+      const message = $('fbMessage')?.value?.trim() || '';
+
+      if (!message) {
+        showToast(t('feedbackMissingMessage'));
+        return;
+      }
+
+      if (!supabase) {
+        showToast(t('feedbackNotAvailable'));
+        return;
+      }
+
+      const rating = ratingRaw ? Number(ratingRaw) : null;
+      const payload = {
+        name: name || null,
+        rating: Number.isFinite(rating) ? rating : null,
+        message,
+        language: getCurrentLanguage(),
+        user_id: currentUser?.id || null,
+        created_at: new Date().toISOString()
+      };
+
+      try {
+        const { error } = await supabase.from('feedback').insert([payload]);
+        if (error) throw error;
+
+        $('fbName').value = '';
+        $('fbRating').value = '';
+        $('fbMessage').value = '';
+        showToast(t('feedbackSendSuccess'));
+      } catch (error) {
+        console.error('Feedback send error:', error);
+        showToast(t('feedbackSendError'));
+      }
+    });
+  }
 
   // Setup suggestion calculator
   const suggestBtn = $("suggest");
