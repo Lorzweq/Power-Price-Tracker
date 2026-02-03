@@ -1273,60 +1273,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     showToast("Price Watch pysäytetty");
   });
 
-  // Price Watch Simulation
-  $("simulatePriceWatch")?.addEventListener("click", async () => {
-    // TESTING: Premium check temporarily disabled for testing on mobile
-    // if (!isPremium) {
-    //   showToast("⭐ Price Watch vaatii Premium-tilauksen");
-    //   return;
-    // }
-    
-    if (!currentDayPrices || currentDayPrices.length === 0) {
-      showToast("Lataa ensin hinnat");
-      return;
-    }
-
-    const cheapestPrice = Math.min(...currentDayPrices.map(p => p.price || 999));
-    const cheapestHour = currentDayPrices.find(p => p.price === cheapestPrice);
-    
-    if (!cheapestHour) return;
-
-    const threshold = cheapestPrice + 5;
-    
-    if ("Notification" in window) {
-      if (Notification.permission !== "granted") {
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") {
-          alert("❌ Ilmoitukset estetty\n\nOta käyttöön:\n1. Avaa puhelimen Asetukset\n2. Etsi 'Pörssisähkö' sovellus\n3. Salli ilmoitukset");
-          return;
-        }
-      }
-      
-      if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
-        const registration = await navigator.serviceWorker.ready;
-        registration.showNotification("Price Watch - Hinta laski!", {
-          body: `Hinta laski alle ${threshold.toFixed(2)} snt/kWh!\nHalvin hinta: ${cheapestPrice.toFixed(2)} snt/kWh klo ${cheapestHour.hour.toString().padStart(2, '0')}:00`,
-          icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='%23fbbf24'>⚡</text></svg>",
-          tag: "price-watch",
-          requireInteraction: false,
-          vibrate: [200, 100, 200]
-        });
-        showToast("✅ Ilmoitus lähetetty! Tarkista ilmoituksesi");
-      } else {
-        new Notification("Price Watch - Hinta laski!", {
-          body: `Hinta laski alle ${threshold.toFixed(2)} snt/kWh!\nHalvin hinta: ${cheapestPrice.toFixed(2)} snt/kWh klo ${cheapestHour.hour.toString().padStart(2, '0')}:00`,
-          icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='%23fbbf24'>⚡</text></svg>",
-          tag: "price-watch",
-          requireInteraction: false,
-          vibrate: [200, 100, 200]
-        });
-        showToast("✅ Ilmoitus lähetetty!");
-      }
-    } else {
-      showToast("Selain ei tue ilmoituksia");
-    }
-  });
-
   // Auto-optimize
   $("autoOptimize")?.addEventListener("click", async () => {
     const idxs = getSelectedDeviceIndexes();
