@@ -19,8 +19,37 @@ export let supabase = null;
 export let currentUser = null;
 export let isPremium = false;
 
-if (SUPABASE_URL && SUPABASE_ANON_KEY) {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Initialize Supabase with proper error handling
+function initializeSupabase() {
+  if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
+    try {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      console.log('✅ Supabase initialized successfully');
+      return supabase;
+    } catch (error) {
+      console.error('❌ Error initializing Supabase:', error);
+      return null;
+    }
+  } else {
+    console.warn('⚠️ Supabase not fully configured:', {
+      hasUrl: !!SUPABASE_URL,
+      hasKey: !!SUPABASE_ANON_KEY,
+      hasClient: !!window.supabase
+    });
+    return null;
+  }
+}
+
+// Try to initialize immediately, but also provide a fallback
+if (window.supabase) {
+  supabase = initializeSupabase();
+} else {
+  // Wait for supabase to be available
+  window.addEventListener('load', () => {
+    if (!supabase) {
+      supabase = initializeSupabase();
+    }
+  });
 }
 
 export async function generateDeviceId() {
@@ -462,7 +491,20 @@ export function updateAuthUI() {
 }
 
 export async function initSupabase() {
-  if (!supabase) return;
+  // Ensure Supabase is initialized
+  if (!supabase) {
+    console.log('⏳ Waiting for Supabase to initialize...');
+    // Wait for supabase to be available
+    for (let i = 0; i < 50; i++) {
+      if (supabase) break;
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+
+  if (!supabase) {
+    console.warn('⚠️ Supabase still not available after initialization attempts');
+    return;
+  }
 
   try {
     const { data: { session } } = await supabase.auth.getSession();
