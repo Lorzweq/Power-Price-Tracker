@@ -458,7 +458,32 @@
   </main>
 
   <!-- Module Scripts -->
-  <script type="module" src="main.js"></script>
+  <!-- All JavaScript is organized in ES6 modules for better maintainability -->
+  <script type="module">
+    // Import all modules
+    import { CONFIG, DEVICES, PRESETS, DEVICE_INDEX_BY_NAME } from './js/config.js';
+    import { initConsent } from './js/consent.js';
+    import { $, showToast, copyTextToClipboard, twoDigits, setTodayDefaults } from './js/ui.js';
+    import { fetchPriceCentsPerKwh, moneyEuro, updateDateAvgPrice, fetchLatestPrices, setPricesData } from './js/pricing.js';
+    import { renderDevicesHTML, collectDeviceData, getDevice } from './js/devices.js';
+    import { calculateSavings } from './js/calculator.js';
+    import { drawHourlyChart, draw15MinChart, drawTop3Chart } from './js/chart.js';
+    import {
+      initSupabase,
+      activatePremium,
+      handleLogin,
+      handleSignup,
+      handleLogout,
+      isPremium
+    } from './js/supabase.js';
+
+    // Load and execute main application logic
+    import('./main.js').then(mainModule => {
+      console.log('Application initialized with all modules');
+    }).catch(error => {
+      console.error('Failed to initialize application:', error);
+    });
+  </script>
 
 </body>
 </html>
