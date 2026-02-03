@@ -7,46 +7,41 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="P�rssis�hk�">
+  <meta name="apple-mobile-web-app-title" content="Pörssisähkö">
   <link rel="manifest" href="manifest.json" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- SEO -->
-  <title>P�rssis�hk�-s��st�laskuri</title>
-  <meta name="description" content="Laske p�rssis�hk�n s��st� siirt�m�ll� laitteiden k�ytt�� halvemmille tunneille. Valitse laitteet, vertaa tuntihintoja ja ehdota halvin aloitusaika.">
+  <title>Pörssisähkö-säästölaskuri</title>
+  <meta name="description" content="Laske pörssisähkön säästö siirtämällä laitteiden käyttöä halvemmille tunneille. Valitse laitteet, vertaa tuntihintoja ja ehdota halvin aloitusaika.">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="https://lorzweq.github.io/Power-Price-Tracker/">
 
-
-  <meta property="og:title" content="P�rssis�hk�-s��st�laskuri">
-  <meta property="og:description" content="Vertaa tuntihintoja ja l�yd� halvin k�ytt�aika laitteille.">
+  <meta property="og:title" content="Pörssisähkö-säästölaskuri">
+  <meta property="og:description" content="Vertaa tuntihintoja ja löydä halvin käyttöaika laitteille.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://lorzweq.github.io/Power-Price-Tracker/">
   <meta property="og:locale" content="fi_FI">
 
-
-  
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
-    "name": "P�rssis�hk�-s��st�laskuri",
+    "name": "Pörssisähkö-säästölaskuri",
     "applicationCategory": "FinanceApplication",
     "operatingSystem": "Web",
-    "description": "Laske p�rssis�hk�n s��st� siirt�m�ll� laitteiden k�ytt�� halvemmille tunneille."
+    "description": "Laske pörssisähkön säästö siirtämällä laitteiden käyttöä halvemmille tunneille."
   }
   </script>
 </head>
 
-<!-- Google Analytics will be loaded dynamically based on consent -->
-
 <body class="bg-slate-50 text-slate-900">
   <main class="w-full mx-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6 max-w-7xl">
-    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-center">P�rssis�hk� - s��st� laitteella ja kellonajalla</h1>
+    <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-center">Pörssisähkö - säästö laitteella ja kellonajalla</h1>
     <p class="mt-2 text-xs sm:text-sm text-slate-600 text-center max-w-2xl mx-auto">
-      Laske, kuinka paljon voit s��st�� siirt�m�ll� s�hk�laitteiden k�ytt�� edullisempaan aikaan p�iv�n aikana.
-      Valitse laitteet, m��rit� p�iv�t ja kellonajat ja paina "Laske s��st�".
+      Laske, kuinka paljon voit säästää siirtämällä sähkölaitteiden käyttöä edullisempaan aikaan päivän aikana.
+      Valitse laitteet, määritä päivät ja kellonajat ja paina "Laske säästö".
     </p>
 
     <div class="mt-6 grid gap-3 sm:gap-4 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
@@ -69,7 +64,7 @@
           </div>
           <p class="mt-1 text-xs sm:text-sm text-slate-600" id="consumptionText"></p>
 
-          <label class="block mt-3 text-xs sm:text-sm font-medium">K�ytett�v� arvo</label>
+          <label class="block mt-3 text-xs sm:text-sm font-medium">Käytettävä arvo</label>
           <select id="pick" class="mt-2 w-full rounded-xl border p-2 text-xs sm:text-sm">
             <option value="min">Min</option>
             <option value="avg" selected>Keskiarvo</option>
@@ -83,7 +78,7 @@
       <div class="bg-white rounded-2xl shadow p-3 sm:p-4 md:p-5 lg:col-span-1 xl:col-span-2">
         <div class="grid gap-2 sm:gap-3">
           <div>
-            <label class="block text-xs sm:text-sm font-medium">Aika 1 (p�iv� + tunti)</label>
+            <label class="block text-xs sm:text-sm font-medium">Aika 1 (päivä + tunti)</label>
 
             <div class="flex items-end gap-2 flex-wrap">
               <input
@@ -136,7 +131,7 @@
 
           <div class="mt-2 grid gap-2 sm:gap-3 grid-cols-2 sm:grid-cols-4 items-start auto-rows-max">
             <div>
-              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Aikav�li alkaa </label>
+              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Aikaväli alkaa</label>
               <input
                 id="winStart"
                 type="number"
@@ -148,7 +143,7 @@
             </div>
 
             <div>
-              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Aikav�li p��ttyy </label>
+              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Aikaväli päättyy</label>
               <input
                 id="winEnd"
                 type="number"
@@ -172,7 +167,7 @@
             </div>
 
             <div>
-              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">P�iv�</label>
+              <label class="block text-xs sm:text-sm text-slate-600 mb-1 whitespace-nowrap overflow-hidden text-ellipsis">Päivä</label>
               <input
                 id="date3"
                 type="date"
@@ -194,22 +189,22 @@
             <label class="block text-xs sm:text-sm text-slate-600 mb-1">Esiasetukset</label>
             <div class="flex gap-2">
               <select id="presetSelect" class="flex-1 h-10 rounded-xl border p-2 text-xs sm:text-sm">
-                <option value="">Valitse esiasetus�</option>
+                <option value="">Valitse esiasetus…</option>
                 <option value="basic">Peruskoti</option>
-                <option value="laundry">Pyykkip�iv�</option>
-                <option value="kitchen">Keitti�ilta</option>
+                <option value="laundry">Pyykkipäivä</option>
+                <option value="kitchen">Keittiöilta</option>
                 <option value="evening">Viihdeilta</option>
               </select>
               <button id="applyPreset" class="rounded-xl bg-slate-700 text-white py-2 px-3 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Aseta laitevalinnat esiasetuksen mukaan">
-                K�yt�
+                Käytä
               </button>
             </div>
             <div class="mt-1 text-xs text-slate-500">
-              Valitse esiasetus ja muokkaa laitteita tai m��ri� tarvittaessa.
+              Valitse esiasetus ja muokkaa laitteita tai määriä tarvittaessa.
             </div>
           </div>
 
-          <button id="autoOptimize" class="mb-2 rounded-xl w-full bg-slate-700 text-white py-2 px-2 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Laskee halvimman aloitusajan valituille laitteille ja p�ivitt�� ajan automaattisesti">
+          <button id="autoOptimize" class="mb-2 rounded-xl w-full bg-slate-700 text-white py-2 px-2 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Laskee halvimman aloitusajan valituille laitteille ja päivittää ajan automaattisesti">
             Optimoi automaattisesti
           </button>
           <div class="mb-3 text-xs text-slate-500">
@@ -225,26 +220,26 @@
           <div class="mt-6 rounded-2xl bg-blue-50 border border-blue-200 p-3 sm:p-4">
             <div class="flex items-center justify-between cursor-pointer" id="priceWatchHeader">
               <div class="flex items-center gap-2">
-                <span id="priceWatchToggle" class="text-blue-900 transition-transform">?</span>
+                <span id="priceWatchToggle" class="text-blue-900 transition-transform">▼</span>
                 <div class="text-sm font-semibold text-blue-900">Price Watch</div>
               </div>
-              <span id="premiumBadge" class="hidden px-2 py-1 text-xs font-bold rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-slate-900">? PREMIUM</span>
+              <span id="premiumBadge" class="hidden px-2 py-1 text-xs font-bold rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-slate-900">⭐ PREMIUM</span>
             </div>
             
             <div id="priceWatchContent">
               <p class="mt-1 text-xs text-blue-800">
-                Saa ilmoitus, kun s�hk�hinta laskee alle asetetun rajan.
+                Saa ilmoitus, kun sähköhinta laskee alle asetetun rajan.
               </p>
               
               <!-- User Authentication -->
               <div id="authSection" class="mt-3 p-3 rounded-lg bg-slate-100 border border-slate-300">
                 <div id="loginForm">
-                  <p class="text-xs font-semibold text-slate-900 mb-2">?? Kirjaudu sis��n Premium-tilille</p>
+                  <p class="text-xs font-semibold text-slate-900 mb-2">👤 Kirjaudu sisään Premium-tilille</p>
                   <div class="flex flex-col gap-2">
                     <input
                       id="authEmail"
                       type="email"
-                      placeholder="S�hk�posti"
+                      placeholder="Sähköposti"
                       class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
                     />
                     <input
@@ -258,7 +253,7 @@
                         Kirjaudu
                       </button>
                       <button id="signupBtn" class="flex-1 rounded-lg bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-300 text-xs">
-                        Rekister�idy
+                        Rekisteröidy
                       </button>
                     </div>
                   </div>
@@ -266,7 +261,7 @@
                 
                 <div id="userInfo" class="hidden">
                   <div class="flex items-center justify-between">
-                    <p class="text-xs font-semibold text-slate-900">?? <span id="userEmail"></span></p>
+                    <p class="text-xs font-semibold text-slate-900">👤 <span id="userEmail"></span></p>
                     <button id="logoutBtn" class="rounded-lg bg-slate-400 text-white py-1 px-2 font-medium hover:bg-slate-300 text-xs">
                       Kirjaudu ulos
                     </button>
@@ -275,55 +270,55 @@
               </div>
               
               <!-- Premium Key Input -->
-            <div id="premiumKeySection" class="mt-3 p-3 rounded-lg bg-yellow-50 border border-yellow-300">
-              <p class="text-xs font-semibold text-yellow-900 mb-2">?? Aktivoi Premium</p>
-              <div class="flex gap-2">
-                <input
-                  id="premiumKeyInput"
-                  type="text"
-                  placeholder="Sy�t� premium-avain"
-                  class="flex-1 h-9 rounded-lg border border-yellow-300 p-2 text-xs"
-                />
-                <button id="activatePremium" class="rounded-lg bg-yellow-500 text-slate-900 py-2 px-3 font-bold hover:bg-yellow-400 text-xs">
-                  Aktivoi
-                </button>
+              <div id="premiumKeySection" class="mt-3 p-3 rounded-lg bg-yellow-50 border border-yellow-300">
+                <p class="text-xs font-semibold text-yellow-900 mb-2">🔑 Aktivoi Premium</p>
+                <div class="flex gap-2">
+                  <input
+                    id="premiumKeyInput"
+                    type="text"
+                    placeholder="Syötä premium-avain"
+                    class="flex-1 h-9 rounded-lg border border-yellow-300 p-2 text-xs"
+                  />
+                  <button id="activatePremium" class="rounded-lg bg-yellow-500 text-slate-900 py-2 px-3 font-bold hover:bg-yellow-400 text-xs">
+                    Aktivoi
+                  </button>
+                </div>
+                <p class="mt-2 text-xs text-yellow-800">Laite ID: <span id="deviceIdDisplay" class="font-mono"></span></p>
               </div>
-              <p class="mt-2 text-xs text-yellow-800">Laite ID: <span id="deviceIdDisplay" class="font-mono"></span></p>
-            </div>
 
-            <!-- Price Watch Controls -->
-            <div id="priceWatchControls">
-              <div class="mt-3 flex gap-2">
-                <input
-                  id="priceWatchThreshold"
-                  type="number"
-                  placeholder="Hinta snt/kWh"
-                  class="flex-1 h-10 rounded-xl border p-2 text-xs sm:text-sm"
-                  step="0.01"
-                  min="0"
-                />
-                <button id="startPriceWatch" class="rounded-xl bg-slate-600 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="K�ynnist� hinnan seuranta">
-                  K�ynnist�
-                </button>
-                <button id="stopPriceWatch" class="hidden rounded-xl bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Pys�yt� hinnan seuranta">
-                  Pys�yt�
+              <!-- Price Watch Controls -->
+              <div id="priceWatchControls">
+                <div class="mt-3 flex gap-2">
+                  <input
+                    id="priceWatchThreshold"
+                    type="number"
+                    placeholder="Hinta snt/kWh"
+                    class="flex-1 h-10 rounded-xl border p-2 text-xs sm:text-sm"
+                    step="0.01"
+                    min="0"
+                  />
+                  <button id="startPriceWatch" class="rounded-xl bg-slate-600 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Käynnistä hinnan seuranta">
+                    Käynnistä
+                  </button>
+                  <button id="stopPriceWatch" class="hidden rounded-xl bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Pysäytä hinnan seuranta">
+                    Pysäytä
+                  </button>
+                </div>
+                <div id="priceWatchStatus" class="mt-2 text-xs text-blue-700"></div>
+                <button id="simulatePriceWatch" class="mt-2 w-full rounded-lg bg-blue-200 text-blue-900 py-2 px-3 font-medium hover:bg-blue-300 text-xs sm:text-sm" title="Demonstroi Price Watch toiminta">
+                  Simuloi hälytystä
                 </button>
               </div>
-              <div id="priceWatchStatus" class="mt-2 text-xs text-blue-700"></div>
-              <button id="simulatePriceWatch" class="mt-2 w-full rounded-lg bg-blue-200 text-blue-900 py-2 px-3 font-medium hover:bg-blue-300 text-xs sm:text-sm" title="Demonstroi Price Watch toiminta">
-                Simuloi h�lytyst�
-              </button>
-            </div>
             </div>
           </div>
         </div>
 
         <div class="my-4 grid grid-cols-2 gap-2">
-          <button id="calc" class="rounded-xl bg-slate-900 text-white py-2 px-2 font-medium hover:bg-slate-800 text-xs sm:text-sm" title="Laske s��st� valituille laitteille">
-            Laske s��st�
+          <button id="calc" class="rounded-xl bg-slate-900 text-white py-2 px-2 font-medium hover:bg-slate-800 text-xs sm:text-sm" title="Laske säästö valituille laitteille">
+            Laske säästö
           </button>
-          <button id="resetBtn" class="rounded-xl bg-slate-200 text-slate-700 py-2 px-2 font-medium hover:bg-slate-300 text-xs sm:text-sm" title="Tyhjenn� kaikki valinnat">
-            Tyhjenn� valinnat
+          <button id="resetBtn" class="rounded-xl bg-slate-200 text-slate-700 py-2 px-2 font-medium hover:bg-slate-300 text-xs sm:text-sm" title="Tyhjennä kaikki valinnat">
+            Tyhjennä valinnat
           </button>
         </div>
 
@@ -331,11 +326,11 @@
           <div class="flex items-center justify-between">
             <div class="text-xs sm:text-sm text-slate-600">Tulos</div>
             <div class="flex gap-2">
-              <button id="priceToggle" class="text-xs px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 text-slate-700" title="Vaihda hintojen esitystapaa">� / snt</button>
-              <button id="copyResults" class="hidden text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-white" title="Kopioi tulos leikep�yd�lle">Kopioi</button>
+              <button id="priceToggle" class="text-xs px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 text-slate-700" title="Vaihda hintojen esitystapaa">€ / snt</button>
+              <button id="copyResults" class="hidden text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-white" title="Kopioi tulos leikepöydälle">Kopioi</button>
             </div>
           </div>
-          <div id="out" class="mt-2 text-xs sm:text-sm">Valitse laite ja paina �Laske s��st��.</div>
+          <div id="out" class="mt-2 text-xs sm:text-sm">Valitse laite ja paina "Laske säästö".</div>
         </div>
       </div>
     </div>
@@ -344,16 +339,16 @@
       <div class="flex flex-wrap items-center justify-between gap-2">
         <div class="flex items-center gap-1 sm:gap-3">
           <button id="chartPrev" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-100" title="Aiemmat hinnat">
-            <span class="hidden sm:inline">? Aiemmin</span>
-            <span class="sm:hidden">?</span>
+            <span class="hidden sm:inline">← Aiemmin</span>
+            <span class="sm:hidden">←</span>
           </button>
           <div class="min-w-0">
-            <div class="text-xs sm:text-sm text-slate-600">P�iv�n p�rssis�hk� (snt/kWh)</div>
+            <div class="text-xs sm:text-sm text-slate-600">Päivän pörssisähkö (snt/kWh)</div>
             <div id="chartTitle" class="text-xs sm:text-sm font-medium truncate"></div>
           </div>
           <button id="chartNext" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-100" title="Tulevat hinnat">
-            <span class="hidden sm:inline">My�hemmin ?</span>
-            <span class="sm:hidden">?</span>
+            <span class="hidden sm:inline">Myöhemmin →</span>
+            <span class="sm:hidden">→</span>
           </button>
         </div>
         <button id="loadDay" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50" title="Palaa nykyhetken hintoihin">
@@ -366,25 +361,16 @@
         <canvas id="dayChart" class="mt-3 sm:mt-4 w-full" height="220" style="display: block; max-width: 100%;"></canvas>
       </div>
 
-      <button id="showTop3" class="mt-3 rounded-xl bg-slate-700 text-white py-2 px-3 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="N�yt� kolme halvinta tuntia t�st� n�kym�st�">
-        N�yt� 3 halvinta tuntia
+      <button id="showTop3" class="mt-3 rounded-xl bg-slate-700 text-white py-2 px-3 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Näytä kolme halvinta tuntia tästä näkymästä">
+        Näytä 3 halvinta tuntia
       </button>
       <div id="top3Out" class="mt-3 text-xs sm:text-sm text-slate-700 hidden"></div>
-  
-        <!--<div id="savingsBox" class="hidden mt-3 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl p-3"></div>-->
     </div>
-
-    <!-- (OPTIONAALINEN) MAINOSPAIKKA: n�yt� vasta kun consent.ads === true 
-    <div id="adSlot" class="mt-6 bg-white rounded-2xl shadow p-4 hidden">
-      <div class="text-sm text-slate-600 mb-2">Mainos</div>
-       AdSense antaa t�h�n oman <ins class="adsbygoogle">...</ins> snippetin 
-      <div class="text-xs text-slate-500">Lis�� t�h�n AdSense-snippetti kun otat k�ytt��n.</div>
-    </div>-->
 
     <section class="mt-6 bg-white rounded-2xl shadow p-4">
       <h2 class="text-lg font-semibold">Palaute</h2>
       <p class="text-sm text-slate-600">
-        L�het� palautetta sovelluksesta.
+        Lähetä palautetta sovelluksesta.
       </p>
 
       <div class="mt-4 grid gap-3 md:grid-cols-2">
@@ -394,7 +380,7 @@
             id="fbName"
             type="text"
             class="mt-1 w-full rounded-xl border p-2 text-xs sm:text-sm"
-            placeholder="Maija Meik�l�inen"
+            placeholder="Maija Meikäläinen"
           />
         </div>
 
@@ -405,11 +391,11 @@
             class="mt-1 w-full rounded-xl border p-2 text-xs sm:text-sm"
           >
             <option value="">Valitse</option>
-            <option value="5">????? 5</option>
-            <option value="4">???? 4</option>
-            <option value="3">??? 3</option>
-            <option value="2">?? 2</option>
-            <option value="1">? 1</option>
+            <option value="5">⭐⭐⭐⭐⭐ 5</option>
+            <option value="4">⭐⭐⭐⭐ 4</option>
+            <option value="3">⭐⭐⭐ 3</option>
+            <option value="2">⭐⭐ 2</option>
+            <option value="1">⭐ 1</option>
           </select>
         </div>
       </div>
@@ -420,7 +406,7 @@
           id="fbMessage"
           rows="4"
           class="mt-1 w-full rounded-xl border p-2 text-xs sm:text-sm"
-          placeholder="Mik� toimi hyvin? Mit� parantaisit?"
+          placeholder="Mikä toimi hyvin? Mitä parantaisit?"
           required
         ></textarea>
       </div>
@@ -429,20 +415,20 @@
         id="sendFeedback"
         class="mt-3 sm:mt-4 rounded-xl bg-slate-600 text-white px-3 sm:px-4 py-2 font-medium hover:bg-slate-700 text-xs sm:text-sm"
       >
-        L�het� palaute
+        Lähetä palaute
       </button>
     </section>
 
-    <!-- Footer: ev�steasetukset + policy linkit -->
-   <footer class="mt-8 pb-10 text-xs sm:text-sm text-slate-500 flex flex-col gap-2 sm:gap-3 items-center">
+    <!-- Footer: evästeasetukset + policy linkit -->
+    <footer class="mt-8 pb-10 text-xs sm:text-sm text-slate-500 flex flex-col gap-2 sm:gap-3 items-center">
       <button id="openConsent" class="rounded-xl border px-2 sm:px-3 py-1 sm:py-2 hover:bg-slate-50 text-xs sm:text-sm">
-        Muuta ev�steasetuksia
+        Muuta evästeasetuksia
       </button>
       <div class="flex gap-3 text-xs sm:text-sm">
         <a class="underline hover:no-underline" href="./privacy.html">Tietosuoja</a>
-        <a class="underline hover:no-underline" href="./cookies.html">Ev�steet</a>
+        <a class="underline hover:no-underline" href="./cookies.html">Evästeet</a>
       </div>
-  </footer>
+    </footer>
 
     <!-- Toast / popup -->
     <div
@@ -454,17 +440,17 @@
 
     <!-- Cookie consent -->
     <div id="consentBanner" class="fixed bottom-4 left-1/2 z-[50] hidden -translate-x-1/2 transform max-w-xl w-[92%] rounded-2xl bg-white border shadow p-4">
-      <div class="text-sm font-semibold">Ev�steet</div>
+      <div class="text-sm font-semibold">Evästeet</div>
       <p class="mt-1 text-sm text-slate-600">
-        K�yt�mme ev�steit�/analytiikkaa ja (valinnaisesti) mainoksia k�ytt�kokemuksen ja rahoituksen vuoksi.
-        Voit hyv�ksy� tai hyl�t� ei-v�ltt�m�tt�m�t.
+        Käytämme evästeitä/analytiikkaa ja (valinnaisesti) mainoksia käyttökokemuksen ja rahoituksen vuoksi.
+        Voit hyväksyä tai hylätä ei-välttämättömät.
       </p>
       <div class="mt-3 flex gap-2 justify-end">
         <button id="consentReject" class="rounded-xl border px-3 py-2 text-sm hover:bg-slate-50">
-          Hylk��
+          Hylkää
         </button>
         <button id="consentAccept" class="rounded-xl bg-slate-900 text-white px-3 py-2 text-sm hover:bg-slate-800">
-          Hyv�ksy
+          Hyväksy
         </button>
       </div>
     </div>
@@ -476,3 +462,4 @@
 
 </body>
 </html>
+
