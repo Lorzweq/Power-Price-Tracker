@@ -29,7 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
     { category: "Keittiö",       name: "Sähköliesi",          min: 1.0,  max: 2.0,  unit: "kWh/vrk",   schedulable: true  },
     { category: "Keittiö",       name: "Induktioliesi",       min: 0.6,  max: 1.9,  unit: "kWh/30 min",schedulable: true  },
     { category: "Keittiö",       name: "Airfryer",            min: 0.3,  max: 0.3,  unit: "kWh/10–15 min", schedulable: true },
-    { category: "Keittiö",       name: "Leivänpaahtin",       min: 0.1,  max: 0.1,  unit: "kWh/5 min", schedulable: true },
+    { category: "Keittiö",       name: "Leivänpaahdin",       min: 0.1,  max: 0.1,  unit: "kWh/5 min", schedulable: true },
     { category: "Keittiö",       name: "Parila / vohvelirauta",min: 0.2, max: 0.2,  unit: "kWh/10 min",schedulable: true },
     { category: "Keittiö",       name: "Mikroaaltouuni",      min: 0.12, max: 0.20, unit: "kWh/10 min",schedulable: true },
     { category: "Keittiö",       name: "Vedenkeitin",         min: 0.10, max: 0.10, unit: "kWh/5 min", schedulable: true },
