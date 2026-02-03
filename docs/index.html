@@ -177,28 +177,30 @@
       </div>
     </div>
     <!-- PWA Install Section -->
-<div class="mt-4 rounded-2xl bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 p-3 sm:p-4">
-  <div class="flex items-center justify-between mb-2">
-    <div class="text-sm font-semibold text-slate-900 flex items-center gap-2">
-       Asennus
-    </div>
-    <span class="text-xs px-2 py-1 rounded-lg bg-slate-200 text-slate-700">
-      Sovellus
-    </span>
-  </div>
+     <div id="installSection" class="mt-4 rounded-2xl bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 p-3 sm:p-4">
+        <div class="mt-4 rounded-2xl bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 p-3 sm:p-4">
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-sm font-semibold text-slate-900 flex items-center gap-2">
+              Asennus
+            </div>
+            <span class="text-xs px-2 py-1 rounded-lg bg-slate-200 text-slate-700">
+              Sovellus
+            </span>
+          </div>
 
-  <button
-    id="installPromptBtn"
-    class="hidden w-full rounded-lg bg-slate-600 text-white py-2 px-4 font-bold hover:bg-slate-500 transition text-sm"
-    title="Asenna sovellus puhelimeesi"
-  >
-    Asenna sovellus
-  </button>
+          <button
+            id="installPromptBtn"
+            class="hidden w-full rounded-lg bg-slate-600 text-white py-2 px-4 font-bold hover:bg-slate-500 transition text-sm"
+            title="Asenna sovellus puhelimeesi"
+          >
+            Asenna sovellus
+          </button>
 
-  <p class="mt-2 text-xs text-slate-600">
-    Asenna sovellus puhelimeesi nopeampaa käyttöä varten
-  </p>
-</div>
+          <p class="mt-2 text-xs text-slate-600">
+            Asenna sovellus puhelimeesi nopeampaa käyttöä varten
+          </p>
+        </div>
+      </div>
     
 
     
@@ -567,4 +569,21 @@
 
 </body>
 </html>
+<script>
+  const installSection = document.getElementById("installSection");
+  const installBtn = document.getElementById("installPromptBtn");
 
+  // 1. Jos PWA on jo asennettu → piilota koko osio
+  if (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true
+  ) {
+    installSection?.classList.add("hidden");
+  }
+
+  // 2. Kun asennus tapahtuu → piilota heti
+  window.addEventListener("appinstalled", () => {
+    installSection?.classList.add("hidden");
+    console.log("PWA asennettu");
+  });
+</script>
