@@ -161,8 +161,8 @@ export function updatePremiumUI() {
 }
 
 export async function handleLogin() {
-  const email = $('loginEmail')?.value;
-  const password = $('loginPassword')?.value;
+  const email = $('authEmail')?.value;
+  const password = $('authPassword')?.value;
 
   if (!email || !password) {
     alert('Täytä sähköposti ja salasana');
@@ -198,8 +198,8 @@ export async function handleLogin() {
 }
 
 export async function handleSignup() {
-  const email = $('signupEmail')?.value;
-  const password = $('signupPassword')?.value;
+  const email = $('authEmail')?.value;
+  const password = $('authPassword')?.value;
 
   if (!email || !password) {
     alert('Täytä sähköposti ja salasana');
