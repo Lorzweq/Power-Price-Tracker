@@ -39,12 +39,15 @@
     <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-center">Pörssisähkö - säästö laitteella ja kellonajalla</h1>
     <p class="mt-2 text-xs sm:text-sm text-slate-600 text-center max-w-2xl mx-auto">
       Laske, kuinka paljon voit säästää siirtämällä sähkölaitteiden käyttöä edullisempaan aikaan päivän aikana.
-      Valitse laitteet, määritä päivät ja kellonajat, ja paina "Laske säästö".
+      Valitse laitteet, määritä päivät ja kellonajat ja paina "Laske säästö".
     </p>
 
     <div class="mt-6 grid gap-3 sm:gap-4 md:gap-4 lg:grid-cols-3 xl:grid-cols-4">
       <div class="bg-white rounded-2xl shadow p-3 sm:p-4 md:p-5 lg:col-span-2 xl:col-span-2">
-        <label class="block text-xs sm:text-sm font-medium">Laitteet</label>
+        <div class="flex items-center justify-between">
+          <label class="block text-xs sm:text-sm font-medium">Laitteet</label>
+          <button id="closeAllCategories" class="text-xs px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 text-slate-700" title="Sulje kaikki kategoriat">Sulje kaikki</button>
+        </div>
 
         <div id="deviceList" class="mt-2 grid gap-2"></div>
 
@@ -172,30 +175,76 @@
           </div>
 
           <div class="my-4 grid grid-cols-2 gap-2">
-            <button id="saveFavorites" class="rounded-xl bg-blue-600 text-white py-2 px-2 font-medium hover:bg-blue-500 text-xs sm:text-sm">
-              💾 Tallenna suosikit
+            <button id="saveFavorites" class="rounded-xl bg-slate-700 text-white py-2 px-2 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Tallenna nykyiset valinnat suosikeiksi">
+              Tallenna suosikit
             </button>
-            <button id="loadFavorites" class="rounded-xl bg-blue-600 text-white py-2 px-2 font-medium hover:bg-blue-500 text-xs sm:text-sm">
-              📂 Lataa suosikit
+            <button id="loadFavorites" class="rounded-xl bg-slate-700 text-white py-2 px-2 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Lataa aiemmin tallennetut suosikit">
+              Lataa suosikit
             </button>
           </div>
 
-          <button id="autoOptimize" class="mb-2 rounded-xl w-full bg-emerald-600 text-white py-2 px-2 font-medium hover:bg-emerald-500 text-xs sm:text-sm">
-            ⚡ Optimoi automaattisesti
-          </button>
+          <div class="mb-3">
+            <label class="block text-xs sm:text-sm text-slate-600 mb-1">Esiasetukset</label>
+            <div class="flex gap-2">
+              <select id="presetSelect" class="flex-1 h-10 rounded-xl border p-2 text-xs sm:text-sm">
+                <option value="">Valitse esiasetus…</option>
+                <option value="basic">Peruskoti</option>
+                <option value="laundry">Pyykkipäivä</option>
+                <option value="kitchen">Keittiöilta</option>
+                <option value="evening">Viihdeilta</option>
+              </select>
+              <button id="applyPreset" class="rounded-xl bg-slate-700 text-white py-2 px-3 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Aseta laitevalinnat esiasetuksen mukaan">
+                Käytä
+              </button>
+            </div>
+            <div class="mt-1 text-xs text-slate-500">
+              Valitse esiasetus ja muokkaa laitteita tai määriä tarvittaessa.
+            </div>
+          </div>
 
-          <button id="suggest" class="mb-4 rounded-xl w-full bg-slate-600 text-white py-2 px-2 font-medium hover:bg-slate-500 text-xs sm:text-sm">
+          <button id="autoOptimize" class="mb-2 rounded-xl w-full bg-slate-700 text-white py-2 px-2 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Laskee halvimman aloitusajan valituille laitteille ja päivittää ajan automaattisesti">
+            Optimoi automaattisesti
+          </button>
+          <div class="mb-3 text-xs text-slate-500">
+            Laskee valituille laitteille halvimman aloitusajan ja asettaa sen automaattisesti.
+          </div>
+
+          <button id="suggest" class="mb-4 rounded-xl w-full bg-slate-600 text-white py-2 px-2 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Ehdottaa halvinta aloitusaikaa valinnoille">
             Ehdota halvin aloitusaika
           </button>
 
           <div id="suggestOut" class="mt-3 text-xs sm:text-sm text-slate-700"></div>
+
+          <div class="mt-6 rounded-2xl bg-blue-50 border border-blue-200 p-3 sm:p-4">
+            <div class="text-sm font-semibold text-blue-900">Price Watch</div>
+            <p class="mt-1 text-xs text-blue-800">
+              Saa ilmoitus, kun sähköhinta laskee alle asetetun rajan.
+            </p>
+            <div class="mt-3 flex gap-2">
+              <input
+                id="priceWatchThreshold"
+                type="number"
+                placeholder="Hinta snt/kWh"
+                class="flex-1 h-10 rounded-xl border p-2 text-xs sm:text-sm"
+                step="0.01"
+                min="0"
+              />
+              <button id="startPriceWatch" class="rounded-xl bg-blue-600 text-white py-2 px-3 font-medium hover:bg-blue-500 text-xs sm:text-sm" title="Käynnistä hinnan seuranta">
+                Käynnistä
+              </button>
+              <button id="stopPriceWatch" class="hidden rounded-xl bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Pysäytä hinnan seuranta">
+                Pysäytä
+              </button>
+            </div>
+            <div id="priceWatchStatus" class="mt-2 text-xs text-blue-700"></div>
+          </div>
         </div>
 
         <div class="my-4 grid grid-cols-2 gap-2">
-          <button id="calc" class="rounded-xl bg-slate-900 text-white py-2 px-2 font-medium hover:bg-slate-800 text-xs sm:text-sm">
+          <button id="calc" class="rounded-xl bg-slate-900 text-white py-2 px-2 font-medium hover:bg-slate-800 text-xs sm:text-sm" title="Laske säästö valituille laitteille">
             Laske säästö
           </button>
-          <button id="resetBtn" class="rounded-xl bg-slate-200 text-slate-700 py-2 px-2 font-medium hover:bg-slate-300 text-xs sm:text-sm">
+          <button id="resetBtn" class="rounded-xl bg-slate-200 text-slate-700 py-2 px-2 font-medium hover:bg-slate-300 text-xs sm:text-sm" title="Tyhjennä kaikki valinnat">
             Tyhjennä valinnat
           </button>
         </div>
@@ -204,8 +253,8 @@
           <div class="flex items-center justify-between">
             <div class="text-xs sm:text-sm text-slate-600">Tulos</div>
             <div class="flex gap-2">
-              <button id="priceToggle" class="text-xs px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 text-slate-700">€ / snt</button>
-              <button id="copyResults" class="hidden text-xs px-2 py-1 rounded bg-blue-500 hover:bg-blue-600 text-white">📋 Kopioi</button>
+              <button id="priceToggle" class="text-xs px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 text-slate-700" title="Vaihda hintojen esitystapaa">€ / snt</button>
+              <button id="copyResults" class="hidden text-xs px-2 py-1 rounded bg-slate-700 hover:bg-slate-600 text-white" title="Kopioi tulos leikepöydälle">Kopioi</button>
             </div>
           </div>
           <div id="out" class="mt-2 text-xs sm:text-sm">Valitse laite ja paina “Laske säästö”.</div>
@@ -229,7 +278,7 @@
             <span class="sm:hidden">→</span>
           </button>
         </div>
-        <button id="loadDay" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50">
+        <button id="loadDay" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50" title="Palaa nykyhetken hintoihin">
           <span class="hidden sm:inline">Nykyhetki</span>
           <span class="sm:hidden">Nyt</span>
         </button>
@@ -239,8 +288,8 @@
         <canvas id="dayChart" class="mt-3 sm:mt-4 w-full" height="220" style="display: block; max-width: 100%;"></canvas>
       </div>
 
-      <button id="showTop3" class="mt-3 rounded-xl bg-slate-600 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm">
-        🏆 Näytä TOP 3 halvinta tuntia
+      <button id="showTop3" class="mt-3 rounded-xl bg-slate-700 text-white py-2 px-3 font-medium hover:bg-slate-600 text-xs sm:text-sm" title="Näytä kolme halvinta tuntia tästä näkymästä">
+        Näytä 3 halvinta tuntia
       </button>
       <div id="top3Out" class="mt-3 text-xs sm:text-sm text-slate-700 hidden"></div>
   
@@ -466,6 +515,36 @@
         }, duration);
       }
 
+      function copyTextToClipboard(text) {
+        if (navigator.clipboard && window.isSecureContext) {
+          return navigator.clipboard.writeText(text);
+        }
+
+        return new Promise((resolve, reject) => {
+          try {
+            const textarea = document.createElement("textarea");
+            textarea.value = text;
+            textarea.setAttribute("readonly", "");
+            textarea.style.position = "fixed";
+            textarea.style.top = "-1000px";
+            textarea.style.left = "-1000px";
+            document.body.appendChild(textarea);
+            textarea.focus();
+            textarea.select();
+
+            const successful = document.execCommand("copy");
+            document.body.removeChild(textarea);
+            if (successful) {
+              resolve();
+            } else {
+              reject(new Error("copy failed"));
+            }
+          } catch (err) {
+            reject(err);
+          }
+        });
+      }
+
       document.addEventListener("DOMContentLoaded", () => {
         const btn = document.getElementById("sendFeedback");
         if (!btn) return;
@@ -522,6 +601,12 @@
     const $ = (id) => document.getElementById(id);
 
     const DEVICES = [
+      { category: "Valaistus",    name: "Hehkulamppu 60 W (4 h/pv)", min: 0.24, max: 0.24, unit: "kWh/vrk", schedulable: false },
+      { category: "Valaistus",    name: "LED-lamppu 8 W (4 h/pv)",   min: 0.032,max: 0.032,unit: "kWh/vrk", schedulable: false },
+
+      { category: "Lämmitys", name: "Sähkölattialämmitys (per m²)", min: 0.27, max: 0.55, unit: "kWh/vrk/m²", schedulable: false },
+      { category: "Lämmitys", name: "Ilmalämpöpumppu",          min: 0.20, max: 2.50, unit: "kWh/h",  schedulable: false },
+
       { category: "Kylmälaitteet", name: "Jääkaappi",           min: 0.3,  max: 0.8,  unit: "kWh/vrk",   schedulable: false },
       { category: "Kylmälaitteet", name: "Jääkaappi-pakastin",  min: 0.8,  max: 1.6,  unit: "kWh/vrk",   schedulable: false },
       { category: "Kylmälaitteet", name: "Pakastin",            min: 0.5,  max: 1.5,  unit: "kWh/vrk",   schedulable: false },
@@ -556,10 +641,45 @@
       { category: "Toimisto",      name: "Tulostin",            min: 0.05, max: 0.05, unit: "kWh/vrk",   schedulable: false },
     ];
 
+    const PRESETS = {
+      basic: [
+        { name: "Jääkaappi-pakastin", qty: 1 },
+        { name: "Laajakaistamodeemi", qty: 1 },
+        { name: "Televisio (LED)", qty: 1 },
+        { name: "Digiboksi", qty: 1 },
+        { name: "Kahvinkeitin", qty: 1 },
+        { name: "Vedenkeitin", qty: 1 },
+      ],
+      laundry: [
+        { name: "Pyykinpesukone", qty: 1 },
+        { name: "Kuivausrumpu", qty: 1 },
+        { name: "Kuivauskaappi", qty: 1 },
+      ],
+      kitchen: [
+        { name: "Astianpesukone", qty: 1 },
+        { name: "Induktioliesi", qty: 1 },
+        { name: "Mikroaaltouuni", qty: 1 },
+        { name: "Vedenkeitin", qty: 1 },
+        { name: "Kahvinkeitin", qty: 1 },
+        { name: "Airfryer", qty: 1 },
+      ],
+      evening: [
+        { name: "Televisio (LED)", qty: 1 },
+        { name: "Pelikonsoli", qty: 1 },
+        { name: "Digiboksi", qty: 1 },
+        { name: "Kannettava tietokone", qty: 1 },
+      ],
+    };
+
     const PRICE_ENDPOINT = "https://porssisahko-proxy.leevi-hanninen3.workers.dev";
+    const LATEST_PRICES_ENDPOINT = "https://porssisahko-proxy.leevi-hanninen3.workers.dev?latest=true";
+    let cachedPrices = null; // Cache latest prices locally
     let showInEuros = true; // Price display toggle state
     let lastResultText = ""; // Store last result for copy function
     let currentDayPrices = []; // Store current day prices for Top 3 feature
+    let priceWatchActive = false; // Price Watch state
+    let priceWatchThreshold = 0; // Price threshold for alerts
+    let priceWatchInterval = null; // Price Watch interval ID
 
     // ---- EHDOTUSLASKURIN APUFUNKTIOT (pidä tässä, ennen suggest-listeneriä) ----
     function parseHour(x, fallback = 0) {
@@ -826,6 +946,7 @@ function addSavings(euro) {
     }
 
     function unitQtyLabel(unit) {
+      if (unit.includes("m²")) return "m²";
       if (unit.includes("kWh/h")) return "h";
       if (unit.includes("kWh/vrk")) return "vrk";
       if (unit.includes("kWh/kerta")) return "krt";
@@ -851,6 +972,68 @@ function addSavings(euro) {
       return Array.from(document.querySelectorAll('input[name="device"]:checked'))
         .map(el => Number(el.value))
         .filter(n => Number.isFinite(n));
+    }
+
+    const DEVICE_INDEX_BY_NAME = DEVICES.reduce((acc, d, i) => {
+      acc[d.name] = i;
+      return acc;
+    }, {});
+
+    function applyPresetById(presetId) {
+      const preset = PRESETS[presetId];
+      if (!preset) {
+        showToast("Valitse esiasetus");
+        return;
+      }
+
+      const required = [
+        { name: "Hehkulamppu 60 W (4 h/pv)", qty: 1 },
+        { name: "LED-lamppu 8 W (4 h/pv)", qty: 1 },
+        { name: "Jääkaappi", qty: 1 },
+        { name: "Pakastin", qty: 1 },
+      ];
+
+      const mergedPreset = [
+        ...required,
+        ...preset.filter(item => !required.some(r => r.name === item.name)),
+      ];
+
+      document.querySelectorAll('input[name="device"]').forEach(cb => {
+        cb.checked = false;
+        const qtyEl = document.querySelector(`input[name="qty"][data-i="${cb.value}"]`);
+        if (qtyEl) {
+          qtyEl.value = 1;
+          qtyEl.disabled = true;
+        }
+      });
+
+      const catsToOpen = new Set();
+
+      mergedPreset.forEach(item => {
+        const i = DEVICE_INDEX_BY_NAME[item.name];
+        if (i === undefined) return;
+
+        const cb = document.querySelector(`input[name="device"][value="${i}"]`);
+        if (cb) cb.checked = true;
+
+        const qtyEl = document.querySelector(`input[name="qty"][data-i="${i}"]`);
+        if (qtyEl) {
+          qtyEl.value = Number(item.qty) || 1;
+          qtyEl.disabled = false;
+        }
+
+        catsToOpen.add(DEVICES[i].category);
+      });
+
+      catsToOpen.forEach(cat => {
+        const id = `cat-${cat.replace(/\s+/g, "-")}`;
+        const el = document.getElementById(id);
+        if (el) el.classList.remove("hidden");
+      });
+
+      onSelectionChange();
+      saveState();
+      showToast("Esiasetus käytetty. Voit muokata valintoja.");
     }
 
     function setTodayDefaults() {
@@ -980,12 +1163,21 @@ function addSavings(euro) {
           });
         }
       } else {
-        const first = document.querySelector('input[name="device"][value="0"]');
-        if (first) {
-          first.checked = true;
-          const q = document.querySelector(`input[name="qty"][data-i="0"]`);
+        const defaults = [
+          "Hehkulamppu 60 W (4 h/pv)",
+          "LED-lamppu 8 W (4 h/pv)",
+          "Jääkaappi",
+          "Pakastin",
+        ];
+
+        defaults.forEach(name => {
+          const i = DEVICE_INDEX_BY_NAME[name];
+          if (i === undefined) return;
+          const cb = document.querySelector(`input[name="device"][value="${i}"]`);
+          if (cb) cb.checked = true;
+          const q = document.querySelector(`input[name="qty"][data-i="${i}"]`);
           if (q) q.disabled = false;
-        }
+        });
       }
 
       onSelectionChange();
@@ -1223,7 +1415,7 @@ function addSavings(euro) {
       return tip;
     }
 
-    function drawBarChartSolidWithHover(canvas, hourlyPrices, startHour = 0) {
+    function drawBarChartSolidWithHover(canvas, hourlyPrices, startHour = 0, quarterMinPrices = null) {
       const prices = (hourlyPrices || []).slice(0, 24);
       const ctx = canvas.getContext("2d");
 
@@ -1308,7 +1500,7 @@ function addSavings(euro) {
       }
 
       const tip = ensureTooltip(canvas);
-      canvas.__chartMeta = { padL, padT, chartW, chartH, barW, prices, startHour };
+      canvas.__chartMeta = { padL, padT, chartW, chartH, barW, prices, startHour, quarterMinPrices };
 
       const onMove = (ev) => {
         const rect = canvas.getBoundingClientRect();
@@ -1332,13 +1524,27 @@ function addSavings(euro) {
         const v = meta.prices[hour];
         const displayHour = (meta.startHour + hour) % 24;
 
-        const hourLabel = `${String(displayHour).padStart(2,"0")}:00–${String(displayHour).padStart(2,"00")}:59`;
+        const hourLabel = `${String(displayHour).padStart(2,"0")}:00–${String(displayHour).padStart(2,"0")}:59`;
+
+        // Show 15-min details if available
+        let detailHTML = ``;
+        if (meta.quarterMinPrices && meta.quarterMinPrices[hour]) {
+          const qPrices = meta.quarterMinPrices[hour];
+          const details = [
+            `00–14 min: ${qPrices[0].toFixed(2)}`,
+            `15–29 min: ${qPrices[1].toFixed(2)}`,
+            `30–44 min: ${qPrices[2].toFixed(2)}`,
+            `45–59 min: ${qPrices[3].toFixed(2)}`
+          ].join(" | ");
+          detailHTML = `<div style="font-size:10px; opacity:0.8; margin-top:4px;">${details} snt/kWh</div>`;
+        }
 
         tip.innerHTML = `
           <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
             <div style="font-weight:700">${hourLabel}</div>
             <div style="font-weight:700">${v.toFixed(2)} <span style="font-weight:500; opacity:.85">snt/kWh</span></div>
           </div>
+          ${detailHTML}
         `;
 
         const parentRect = canvas.parentElement.getBoundingClientRect();
@@ -1398,10 +1604,40 @@ function addSavings(euro) {
       }
 
       try {
-        const pricesLocal = [];
+        // Fetch latest prices if not cached
+        if (!cachedPrices) {
+          try {
+            console.log("Fetching latest prices from:", LATEST_PRICES_ENDPOINT);
+            const res = await fetch(LATEST_PRICES_ENDPOINT);
+            console.log("Fetch response status:", res.status);
+            if (res.ok) {
+              const data = await res.json();
+              console.log("Fetched data:", data);
+              cachedPrices = data.prices || data || [];
+              console.log("Cached prices count:", cachedPrices.length);
+              if (cachedPrices.length === 0) {
+                console.warn("No prices found in response, using test data");
+                // Create test data if empty
+                cachedPrices = Array(96).fill(null).map((_, i) => ({
+                  startDate: new Date(Date.now() - 96*15*60*1000 + i*15*60*1000).toISOString(),
+                  endDate: new Date(Date.now() - 96*15*60*1000 + (i+1)*15*60*1000).toISOString(),
+                  price: 3.5 + Math.sin(i/10) * 2
+                }));
+              }
+            } else {
+              console.error("Fetch failed with status:", res.status);
+              cachedPrices = [];
+            }
+          } catch (e) {
+            console.error("Failed to fetch latest prices:", e);
+            cachedPrices = [];
+          }
+        }
 
-        // Build all fetch promises at once for parallel execution
-        const fetchPromises = [];
+        const pricesLocal = [];
+        const quarterMinPrices = []; // Store all 15-min prices for hover detail
+
+        // Calculate hourly average prices
         for (let i = 0; i < 22; i++) {
           const hourOffset = startHour + i;
           const daysOffset = Math.floor(hourOffset / 24);
@@ -1411,32 +1647,45 @@ function addSavings(euro) {
           fetchDate.setDate(fetchDate.getDate() + daysOffset);
 
           const y = fetchDate.getFullYear();
-          const m = String(fetchDate.getMonth() + 1).padStart(2, '0');
-          const d = String(fetchDate.getDate()).padStart(2, '0');
+          const mo = fetchDate.getMonth();
+          const d = fetchDate.getDate();
 
-          const local = new Date(y, fetchDate.getMonth(), fetchDate.getDate(), hourOfDay, 0, 0);
-          const isoUtc = local.toISOString();
-          const url = `${PRICE_ENDPOINT}?date=${encodeURIComponent(isoUtc)}`;
-          
-          fetchPromises.push(
-            fetch(url, { cache: "no-store" })
-              .then(res => {
-                if (!res.ok) return null;
-                return res.json().catch(() => null);
-              })
-              .then(data => {
-                if (data && typeof data.price === 'number') {
-                  return data.price;
+          // Get 4 quarter-hour prices for this hour
+          const quarterHourPrices = [];
+          for (let q = 0; q < 4; q++) {
+            const qDate = new Date(y, mo, d, hourOfDay, q * 15, 0);
+            
+            // Find price in cache
+            let price = 5.0; // fallback
+            if (cachedPrices && cachedPrices.length > 0) {
+              const matching = cachedPrices.find(
+                p => {
+                  const pStart = new Date(p.startDate);
+                  const pEnd = new Date(p.endDate);
+                  return pStart <= qDate && pEnd > qDate;
                 }
-                return 5.0; // fallback for missing data
-              })
-              .catch(() => 5.0) // fallback for network errors
-          );
+              );
+              if (matching) {
+                // Parse price - handle both number and string (comma decimal)
+                let rawPrice = matching.price;
+                if (typeof rawPrice === 'string') {
+                  rawPrice = parseFloat(rawPrice.replace(',', '.'));
+                }
+                if (typeof rawPrice === 'number' && !isNaN(rawPrice)) {
+                  price = rawPrice;
+                }
+              }
+            }
+            quarterHourPrices.push(price);
+          }
+
+          const hourlyAvg = quarterHourPrices.reduce((a, b) => a + b, 0) / quarterHourPrices.length;
+          pricesLocal.push(hourlyAvg);
+          quarterMinPrices.push(quarterHourPrices);
         }
 
-        // Wait for all fetches in parallel
-        const results = await Promise.all(fetchPromises);
-        pricesLocal.push(...results);
+        console.log("Final pricesLocal array (22 hourly averages):", pricesLocal);
+        console.log("Final quarterMinPrices array:", quarterMinPrices);
 
         // Store prices for top 3 feature
         currentDayPrices = pricesLocal.map((price, idx) => ({
@@ -1444,7 +1693,10 @@ function addSavings(euro) {
           price: price
         }));
 
-        drawBarChartSolidWithHover($("dayChart"), pricesLocal, startHour);
+        console.log("About to draw chart with prices:", pricesLocal);
+        console.log("quarterMinPrices count:", quarterMinPrices.length);
+        drawBarChartSolidWithHover($("dayChart"), pricesLocal, startHour, quarterMinPrices);
+        console.log("Chart drawn successfully");
         
         // Update title with final text (no loading indicator)
         if (hoursOffset === 0) {
@@ -1455,7 +1707,8 @@ function addSavings(euro) {
           $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - ${hoursOffset}h`;
         }
       } catch (e) {
-        drawBarChartSolidWithHover($("dayChart"), Array(22).fill(0), startHour);
+        console.error("Error in loadDayAndDraw:", e);
+        drawBarChartSolidWithHover($("dayChart"), Array(22).fill(5.0), startHour);
         $("chartTitle").textContent = `Virhe hintojen haussa`;
       } finally {
         chartLoading = false;
@@ -1577,6 +1830,14 @@ function addSavings(euro) {
       showToast("Valinnat tyhjennetty");
     });
 
+    // Close all categories
+    $("closeAllCategories").addEventListener("click", () => {
+      document.querySelectorAll("[data-cat-body]").forEach(el => {
+        el.classList.add("hidden");
+      });
+      showToast("Kategoriat suljettu");
+    });
+
     // Save Favorites
     $("saveFavorites").addEventListener("click", () => {
       const currentState = loadState();
@@ -1603,6 +1864,72 @@ function addSavings(euro) {
       }
     });
 
+    // Presets
+    $("applyPreset").addEventListener("click", () => {
+      const presetId = $("presetSelect").value;
+      applyPresetById(presetId);
+    });
+
+    // Price Watch
+    function checkPricesForWatch() {
+      if (!currentDayPrices || currentDayPrices.length === 0) return;
+
+      const cheapestPrice = Math.min(...currentDayPrices.map(p => p.price || 999));
+      
+      if (cheapestPrice <= priceWatchThreshold) {
+        const msg = `Hinta laski alle ${priceWatchThreshold} snt/kWh! Halvin hinta nyt: ${cheapestPrice.toFixed(2)} snt/kWh`;
+        showToast(msg);
+
+        // Browser notification if permitted
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("Price Watch - Hinta laski!", {
+            body: msg,
+            icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='70' font-size='70' text-anchor='middle'>⚡</text></svg>"
+          });
+        }
+      }
+    }
+
+    $("startPriceWatch").addEventListener("click", () => {
+      const threshold = parseFloat($("priceWatchThreshold").value);
+      if (!threshold || threshold <= 0) {
+        showToast("Aseta hinnan raja");
+        return;
+      }
+
+      priceWatchThreshold = threshold;
+      priceWatchActive = true;
+
+      // Request notification permission
+      if ("Notification" in window && Notification.permission === "default") {
+        Notification.requestPermission();
+      }
+
+      $("startPriceWatch").classList.add("hidden");
+      $("stopPriceWatch").classList.remove("hidden");
+      $("priceWatchStatus").textContent = `Seurannan kohde: ${threshold} snt/kWh. Tarkistetaan hinnat...`;
+
+      // Check every 5 minutes
+      if (priceWatchInterval) clearInterval(priceWatchInterval);
+      priceWatchInterval = setInterval(checkPricesForWatch, 5 * 60 * 1000);
+      
+      // Initial check
+      checkPricesForWatch();
+      showToast("Price Watch käynnistetty");
+    });
+
+    $("stopPriceWatch").addEventListener("click", () => {
+      priceWatchActive = false;
+      if (priceWatchInterval) {
+        clearInterval(priceWatchInterval);
+        priceWatchInterval = null;
+      }
+      $("startPriceWatch").classList.remove("hidden");
+      $("stopPriceWatch").classList.add("hidden");
+      $("priceWatchStatus").textContent = "";
+      showToast("Price Watch pysäytetty");
+    });
+
     // Auto-optimize
     $("autoOptimize").addEventListener("click", async () => {
       const idxs = getSelectedDeviceIndexes();
@@ -1618,7 +1945,7 @@ function addSavings(euro) {
       $("winEnd").value = 23;
       $("durHours").value = 1; // Default 1 hour
 
-      showToast("⚡ Optimoidaan...");
+      showToast("Optimoidaan...");
       
       // Trigger suggest click
       $("suggest").click();
@@ -1631,8 +1958,8 @@ function addSavings(euro) {
         return;
       }
       try {
-        await navigator.clipboard.writeText(lastResultText);
-        showToast("📋 Tulos kopioitu leikepöydälle!");
+        await copyTextToClipboard(lastResultText);
+        showToast("Tulos kopioitu leikepöydälle!");
       } catch (e) {
         showToast("Virhe kopioinnissa");
       }
@@ -1658,8 +1985,7 @@ function addSavings(euro) {
 
       // Create array of {hour, price} and sort by price
       const hourPrices = currentDayPrices
-        .map((price, hour) => ({ hour, price }))
-        .filter(item => item.price !== null && item.price !== undefined)
+        .filter(item => item && item.price !== null && item.price !== undefined)
         .sort((a, b) => a.price - b.price)
         .slice(0, 3);
 
@@ -1669,7 +1995,7 @@ function addSavings(euro) {
         return;
       }
 
-      const html = `<strong>🏆 TOP 3 halvinta tuntia:</strong><br>` +
+      const html = `<strong>3 halvinta tuntia:</strong><br>` +
         hourPrices.map((item, idx) => 
           `${idx + 1}. klo ${item.hour.toString().padStart(2, '0')}:00 – <strong>${item.price.toFixed(2)} snt/kWh</strong>`
         ).join('<br>');

@@ -85,14 +85,48 @@ export default {
       }
 
       const dateParam = url.searchParams.get("date");
+      const latestParam = url.searchParams.get("latest");
+
+      // Handle latest prices endpoint
+      if (latestParam === "true") {
+        try {
+          const upstream = "https://api.porssisahko.net/v2/latest-prices.json";
+          const response = await fetch(upstream);
+          
+          if (response.ok) {
+            const data = await response.json();
+            return json(
+              data,
+              { 
+                status: 200, 
+                headers: {
+                  ...cors,
+                  "Cache-Control": "max-age=3600",
+                }
+              }
+            );
+          } else {
+            return json(
+              { ok: false, error: "Failed to fetch latest prices from upstream" },
+              { status: response.status, headers: cors }
+            );
+          }
+        } catch (error) {
+          console.error("Latest prices fetch error:", error);
+          return json(
+            { ok: false, error: "Failed to fetch latest prices", details: error instanceof Error ? error.message : "Unknown error" },
+            { status: 500, headers: cors }
+          );
+        }
+      }
 
       // jos ei annettu parametreja → näytä usage
       if (!dateParam) {
         return json(
           { 
             ok: true, 
-            usage: "Use ?date=<ISO8601-timestamp> to get price in cents/kWh",
-            example: "?date=2026-02-02T14:00:00.000Z"
+            usage: "Use ?date=<ISO8601-timestamp> to get price in cents/kWh, or ?latest=true for 48-hour prices",
+            example: "?date=2026-02-02T14:00:00.000Z or ?latest=true"
           },
           { status: 200, headers: cors }
         );
