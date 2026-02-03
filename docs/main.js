@@ -1078,17 +1078,33 @@ function checkPricesForWatch() {
 // ========== PWA INSTALLATION ==========
 let installPrompt = null;
 
+// Check if app is already installed
+function isAppInstalled() {
+  return window.navigator.standalone === true || 
+         window.matchMedia('(display-mode: standalone)').matches ||
+         window.navigator.standalone;
+}
+
 window.addEventListener('beforeinstallprompt', (event) => {
   event.preventDefault();
   installPrompt = event;
   const installBtn = $('installPromptBtn');
-  if (installBtn) {
+  if (installBtn && !isAppInstalled()) {
     installBtn.classList.remove('hidden');
   }
 });
 
 const installBtn = $('installPromptBtn');
 if (installBtn) {
+  // Show install prompt on page load if not installed
+  window.addEventListener('load', () => {
+    if (!isAppInstalled() && installPrompt) {
+      installBtn.classList.remove('hidden');
+    } else if (isAppInstalled()) {
+      installBtn.classList.add('hidden');
+    }
+  });
+
   installBtn.addEventListener('click', async () => {
     if (!installPrompt) return;
     installPrompt.prompt();
@@ -1100,6 +1116,7 @@ if (installBtn) {
     installPrompt = null;
   });
 }
+
 
 // ========== EVENT HANDLERS ==========
 document.addEventListener("DOMContentLoaded", async () => {
