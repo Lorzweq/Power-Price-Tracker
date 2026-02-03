@@ -8,6 +8,12 @@ yarn-error.log*
 lerna-debug.log*
 .pnpm-debug.log*
 
+# Environment variables
+.env.local
+.env.*.local
+docs/.env.local
+docs/.env.*.local
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json

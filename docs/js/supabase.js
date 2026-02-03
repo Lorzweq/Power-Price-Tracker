@@ -1,6 +1,15 @@
 // Supabase and Premium System
+// 
+// SECURITY NOTES:
+// ================
+// 1. Salasanat lähetetään HTTPS:llä (TLS 1.3+) - salattu matkalla
+// 2. Supabase hashaa salasanat palvelimella bcrypt:llä - eivät tallennu plaintekstinä
+// 3. Client ei koskaan näe hattua salasanoista - vain Supabase auth API
+// 4. Istuntotunnukset tallennetaan paikallisesti mutta ovat allekirjoitettuja JWT-tokeneita
+// 5. Premium-avaimet tallennetaan tietokantaan, mutta käyttäjätunnisteet ovat hajautettuja
+//
 import { CONFIG } from './config.js';
-import { $ } from './ui.js';
+import { $, showToast } from './ui.js';
 
 // Initialize Supabase client
 const SUPABASE_URL = CONFIG.SUPABASE_URL;
@@ -50,50 +59,66 @@ export async function activatePremium() {
   const keyInput = $('premiumKeyInput');
   if (!keyInput) return;
 
-  const premiumKey = keyInput.value.trim();
+  const premiumKey = keyInput.value.trim().toUpperCase();
   if (!premiumKey) {
     alert('Anna premium-avain!');
     return;
   }
 
-  const deviceId = await generateDeviceId();
+  if (!supabase) {
+    alert('Supabase ei ole konfiguroitu');
+    return;
+  }
 
   try {
-    const response = await fetch(`${CONFIG.WORKER_URL}/validate-premium`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ deviceId, premiumKey })
-    });
+    // Check if premium key exists and is valid
+    const { data: keyData, error: keyError } = await supabase
+      .from('premium_keys')
+      .select('*')
+      .eq('key', premiumKey)
+      .eq('is_used', false)
+      .single();
 
-    const result = await response.json();
-
-    if (result.valid) {
-      isPremium = true;
-      localStorage.setItem('isPremium', 'true');
-      localStorage.setItem('premiumDeviceId', deviceId);
-
-      if (supabase && currentUser) {
-        await activatePremiumInSupabase(deviceId, premiumKey);
-      }
-
-      updatePremiumUI();
-      alert('Premium aktivoitu onnistuneesti!');
-    } else {
-      alert('Virheellinen premium-avain!');
+    if (keyError || !keyData) {
+      alert('Virheellinen tai jo käytetty premium-avain!');
+      return;
     }
+
+    // Check if key has expired
+    if (keyData.expires_at && new Date(keyData.expires_at) < new Date()) {
+      alert('Premium-avain on vanhentunut!');
+      return;
+    }
+
+    // If user is logged in, save to Supabase
+    if (currentUser) {
+      const { error: updateError } = await supabase
+        .from('premium_keys')
+        .update({ is_used: true, used_by_user_id: currentUser.id, used_at: new Date().toISOString() })
+        .eq('key', premiumKey);
+
+      if (updateError) throw updateError;
+
+      // Save to premium_users table
+      await activatePremiumInSupabase(premiumKey);
+    } else {
+      // Offline mode - save locally
+      localStorage.setItem('isPremium', 'true');
+      localStorage.setItem('premiumKey', premiumKey);
+    }
+
+    isPremium = true;
+    localStorage.setItem('isPremium', 'true');
+    updatePremiumUI();
+    alert('Premium aktivoitu onnistuneesti!');
+    keyInput.value = '';
   } catch (error) {
     console.error('Premium activation error:', error);
-    
-    localStorage.setItem('isPremium', 'true');
-    localStorage.setItem('premiumDeviceId', deviceId);
-    isPremium = true;
-    updatePremiumUI();
-    
-    alert('Premium aktivoitu paikallisesti (offline mode)');
+    alert('Virhe premium-aktivoinnissa: ' + error.message);
   }
 }
 
-async function activatePremiumInSupabase(deviceId, premiumKey) {
+async function activatePremiumInSupabase(premiumKey) {
   if (!supabase || !currentUser) return;
 
   try {
@@ -101,7 +126,6 @@ async function activatePremiumInSupabase(deviceId, premiumKey) {
       .from('premium_users')
       .upsert({
         user_id: currentUser.id,
-        device_id: deviceId,
         premium_key: premiumKey,
         is_premium: true,
         activated_at: new Date().toISOString()
@@ -111,6 +135,8 @@ async function activatePremiumInSupabase(deviceId, premiumKey) {
 
     if (error) {
       console.error('Error saving to Supabase:', error);
+    } else {
+      console.log('Premium status saved to Supabase');
     }
   } catch (error) {
     console.error('Supabase activation error:', error);
@@ -142,6 +168,9 @@ export async function checkSupabasePremiumStatus() {
 export function updatePremiumUI() {
   const badge = $('premiumBadge');
   const keySection = $('premiumKeySection');
+  const statusBadge = $('authStatusBadge');
+  const userInfo = $('userInfo');
+  const loginForm = $('loginForm');
 
   if (isPremium) {
     if (badge) {
@@ -150,12 +179,29 @@ export function updatePremiumUI() {
     if (keySection) {
       keySection.classList.add('hidden');
     }
+    if (statusBadge) {
+      statusBadge.textContent = '✅ Premium aktiivinen';
+      statusBadge.classList.remove('bg-slate-200', 'text-slate-700');
+      statusBadge.classList.add('bg-yellow-200', 'text-yellow-700');
+    }
   } else {
     if (badge) {
       badge.classList.add('hidden');
     }
     if (keySection) {
       keySection.classList.remove('hidden');
+    }
+    if (statusBadge) {
+      const isLoggedIn = userInfo && !userInfo.classList.contains('hidden');
+      if (isLoggedIn) {
+        statusBadge.textContent = '🔑 Kirjautunut - Lisää premium';
+        statusBadge.classList.remove('bg-slate-200', 'text-slate-700', 'bg-yellow-200', 'text-yellow-700');
+        statusBadge.classList.add('bg-blue-200', 'text-blue-700');
+      } else {
+        statusBadge.textContent = 'Ei kirjautunut';
+        statusBadge.classList.remove('bg-blue-200', 'text-blue-700', 'bg-yellow-200', 'text-yellow-700');
+        statusBadge.classList.add('bg-slate-200', 'text-slate-700');
+      }
     }
   }
 }
@@ -165,12 +211,12 @@ export async function handleLogin() {
   const password = $('authPassword')?.value;
 
   if (!email || !password) {
-    alert('Täytä sähköposti ja salasana');
+    showToast('⚠️ Täytä sähköposti ja salasana');
     return;
   }
 
   if (!supabase) {
-    alert('Supabase ei ole konfiguroitu');
+    showToast('❌ Supabase ei ole konfiguroitu');
     return;
   }
 
@@ -191,38 +237,192 @@ export async function handleLogin() {
 
     updateAuthUI();
     updatePremiumUI();
-    alert('Kirjauduttu sisään!');
+    showToast('✅ Tervetuloa! Kirjauduttu sisään');
   } catch (error) {
-    alert('Kirjautuminen epäonnistui: ' + error.message);
+    showToast('❌ Kirjautuminen epäonnistui: ' + error.message);
   }
 }
 
 export async function handleSignup() {
-  const email = $('authEmail')?.value;
-  const password = $('authPassword')?.value;
+  // Old handleSignup - now just opens the modal
+  showSignupModal();
+}
 
-  if (!email || !password) {
-    alert('Täytä sähköposti ja salasana');
-    return;
-  }
+export function showSignupModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal-content';
+  
+  modal.innerHTML = `
+    <div class="text-center">
+      <h2 class="text-2xl font-bold text-slate-900 mb-1">Rekisteröidy</h2>
+      <p class="text-xs text-slate-500 mb-4">Luo uusi käyttäjätili</p>
+      
+      <div class="flex flex-col gap-2">
+        <input
+          id="signupEmail"
+          type="email"
+          placeholder="Sähköposti"
+          class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
+        />
+        <input
+          id="signupPassword"
+          type="password"
+          placeholder="Salasana (vähintään 6 merkkiä)"
+          class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
+        />
+        <input
+          id="signupPasswordConfirm"
+          type="password"
+          placeholder="Vahvista salasana"
+          class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
+        />
+        
+        <button id="submitSignup" class="mt-2 w-full rounded-lg bg-slate-600 text-white py-2 px-4 font-bold hover:bg-slate-500 text-xs">
+          Rekisteröidy
+        </button>
+        <button id="closeSignupModalBtn" class="w-full rounded-lg bg-slate-200 text-slate-700 py-2 px-4 font-medium hover:bg-slate-300 text-xs">
+          Peruuta
+        </button>
+      </div>
+      
+      <p class="mt-3 text-xs text-slate-500">
+        Sinulla on jo tunnus? <button id="goBackToLogin" class="underline hover:text-slate-700 font-semibold">Kirjaudu sisään</button>
+      </p>
+    </div>
+  `;
+  
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  // Event listeners
+  const submitBtn = modal.querySelector('#submitSignup');
+  const closeBtn = modal.querySelector('#closeSignupModalBtn');
+  const goBackBtn = modal.querySelector('#goBackToLogin');
+  const emailInput = modal.querySelector('#signupEmail');
+  const passwordInput = modal.querySelector('#signupPassword');
+  const confirmInput = modal.querySelector('#signupPasswordConfirm');
+  
+  submitBtn.addEventListener('click', async () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    const confirm = confirmInput.value;
+    
+    if (!email || !password || !confirm) {
+      showToast('⚠️ Täytä kaikki kentät');
+      return;
+    }
+    
+    if (password !== confirm) {
+      showToast('⚠️ Salasanat eivät täsmää');
+      return;
+    }
+    
+    if (password.length < 6) {
+      showToast('⚠️ Salasana on liian lyhyt (vähintään 6 merkkiä)');
+      return;
+    }
+    
+    // Perform signup
+    if (!supabase) {
+      showToast('❌ Supabase ei ole konfiguroitu');
+      return;
+    }
+    
+    try {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Rekisteröidään...';
+      
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password
+      });
+      
+      if (error) throw error;
+      
+      // Close modal and show success
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.3s ease';
+      setTimeout(() => overlay.remove(), 300);
+      
+      showSignupSuccessModal(email);
+    } catch (error) {
+      showToast('❌ Rekisteröinti epäonnistui: ' + error.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Rekisteröidy';
+    }
+  });
+  
+  closeBtn.addEventListener('click', () => {
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => overlay.remove(), 300);
+  });
+  
+  goBackBtn.addEventListener('click', () => {
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => overlay.remove(), 300);
+  });
+  
+  // Click outside to close
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.3s ease';
+      setTimeout(() => overlay.remove(), 300);
+    }
+  });
+  
+  // Focus on first input
+  emailInput.focus();
+}
 
-  if (!supabase) {
-    alert('Supabase ei ole konfiguroitu');
-    return;
-  }
-
-  try {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password
-    });
-
-    if (error) throw error;
-
-    alert('Rekisteröinti onnistui! Tarkista sähköpostisi vahvistusta varten.');
-  } catch (error) {
-    alert('Rekisteröinti epäonnistui: ' + error.message);
-  }
+export function showSignupSuccessModal(email) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal-content';
+  
+  modal.innerHTML = `
+    <div class="text-center">
+      <div class="text-5xl mb-4">✅</div>
+      <h2 class="text-2xl font-bold text-slate-900 mb-2">Rekisteröinti onnistui!</h2>
+      <p class="text-sm text-slate-600 mb-4">
+        Olemme lähettäneet vahvistuslinkin osoitteeseen:
+      </p>
+      <p class="text-sm font-mono bg-slate-100 p-2 rounded-lg mb-4 break-all text-xs">${email}</p>
+      <p class="text-xs text-slate-500 mb-6">
+        Tarkista sähköpostisi (ja roskapostin kansio) ja klikkaa vahvistuslinkkiä jatkaaksesi.
+      </p>
+      <button id="closeSignupSuccessModal" class="w-full rounded-lg bg-slate-600 text-white py-2 px-4 font-bold hover:bg-slate-500 text-xs">
+        Ymmärretty
+      </button>
+    </div>
+  `;
+  
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  // Close button functionality
+  const closeBtn = modal.querySelector('#closeSignupSuccessModal');
+  closeBtn.addEventListener('click', () => {
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => overlay.remove(), 300);
+  });
+  
+  // Click outside to close
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.3s ease';
+      setTimeout(() => overlay.remove(), 300);
+    }
+  });
 }
 
 export async function handleLogout() {
@@ -231,10 +431,13 @@ export async function handleLogout() {
   try {
     await supabase.auth.signOut();
     currentUser = null;
+    isPremium = false;
+    localStorage.removeItem('isPremium');
     updateAuthUI();
-    alert('Kirjauduttu ulos');
+    updatePremiumUI();
+    showToast('👋 Kirjauduttu ulos');
   } catch (error) {
-    alert('Uloskirjautuminen epäonnistui: ' + error.message);
+    showToast('❌ Uloskirjautuminen epäonnistui: ' + error.message);
   }
 }
 

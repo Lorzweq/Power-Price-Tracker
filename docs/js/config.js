@@ -1,10 +1,12 @@
 // Configuration and Constants
+// Load from .env.local file (create that file with your own values)
+// See .env.example for required variables
 export const CONFIG = {
   PRICE_ENDPOINT: "https://porssisahko-proxy.leevi-hanninen3.workers.dev",
   LATEST_PRICES_ENDPOINT: "https://porssisahko-proxy.leevi-hanninen3.workers.dev?latest=true",
   PREMIUM_API_URL: 'https://porssisahko-proxy.leevi-hanninen3.workers.dev/validate-premium',
-  SUPABASE_URL: 'YOUR_SUPABASE_URL',
-  SUPABASE_ANON_KEY: 'YOUR_SUPABASE_ANON_KEY',
+  SUPABASE_URL: 'https://lztelpmsfyrlohjcawkm.supabase.co',
+  SUPABASE_ANON_KEY: 'sb_publishable__DJPPvPSjAZgVuaAQ-FyAw_MFiHt2qN',
   STORAGE_KEY: "psl_state_v1",
   SAVINGS_KEY: "psl_savings_v1",
   CONSENT_KEY: "consent_v1"

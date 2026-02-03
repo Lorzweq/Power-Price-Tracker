@@ -50,6 +50,35 @@ export function copyTextToClipboard(text) {
   });
 }
 
+export function setupAuthToggle() {
+  const authHeader = $("authHeader");
+  const authContent = $("authContent");
+  const authToggle = $("authToggle");
+
+  if (!authHeader || !authContent || !authToggle) return;
+
+  authHeader.addEventListener("click", () => {
+    const isHidden = authContent.classList.contains("hidden");
+    
+    if (isHidden) {
+      authContent.classList.remove("hidden");
+      authToggle.style.transform = "rotate(0deg)";
+      localStorage.setItem("authSectionOpen", "true");
+    } else {
+      authContent.classList.add("hidden");
+      authToggle.style.transform = "rotate(-90deg)";
+      localStorage.setItem("authSectionOpen", "false");
+    }
+  });
+
+  // Restore toggle state from localStorage
+  const wasOpen = localStorage.getItem("authSectionOpen") !== "false";
+  if (!wasOpen) {
+    authContent.classList.add("hidden");
+    authToggle.style.transform = "rotate(-90deg)";
+  }
+}
+
 export function twoDigits(n) {
   return (n < 10 ? "0" + n : "" + n);
 }

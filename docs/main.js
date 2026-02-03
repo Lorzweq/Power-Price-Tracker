@@ -1,7 +1,7 @@
 // Main Application Logic
 import { CONFIG, DEVICES, PRESETS, DEVICE_INDEX_BY_NAME } from './js/config.js';
 import { initConsent } from './js/consent.js';
-import { $, showToast, copyTextToClipboard, twoDigits, setTodayDefaults } from './js/ui.js';
+import { $, showToast, copyTextToClipboard, twoDigits, setTodayDefaults, setupAuthToggle } from './js/ui.js';
 import { fetchPriceCentsPerKwh, moneyEuro, updateDateAvgPrice, fetchLatestPrices, setPricesData } from './js/pricing.js';
 import { renderDevicesHTML, collectDeviceData, getDevice } from './js/devices.js';
 import { calculateSavings } from './js/calculator.js';
@@ -10,8 +10,8 @@ import {
   initSupabase,
   activatePremium,
   handleLogin,
-  handleSignup,
   handleLogout,
+  showSignupModal,
   isPremium
 } from './js/supabase.js';
 
@@ -1107,8 +1107,8 @@ document.addEventListener("DOMContentLoaded", async () => {
   const loginBtn = $('loginBtn');
   if (loginBtn) loginBtn.addEventListener('click', handleLogin);
   
-  const signupBtn = $('signupBtn');
-  if (signupBtn) signupBtn.addEventListener('click', handleSignup);
+  const openSignupModalBtn = $('openSignupModal');
+  if (openSignupModalBtn) openSignupModalBtn.addEventListener('click', showSignupModal);
   
   const logoutBtn = $('logoutBtn');
   if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
@@ -1275,10 +1275,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Price Watch Simulation
   $("simulatePriceWatch")?.addEventListener("click", async () => {
-    if (!isPremium) {
-      showToast("⭐ Price Watch vaatii Premium-tilauksen");
-      return;
-    }
+    // TESTING: Premium check temporarily disabled for testing on mobile
+    // if (!isPremium) {
+    //   showToast("⭐ Price Watch vaatii Premium-tilauksen");
+    //   return;
+    // }
     
     if (!currentDayPrices || currentDayPrices.length === 0) {
       showToast("Lataa ensin hinnat");
@@ -1435,6 +1436,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     onSelectionChange();
   } catch (e) {
     console.error("❌ Error in onSelectionChange:", e);
+  }
+
+  // Setup auth toggle
+  try {
+    setupAuthToggle();
+  } catch (e) {
+    console.error("❌ Error in setupAuthToggle:", e);
   }
 
   // Load chart
