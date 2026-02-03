@@ -469,11 +469,11 @@
       </div>
     </div>
 
-    <script>
-      // -------------------------
-      // CONSENT + ADS LOADER
-      // -------------------------
-      const CONSENT_KEY = "consent_v1"; // localStorage
+  </main>
+
+  <!-- SOVELLUSLOGIIKKA -->
+  <!-- Module Scripts -->
+  <script type="module" src="main.js"></script>
 
       function getConsent() {
         try { return JSON.parse(localStorage.getItem(CONSENT_KEY) || "null"); }
@@ -1015,22 +1015,25 @@
   </main>
 
   <!-- SOVELLUSLOGIIKKA -->
-  <script>
-  // Register Service Worker for PWA
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((registration) => {
-          console.log('SW registered:', registration);
-        })
-        .catch((error) => {
-          console.log('SW registration failed:', error);
-        });
-    });
-  }
+  <!-- Module Scripts -->
+  <script type="module" src="main.js"></script>
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const DEVICES = [
+  <!-- Old embedded script removed - now using modular JavaScript -->
+  <!--
+  <script>
+  // All JavaScript logic has been moved to modular files:
+  // - main.js: Main application logic
+  // - js/config.js: Constants and device data
+  // - js/consent.js: Cookie consent management
+  // - js/ui.js: UI helper functions
+  // - js/pricing.js: Pricing API and data management
+  // - js/devices.js: Device management and rendering
+  // - js/calculator.js: Calculation logic
+  // - js/chart.js: Chart drawing
+  // - js/supabase.js: Supabase and premium system
+  -->
+</body>
+</html>
       { category: "Valaistus",    name: "Hehkulamppu 60 W (4 h/pv)", min: 0.24, max: 0.24, unit: "kWh/vrk", schedulable: false },
       { category: "Valaistus",    name: "LED-lamppu 8 W (4 h/pv)",   min: 0.032,max: 0.032,unit: "kWh/vrk", schedulable: false },
 
