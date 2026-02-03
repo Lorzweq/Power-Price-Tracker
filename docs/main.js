@@ -2,7 +2,7 @@
 import { CONFIG, DEVICES, PRESETS, DEVICE_INDEX_BY_NAME } from './js/config.js';
 import { initConsent } from './js/consent.js';
 import { $, showToast, copyTextToClipboard, twoDigits, setTodayDefaults, setupAuthToggle } from './js/ui.js';
-import { fetchPriceCentsPerKwh, moneyEuro, updateDateAvgPrice, fetchLatestPrices, setPricesData } from './js/pricing.js';
+import { fetchPriceCentsPerKwh, moneyEuro, updateDateAvgPrice, fetchLatestPrices, setPricesData, clearCachedPrices } from './js/pricing.js';
 import { renderDevicesHTML, collectDeviceData, getDevice } from './js/devices.js';
 import { calculateSavings } from './js/calculator.js';
 import { drawHourlyChart, draw15MinChart, drawTop3Chart } from './js/chart.js';
@@ -1094,6 +1094,7 @@ async function refreshLatestPricesIfChanged() {
 
     const nextSig = getPricesSignature(nextPrices);
     if (nextSig && nextSig !== lastPricesSignature) {
+      clearCachedPrices(); // Clear cache before updating
       cachedPrices = nextPrices;
       lastPricesSignature = nextSig;
       await loadDayAndDraw(chartOffset);

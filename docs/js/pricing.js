@@ -19,6 +19,27 @@ export async function fetchPriceCentsPerKwh(dateStr, hour) {
     throw new Error("Invalid Date (päivä/tunti)");
   }
 
+  // Try to get price from cached data first
+  const prices = await fetchLatestPrices();
+  if (prices && prices.length > 0) {
+    const matching = prices.find(p => {
+      const pStart = new Date(p.startDate);
+      const pEnd = new Date(p.endDate);
+      return pStart <= local && pEnd > local;
+    });
+
+    if (matching) {
+      let rawPrice = matching.price;
+      if (typeof rawPrice === 'string') {
+        rawPrice = parseFloat(rawPrice.replace(',', '.'));
+      }
+      if (typeof rawPrice === 'number' && !isNaN(rawPrice)) {
+        return rawPrice;
+      }
+    }
+  }
+
+  // Fallback to API call if not found in cache
   const isoUtc = local.toISOString();
   const url = `${CONFIG.PRICE_ENDPOINT}?date=${encodeURIComponent(isoUtc)}`;
 
@@ -48,26 +69,37 @@ export async function updateDateAvgPrice(dateInputId) {
   }
 
   try {
-    const [y, m, d] = dateStr.split("-").map(Number);
-    const promises = Array.from({ length: 24 }, async (_, h) => {
-      const local = new Date(y, m - 1, d, h, 0, 0);
-      const isoUtc = local.toISOString();
-      const url = `${CONFIG.PRICE_ENDPOINT}?date=${encodeURIComponent(isoUtc)}`;
-      
-      try {
-        const res = await fetch(url, { cache: "no-store" });
-        const data = await res.json().catch(() => null);
-        if (data && typeof data.price === 'number') {
-          return data.price;
-        }
-        return null;
-      } catch {
-        return null;
-      }
-    });
+    // Ensure we have cached prices
+    const prices = await fetchLatestPrices();
+    if (!prices || prices.length === 0) {
+      if (label) label.textContent = `${label.textContent}  Ei dataa`;
+      return;
+    }
 
-    const prices = await Promise.all(promises);
-    const validPrices = prices.filter(p => p !== null);
+    const [y, m, d] = dateStr.split("-").map(Number);
+    const validPrices = [];
+
+    // Get prices for each hour from cached data
+    for (let h = 0; h < 24; h++) {
+      const local = new Date(y, m - 1, d, h, 0, 0);
+      
+      // Find matching price from cached data
+      const matching = prices.find(p => {
+        const pStart = new Date(p.startDate);
+        const pEnd = new Date(p.endDate);
+        return pStart <= local && pEnd > local;
+      });
+
+      if (matching) {
+        let rawPrice = matching.price;
+        if (typeof rawPrice === 'string') {
+          rawPrice = parseFloat(rawPrice.replace(',', '.'));
+        }
+        if (typeof rawPrice === 'number' && !isNaN(rawPrice)) {
+          validPrices.push(rawPrice);
+        }
+      }
+    }
     
     if (validPrices.length > 0 && label) {
       const avgPrice = validPrices.reduce((a, b) => a + b, 0) / validPrices.length;
@@ -109,4 +141,8 @@ export async function fetchLatestPrices() {
 export function setPricesData(prices, quarterPrices) {
   currentDayPrices = prices;
   quarterMinPrices = quarterPrices;
+}
+
+export function clearCachedPrices() {
+  cachedPrices = null;
 }

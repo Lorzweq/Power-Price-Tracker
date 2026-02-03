@@ -17,6 +17,7 @@ export const DEVICES = [
   { category: "Valaistus", name: "LED-lamppu 8 W (4 h/pv)", min: 0.032, max: 0.032, unit: "kWh/vrk", schedulable: false },
   { category: "Lämmitys", name: "Sähkölattialämmitys (per m²)", min: 0.27, max: 0.55, unit: "kWh/vrk/m²", schedulable: false },
   { category: "Lämmitys", name: "Ilmalämpöpumppu", min: 0.20, max: 2.50, unit: "kWh/h", schedulable: false },
+  { category: "Lämmitys", name: "Sähkökiuas", min: 6.0, max: 9.0, unit: "kWh/h", schedulable: true },
   { category: "Kylmälaitteet", name: "Jääkaappi", min: 0.3, max: 0.8, unit: "kWh/vrk", schedulable: false },
   { category: "Kylmälaitteet", name: "Jääkaappi-pakastin", min: 0.8, max: 1.6, unit: "kWh/vrk", schedulable: false },
   { category: "Kylmälaitteet", name: "Pakastin", min: 0.5, max: 1.5, unit: "kWh/vrk", schedulable: false },
