@@ -12,6 +12,18 @@ const ALLOWED_ORIGINS = new Set<string>([
   "http://192.168.101.100:5500",
 ]);
 
+// Premium keys stored server-side (not exposed to clients)
+const PREMIUM_KEYS = new Set<string>([
+  'PREM-8K9L-M3N7-Q2R5-X4W8',
+  'PWAT-7H2J-F9D6-C5V1-B8N3',
+  'ELEC-4T3Y-G8K2-P7M9-L6H5',
+  'GOLD-9X2C-V5B7-N4M8-K3J6',
+  'STAR-6L8H-J2K9-M5P3-R7T4',
+  'LITE-3W5Y-B8N2-V6C9-X4Z7',
+  'MEGA-2R9T-H5K7-J3M6-P8L4',
+  'ULTR-7C4V-N8B2-M6K5-G9F3'
+]);
+
 function corsHeaders(origin: string | null) {
   const allow = origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://lorzweq.github.io";
   return {
@@ -41,6 +53,42 @@ export default {
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: cors });
+    }
+
+    // --- PREMIUM KEY VALIDATION ---
+    if (url.pathname === "/validate-premium") {
+      if (request.method !== "POST") {
+        return json({ ok: false, error: "Method not allowed" }, { status: 405, headers: cors });
+      }
+
+      let data: any = null;
+      try {
+        data = await request.json();
+      } catch {
+        return json({ ok: false, error: "Invalid JSON" }, { status: 400, headers: cors });
+      }
+
+      const key = typeof data?.key === "string" ? data.key.trim().toUpperCase() : "";
+      const deviceId = typeof data?.deviceId === "string" ? data.deviceId : "";
+
+      if (!key || !deviceId) {
+        return json({ valid: false, error: "Key and deviceId required" }, { status: 400, headers: cors });
+      }
+
+      // Validate the premium key
+      const isValid = PREMIUM_KEYS.has(key);
+
+      if (isValid) {
+        // Optional: Store activation in KV for tracking
+        const activationKey = `premium:${deviceId}`;
+        await env.FEEDBACK_KV.put(
+          activationKey,
+          JSON.stringify({ key, deviceId, activatedAt: new Date().toISOString() }),
+          { expirationTtl: 60 * 60 * 24 * 365 } // 1 year
+        );
+      }
+
+      return json({ valid: isValid }, { status: 200, headers: cors });
     }
 
     // --- FEEDBACK ---

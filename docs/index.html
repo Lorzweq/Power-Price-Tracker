@@ -10,6 +10,7 @@
   <meta name="apple-mobile-web-app-title" content="Pörssisähkö">
   <link rel="manifest" href="manifest.json" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <!-- SEO -->
   <title>Pörssisähkö-säästölaskuri</title>
@@ -222,17 +223,60 @@
           <div id="suggestOut" class="mt-3 text-xs sm:text-sm text-slate-700"></div>
 
           <div class="mt-6 rounded-2xl bg-blue-50 border border-blue-200 p-3 sm:p-4">
-            <div class="flex items-center justify-between">
-              <div class="text-sm font-semibold text-blue-900">Price Watch</div>
+            <div class="flex items-center justify-between cursor-pointer" id="priceWatchHeader">
+              <div class="flex items-center gap-2">
+                <span id="priceWatchToggle" class="text-blue-900 transition-transform">▼</span>
+                <div class="text-sm font-semibold text-blue-900">Price Watch</div>
+              </div>
               <span id="premiumBadge" class="hidden px-2 py-1 text-xs font-bold rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-slate-900">⭐ PREMIUM</span>
             </div>
-            <p class="mt-1 text-xs text-blue-800">
-              Saa ilmoitus, kun sähköhinta laskee alle asetetun rajan.
-            </p>
             
-            <!-- Premium Key Input -->
-            <div id="premiumKeySection" class="hidden mt-3 p-3 rounded-lg bg-yellow-50 border border-yellow-300">
-              <p class="text-xs font-semibold text-yellow-900 mb-2"> Aktivoi Premium</p>
+            <div id="priceWatchContent">
+              <p class="mt-1 text-xs text-blue-800">
+                Saa ilmoitus, kun sähköhinta laskee alle asetetun rajan.
+              </p>
+              
+              <!-- User Authentication -->
+              <div id="authSection" class="mt-3 p-3 rounded-lg bg-slate-100 border border-slate-300">
+                <div id="loginForm">
+                  <p class="text-xs font-semibold text-slate-900 mb-2">👤 Kirjaudu sisään Premium-tilille</p>
+                  <div class="flex flex-col gap-2">
+                    <input
+                      id="authEmail"
+                      type="email"
+                      placeholder="Sähköposti"
+                      class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
+                    />
+                    <input
+                      id="authPassword"
+                      type="password"
+                      placeholder="Salasana"
+                      class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
+                    />
+                    <div class="flex gap-2">
+                      <button id="loginBtn" class="flex-1 rounded-lg bg-slate-600 text-white py-2 px-3 font-bold hover:bg-slate-500 text-xs">
+                        Kirjaudu
+                      </button>
+                      <button id="signupBtn" class="flex-1 rounded-lg bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-300 text-xs">
+                        Rekisteröidy
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                
+                <div id="userInfo" class="hidden">
+                  <div class="flex items-center justify-between">
+                    <p class="text-xs font-semibold text-slate-900">👤 <span id="userEmail"></span></p>
+                    <button id="logoutBtn" class="rounded-lg bg-slate-400 text-white py-1 px-2 font-medium hover:bg-slate-300 text-xs">
+                      Kirjaudu ulos
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Premium Key Input -->
+            <div id="premiumKeySection" class="mt-3 p-3 rounded-lg bg-yellow-50 border border-yellow-300">
+              <p class="text-xs font-semibold text-yellow-900 mb-2">🔑 Aktivoi Premium</p>
               <div class="flex gap-2">
                 <input
                   id="premiumKeyInput"
@@ -269,6 +313,7 @@
               <button id="simulatePriceWatch" class="mt-2 w-full rounded-lg bg-blue-200 text-blue-900 py-2 px-3 font-medium hover:bg-blue-300 text-xs sm:text-sm" title="Demonstroi Price Watch toiminta">
                 Simuloi hälytystä
               </button>
+            </div>
             </div>
           </div>
         </div>
@@ -499,18 +544,101 @@
         }
       }
 
+      // Utility function for getElementById
+      const $ = (id) => document.getElementById(id);
+      
+      // Supabase configuration
+      const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // Replace with your Supabase URL
+      const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY'; // Replace with your Supabase anon key
+      let supabase = null;
+      let currentUser = null;
+      
+      // Initialize Supabase if credentials are provided
+      if (SUPABASE_URL !== 'YOUR_SUPABASE_URL' && SUPABASE_ANON_KEY !== 'YOUR_SUPABASE_ANON_KEY') {
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+
       document.addEventListener("DOMContentLoaded", async () => {
         // Initialize device ID and premium status
         deviceId = await generateDeviceId();
-        isPremiumUser = checkPremiumStatus();
+        
+        // Check Supabase auth state
+        if (supabase) {
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) {
+            currentUser = user;
+            await checkSupabasePremiumStatus(user.id);
+            updateAuthUI(true, user.email);
+          } else {
+            isPremiumUser = checkPremiumStatus();
+          }
+        } else {
+          isPremiumUser = checkPremiumStatus();
+        }
         
         $("deviceIdDisplay").textContent = deviceId;
         updatePremiumUI();
         
+        // Auth event listeners
+        if (supabase) {
+          $("loginBtn").addEventListener("click", handleLogin);
+          $("signupBtn").addEventListener("click", handleSignup);
+          $("logoutBtn").addEventListener("click", handleLogout);
+        } else {
+          // Hide auth section if Supabase not configured
+          $("authSection").innerHTML = '<p class="text-xs text-slate-600">Määritä Supabase käyttääksesi käyttäjätilien hallintaa</p>';
+        }
+        
+        // Price Watch toggle
+        const priceWatchHeader = $("priceWatchHeader");
+        const priceWatchContent = $("priceWatchContent");
+        const priceWatchToggle = $("priceWatchToggle");
+        let priceWatchExpanded = localStorage.getItem('priceWatchExpanded') !== 'false';
+        
+        // Set initial state
+        if (!priceWatchExpanded) {
+          priceWatchContent.style.display = 'none';
+          priceWatchToggle.style.transform = 'rotate(-90deg)';
+        }
+        
+        priceWatchHeader.addEventListener("click", () => {
+          priceWatchExpanded = !priceWatchExpanded;
+          localStorage.setItem('priceWatchExpanded', priceWatchExpanded);
+          
+          if (priceWatchExpanded) {
+            priceWatchContent.style.display = 'block';
+            priceWatchToggle.style.transform = 'rotate(0deg)';
+          } else {
+            priceWatchContent.style.display = 'none';
+            priceWatchToggle.style.transform = 'rotate(-90deg)';
+          }
+        });
+        
         // Premium key activation
-        $("activatePremium").addEventListener("click", () => {
+        $("activatePremium").addEventListener("click", async () => {
           const key = $("premiumKeyInput").value;
-          if (validatePremiumKey(key)) {
+          if (!key.trim()) {
+            showToast("❌ Syötä premium-avain");
+            return;
+          }
+          
+          showToast("🔄 Tarkistetaan...");
+          const isValid = await validatePremiumKey(key);
+          
+          if (isValid) {
+            // If user is logged in, save to Supabase
+            if (currentUser && supabase) {
+              const saved = await activatePremiumInSupabase(currentUser.id, key.trim().toUpperCase());
+              if (saved) {
+                isPremiumUser = true;
+                updatePremiumUI();
+                showToast("✅ Premium aktivoitu ja tallennettu tilillesi!");
+                $("premiumKeyInput").value = "";
+                return;
+              }
+            }
+            
+            // Fallback to localStorage
             setPremiumStatus(true);
             showToast("✅ Premium aktivoitu!");
             $("premiumKeyInput").value = "";
@@ -544,6 +672,245 @@
 
       window.addEventListener("consent-updated", loadAdSenseIfAllowed);
       window.addEventListener("consent-updated", loadGoogleAnalytics);
+
+      // -------------------------
+      // PREMIUM SYSTEM
+      // -------------------------
+      async function generateDeviceId() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#f60';
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = '#069';
+        ctx.fillText('Device ID', 2, 15);
+        const canvasData = canvas.toDataURL();
+        
+        const fingerprint = [
+          navigator.userAgent,
+          navigator.language,
+          screen.width + 'x' + screen.height,
+          screen.colorDepth,
+          new Date().getTimezoneOffset(),
+          canvasData.slice(-50)
+        ].join('|');
+        
+        // Use crypto.subtle if available (HTTPS), otherwise simple hash
+        if (window.crypto && window.crypto.subtle) {
+          try {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(fingerprint);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex.slice(0, 16).toUpperCase();
+          } catch (e) {
+            console.warn('crypto.subtle failed, using fallback:', e);
+          }
+        }
+        
+        // Fallback: simple hash for non-HTTPS contexts
+        let hash = 0;
+        for (let i = 0; i < fingerprint.length; i++) {
+          const char = fingerprint.charCodeAt(i);
+          hash = ((hash << 5) - hash) + char;
+          hash = hash & hash;
+        }
+        return Math.abs(hash).toString(16).padStart(16, '0').slice(0, 16).toUpperCase();
+      }
+      
+      function checkPremiumStatus() {
+        const stored = localStorage.getItem('premium_status');
+        if (!stored) return false;
+        
+        try {
+          const data = JSON.parse(stored);
+          if (data.deviceId === deviceId && data.isPremium) {
+            return true;
+          }
+        } catch (e) {
+          console.error('Premium check error:', e);
+        }
+        return false;
+      }
+      
+      function setPremiumStatus(status) {
+        localStorage.setItem('premium_status', JSON.stringify({
+          deviceId: deviceId,
+          isPremium: status,
+          activatedAt: Date.now()
+        }));
+        isPremiumUser = status;
+        updatePremiumUI();
+      }
+      
+      function updatePremiumUI() {
+        const badge = $("premiumBadge");
+        const keySection = $("premiumKeySection");
+        const controls = $("priceWatchControls");
+        
+        if (isPremiumUser) {
+          badge.classList.remove("hidden");
+          keySection.classList.add("hidden");
+          controls.style.opacity = "1";
+          controls.style.pointerEvents = "auto";
+        } else {
+          badge.classList.add("hidden");
+          keySection.classList.remove("hidden");
+          controls.style.opacity = "0.5";
+          controls.style.pointerEvents = "none";
+        }
+      }
+      
+      async function validatePremiumKey(key) {
+        try {
+          const response = await fetch(PREMIUM_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: key.trim().toUpperCase(), deviceId })
+          });
+          
+          if (!response.ok) return false;
+          
+          const data = await response.json();
+          return data.valid === true;
+        } catch (error) {
+          console.error('Premium validation error:', error);
+          return false;
+        }
+      }
+      
+      // -------------------------
+      // SUPABASE AUTH FUNCTIONS
+      // -------------------------
+      async function handleLogin() {
+        const email = $("authEmail").value.trim();
+        const password = $("authPassword").value;
+        
+        if (!email || !password) {
+          showToast("❌ Täytä sähköposti ja salasana");
+          return;
+        }
+        
+        try {
+          const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+          
+          if (error) throw error;
+          
+          currentUser = data.user;
+          await checkSupabasePremiumStatus(data.user.id);
+          updateAuthUI(true, data.user.email);
+          showToast("✅ Kirjautuminen onnistui!");
+        } catch (error) {
+          console.error('Login error:', error);
+          showToast("❌ Kirjautuminen epäonnistui: " + error.message);
+        }
+      }
+      
+      async function handleSignup() {
+        const email = $("authEmail").value.trim();
+        const password = $("authPassword").value;
+        
+        if (!email || !password) {
+          showToast("❌ Täytä sähköposti ja salasana");
+          return;
+        }
+        
+        if (password.length < 6) {
+          showToast("❌ Salasanan tulee olla vähintään 6 merkkiä");
+          return;
+        }
+        
+        try {
+          const { data, error } = await supabase.auth.signUp({ email, password });
+          
+          if (error) throw error;
+          
+          showToast("✅ Rekisteröinti onnistui! Tarkista sähköpostisi vahvistaaksesi tilin.");
+        } catch (error) {
+          console.error('Signup error:', error);
+          showToast("❌ Rekisteröinti epäonnistui: " + error.message);
+        }
+      }
+      
+      async function handleLogout() {
+        try {
+          const { error } = await supabase.auth.signOut();
+          
+          if (error) throw error;
+          
+          currentUser = null;
+          isPremiumUser = false;
+          updateAuthUI(false);
+          updatePremiumUI();
+          showToast("✅ Kirjauduttu ulos");
+        } catch (error) {
+          console.error('Logout error:', error);
+          showToast("❌ Uloskirjautuminen epäonnistui");
+        }
+      }
+      
+      function updateAuthUI(isLoggedIn, email = "") {
+        const loginForm = $("loginForm");
+        const userInfo = $("userInfo");
+        const premiumKeySection = $("premiumKeySection");
+        
+        if (isLoggedIn) {
+          loginForm.classList.add("hidden");
+          userInfo.classList.remove("hidden");
+          $("userEmail").textContent = email;
+          if (isPremiumUser) {
+            premiumKeySection.classList.add("hidden");
+          }
+        } else {
+          loginForm.classList.remove("hidden");
+          userInfo.classList.add("hidden");
+          $("authEmail").value = "";
+          $("authPassword").value = "";
+        }
+      }
+      
+      async function checkSupabasePremiumStatus(userId) {
+        try {
+          const { data, error } = await supabase
+            .from('premium_users')
+            .select('*')
+            .eq('user_id', userId)
+            .single();
+          
+          if (error && error.code !== 'PGRST116') { // PGRST116 = not found
+            console.error('Supabase premium check error:', error);
+            return;
+          }
+          
+          isPremiumUser = data?.is_premium === true;
+        } catch (error) {
+          console.error('Premium status check error:', error);
+        }
+      }
+      
+      async function activatePremiumInSupabase(userId, key) {
+        try {
+          const { error } = await supabase
+            .from('premium_users')
+            .upsert({
+              user_id: userId,
+              device_id: deviceId,
+              premium_key: key,
+              is_premium: true,
+              activated_at: new Date().toISOString()
+            }, { onConflict: 'user_id' });
+          
+          if (error) throw error;
+          
+          return true;
+        } catch (error) {
+          console.error('Supabase activation error:', error);
+          return false;
+        }
+      }
 
       // -------------------------
       // TOAST + FEEDBACK
@@ -591,85 +958,6 @@
             } else {
               reject(new Error("copy failed"));
             }
-
-      // -------------------------
-      // PREMIUM SYSTEM
-      // -------------------------
-      async function generateDeviceId() {
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-        ctx.textBaseline = 'top';
-        ctx.font = '14px Arial';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillStyle = '#f60';
-        ctx.fillRect(125, 1, 62, 20);
-        ctx.fillStyle = '#069';
-        ctx.fillText('Device ID', 2, 15);
-        const canvasData = canvas.toDataURL();
-        
-        const fingerprint = [
-          navigator.userAgent,
-          navigator.language,
-          screen.width + 'x' + screen.height,
-          screen.colorDepth,
-          new Date().getTimezoneOffset(),
-          canvasData.slice(-50)
-        ].join('|');
-        
-        const encoder = new TextEncoder();
-        const data = encoder.encode(fingerprint);
-        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        return hashHex.slice(0, 16).toUpperCase();
-      }
-      
-      function checkPremiumStatus() {
-        const stored = localStorage.getItem('premium_status');
-        if (!stored) return false;
-        
-        try {
-          const data = JSON.parse(stored);
-          if (data.deviceId === deviceId && data.isPremium) {
-            return true;
-          }
-        } catch (e) {
-          console.error('Premium check error:', e);
-        }
-        return false;
-      }
-      
-      function setPremiumStatus(status) {
-        localStorage.setItem('premium_status', JSON.stringify({
-          deviceId: deviceId,
-          isPremium: status,
-          activatedAt: Date.now()
-        }));
-        isPremiumUser = status;
-        updatePremiumUI();
-      }
-      
-      function updatePremiumUI() {
-        const badge = $("premiumBadge");
-        const keySection = $("premiumKeySection");
-        const controls = $("priceWatchControls");
-        
-        if (isPremiumUser) {
-          badge.classList.remove("hidden");
-          keySection.classList.add("hidden");
-          controls.style.opacity = "1";
-          controls.style.pointerEvents = "auto";
-        } else {
-          badge.classList.add("hidden");
-          keySection.classList.remove("hidden");
-          controls.style.opacity = "0.5";
-          controls.style.pointerEvents = "none";
-        }
-      }
-      
-      function validatePremiumKey(key) {
-        return PREMIUM_KEYS.includes(key.toUpperCase().trim());
-      }
           } catch (err) {
             reject(err);
           }
@@ -742,8 +1030,6 @@
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    const $ = (id) => document.getElementById(id);
-
     const DEVICES = [
       { category: "Valaistus",    name: "Hehkulamppu 60 W (4 h/pv)", min: 0.24, max: 0.24, unit: "kWh/vrk", schedulable: false },
       { category: "Valaistus",    name: "LED-lamppu 8 W (4 h/pv)",   min: 0.032,max: 0.032,unit: "kWh/vrk", schedulable: false },
@@ -828,16 +1114,7 @@
     // Premium System
     let deviceId = null;
     let isPremiumUser = false;
-    const PREMIUM_KEYS = [
-      'PREM-8K9L-M3N7-Q2R5-X4W8',
-      'PWAT-7H2J-F9D6-C5V1-B8N3',
-      'ELEC-4T3Y-G8K2-P7M9-L6H5',
-      'GOLD-9X2C-V5B7-N4M8-K3J6',
-      'STAR-6L8H-J2K9-M5P3-R7T4',
-      'LITE-3W5Y-B8N2-V6C9-X4Z7',
-      'MEGA-2R9T-H5K7-J3M6-P8L4',
-      'ULTR-7C4V-N8B2-M6K5-G9F3'
-    ];
+    const PREMIUM_API_URL = 'https://porssisahko-proxy.leevi-hanninen3.workers.dev/validate-premium';
 
     // ---- EHDOTUSLASKURIN APUFUNKTIOT (pidä tässä, ennen suggest-listeneriä) ----
     function parseHour(x, fallback = 0) {
