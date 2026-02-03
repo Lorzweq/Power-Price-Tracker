@@ -14,6 +14,10 @@ lerna-debug.log*
 docs/.env.local
 docs/.env.*.local
 
+# Premium key generation tools
+create_premium_keys.sql
+generate_premium_keys.py
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 
 report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json

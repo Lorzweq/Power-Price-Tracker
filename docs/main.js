@@ -12,6 +12,8 @@ import {
   handleLogin,
   handleLogout,
   showSignupModal,
+  showPasswordResetModal,
+  showNewPasswordModal,
   isPremium
 } from './js/supabase.js';
 
@@ -1109,6 +1111,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   
   const openSignupModalBtn = $('openSignupModal');
   if (openSignupModalBtn) openSignupModalBtn.addEventListener('click', showSignupModal);
+  
+  const forgotPasswordLink = $('forgotPasswordLink');
+  if (forgotPasswordLink) forgotPasswordLink.addEventListener('click', showPasswordResetModal);
+  
+  const changePasswordBtn = $('changePasswordBtn');
+  if (changePasswordBtn) changePasswordBtn.addEventListener('click', showNewPasswordModal);
   
   const logoutBtn = $('logoutBtn');
   if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);

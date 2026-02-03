@@ -362,9 +362,15 @@ export function showSignupModal() {
       submitBtn.disabled = true;
       submitBtn.textContent = 'Rekisteröidään...';
       
+      // Get current URL for redirect (without hash)
+      const redirectUrl = window.location.origin + window.location.pathname;
+      
       const { data, error } = await supabase.auth.signUp({
         email,
-        password
+        password,
+        options: {
+          emailRedirectTo: redirectUrl
+        }
       });
       
       if (error) throw error;
@@ -405,6 +411,189 @@ export function showSignupModal() {
   
   // Focus on first input
   emailInput.focus();
+}
+
+export function showPasswordResetModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal-content';
+  
+  modal.innerHTML = `
+    <div class="text-center">
+      <h2 class="text-2xl font-bold text-slate-900 mb-1">Palauta salasana</h2>
+      <p class="text-xs text-slate-500 mb-4">Lähetämme palautuslinking sähköpostiisi</p>
+      
+      <div class="flex flex-col gap-2">
+        <input
+          id="resetEmail"
+          type="email"
+          placeholder="Sähköposti"
+          class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
+        />
+        
+        <button id="submitReset" class="mt-2 w-full rounded-lg bg-slate-600 text-white py-2 px-4 font-bold hover:bg-slate-500 text-xs">
+          Lähetä palautuslinkki
+        </button>
+        <button id="closeResetModal" class="w-full rounded-lg bg-slate-200 text-slate-700 py-2 px-4 font-medium hover:bg-slate-300 text-xs">
+          Peruuta
+        </button>
+      </div>
+    </div>
+  `;
+  
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  const submitBtn = modal.querySelector('#submitReset');
+  const closeBtn = modal.querySelector('#closeResetModal');
+  const emailInput = modal.querySelector('#resetEmail');
+  
+  submitBtn.addEventListener('click', async () => {
+    const email = emailInput.value.trim();
+    
+    if (!email) {
+      showToast('⚠️ Anna sähköpostiosoite');
+      return;
+    }
+    
+    if (!supabase) {
+      showToast('❌ Supabase ei ole konfiguroitu');
+      return;
+    }
+    
+    try {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Lähetetään...';
+      
+      const redirectUrl = window.location.origin + window.location.pathname;
+      
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: redirectUrl
+      });
+      
+      if (error) throw error;
+      
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.3s ease';
+      setTimeout(() => overlay.remove(), 300);
+      
+      showToast('✅ Palautuslinkki lähetetty! Tarkista sähköpostisi');
+    } catch (error) {
+      showToast('❌ Virhe: ' + error.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Lähetä palautuslinkki';
+    }
+  });
+  
+  closeBtn.addEventListener('click', () => {
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => overlay.remove(), 300);
+  });
+  
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.3s ease';
+      setTimeout(() => overlay.remove(), 300);
+    }
+  });
+  
+  emailInput.focus();
+}
+
+export function showNewPasswordModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal-content';
+  
+  modal.innerHTML = `
+    <div class="text-center">
+      <h2 class="text-2xl font-bold text-slate-900 mb-1">Aseta uusi salasana</h2>
+      <p class="text-xs text-slate-500 mb-4">Valitse uusi salasana tilillesi</p>
+      
+      <div class="flex flex-col gap-2">
+        <input
+          id="newPassword"
+          type="password"
+          placeholder="Uusi salasana (vähintään 6 merkkiä)"
+          class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
+        />
+        <input
+          id="newPasswordConfirm"
+          type="password"
+          placeholder="Vahvista uusi salasana"
+          class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
+        />
+        
+        <button id="submitNewPassword" class="mt-2 w-full rounded-lg bg-slate-600 text-white py-2 px-4 font-bold hover:bg-slate-500 text-xs">
+          Vaihda salasana
+        </button>
+      </div>
+    </div>
+  `;
+  
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  const submitBtn = modal.querySelector('#submitNewPassword');
+  const passwordInput = modal.querySelector('#newPassword');
+  const confirmInput = modal.querySelector('#newPasswordConfirm');
+  
+  submitBtn.addEventListener('click', async () => {
+    const password = passwordInput.value;
+    const confirm = confirmInput.value;
+    
+    if (!password || !confirm) {
+      showToast('⚠️ Täytä molemmat kentät');
+      return;
+    }
+    
+    if (password !== confirm) {
+      showToast('⚠️ Salasanat eivät täsmää');
+      return;
+    }
+    
+    if (password.length < 6) {
+      showToast('⚠️ Salasana on liian lyhyt (vähintään 6 merkkiä)');
+      return;
+    }
+    
+    if (!supabase) {
+      showToast('❌ Supabase ei ole konfiguroitu');
+      return;
+    }
+    
+    try {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Vaihdetaan...';
+      
+      const { error } = await supabase.auth.updateUser({
+        password: password
+      });
+      
+      if (error) throw error;
+      
+      overlay.style.opacity = '0';
+      overlay.style.transition = 'opacity 0.3s ease';
+      setTimeout(() => overlay.remove(), 300);
+      
+      showToast('✅ Salasana vaihdettu onnistuneesti!');
+      
+      // Clean up URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    } catch (error) {
+      showToast('❌ Virhe: ' + error.message);
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Vaihda salasana';
+    }
+  });
+  
+  passwordInput.focus();
 }
 
 export function showSignupSuccessModal(email) {
@@ -514,12 +703,29 @@ export async function initSupabase() {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     
+    // Check if user came from email confirmation link or password reset
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const isEmailConfirmation = hashParams.has('access_token') && hashParams.get('type') === 'signup';
+    const isPasswordRecovery = hashParams.has('access_token') && hashParams.get('type') === 'recovery';
+    
     if (session?.user) {
       currentUser = session.user;
       isPremium = await checkSupabasePremiumStatus();
       
       if (isPremium) {
         localStorage.setItem('isPremium', 'true');
+      }
+      
+      // Show success message if coming from email confirmation
+      if (isEmailConfirmation) {
+        showToast('✅ Sähköposti vahvistettu! Olet nyt kirjautunut sisään');
+        // Clean up URL
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+      
+      // Show password reset modal if coming from password reset link
+      if (isPasswordRecovery) {
+        showNewPasswordModal();
       }
     } else {
       const localPremium = localStorage.getItem('isPremium');
