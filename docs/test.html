@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Devices Load</title>
+</head>
+<body>
+  <h1>Test - Check Console</h1>
+  <div id="deviceList" style="border: 2px solid red; padding: 10px;">
+    <!-- Laitteet tulee tänne -->
+  </div>
+
+  <script type="module">
+    import { CONFIG, DEVICES, PRESETS, DEVICE_INDEX_BY_NAME } from './js/config.js';
+    import { $ } from './js/ui.js';
+
+    console.log("Test started");
+    console.log("DEVICES:", DEVICES);
+    console.log("DEVICES length:", DEVICES.length);
+    console.log("deviceList element:", $("deviceList"));
+    
+    if (DEVICES && DEVICES.length > 0) {
+      const html = DEVICES.map(d => `<div>${d.name} (${d.category})</div>`).join('');
+      $("deviceList").innerHTML = html;
+      console.log("Devices rendered");
+    } else {
+      console.error("DEVICES array is empty!");
+    }
+  </script>
+</body>
+</html>

@@ -179,10 +179,15 @@ function applyPresetById(presetId) {
 
 // ========== DEVICE RENDERING ==========
 function renderDevices() {
+  console.log("🟦 renderDevices called");
+  console.log("🟦 DEVICES:", DEVICES);
+  
   const groups = DEVICES.reduce((acc, d, i) => {
     (acc[d.category] ||= []).push({ d, i });
     return acc;
   }, {});
+
+  console.log("🟦 Groups:", groups);
 
   const html = Object.entries(groups).map(([cat, items]) => {
     const bodyId = `cat-${cat.replace(/\s+/g, "-")}`;
@@ -244,7 +249,15 @@ function renderDevices() {
     `;
   }).join("");
 
-  $("deviceList").innerHTML = html;
+  const deviceListEl = $("deviceList");
+  console.log("🟦 deviceList element:", deviceListEl);
+  
+  if (!deviceListEl) {
+    console.error("❌ deviceList element not found!");
+    return;
+  }
+  
+  deviceListEl.innerHTML = html;
 
   document.querySelectorAll('input[name="device"]').forEach(cb => {
     cb.addEventListener("change", () => {
@@ -722,14 +735,29 @@ function ensureTooltip(canvas) {
 }
 
 function drawBarChartSolidWithHover(canvas, hourlyPrices, startHour = 0, quarterMinPrices = null) {
-  const prices = (hourlyPrices || []).slice(0, 24);
-  const ctx = canvas.getContext("2d");
+  console.log("🟦 drawBarChartSolidWithHover called with canvas:", canvas, "prices:", hourlyPrices);
+  
+  if (!canvas) {
+    console.error("❌ Canvas element is null!");
+    return;
+  }
 
-  const parentWidth = canvas.parentElement.clientWidth;
+  const prices = (hourlyPrices || []).slice(0, 24);
+  console.log("🟦 Prices array length:", prices.length, "values:", prices);
+  
+  const ctx = canvas.getContext("2d");
+  if (!ctx) {
+    console.error("❌ Could not get canvas context!");
+    return;
+  }
+
+  const parentWidth = canvas.parentElement?.clientWidth || 400;
   const cssW = Math.min(parentWidth, window.innerWidth - 40);
   const cssH = 220;
 
   const dpr = window.devicePixelRatio || 1;
+  console.log("🟦 Setting canvas size: width=" + Math.floor(cssW * dpr) + " height=" + Math.floor(cssH * dpr) + " dpr=" + dpr);
+  
   canvas.width = Math.floor(cssW * dpr);
   canvas.height = Math.floor(cssH * dpr);
   canvas.style.width = cssW + 'px';
@@ -922,21 +950,23 @@ async function loadDayAndDraw(hoursOffset = 0) {
           const data = await res.json();
           console.log("🟦 Fetched data:", data);
           cachedPrices = data.prices || data || [];
-          if (cachedPrices.length === 0) {
-            console.log("🟦 Using fallback prices");
-            cachedPrices = Array(96).fill(null).map((_, i) => ({
-              startDate: new Date(Date.now() - 96*15*60*1000 + i*15*60*1000).toISOString(),
-              endDate: new Date(Date.now() - 96*15*60*1000 + (i+1)*15*60*1000).toISOString(),
-              price: 3.5 + Math.sin(i/10) * 2
-            }));
-          }
         } else {
-          console.log("🟦 Response not ok, using fallback");
+          console.log("🟦 Response not ok, status:", res.status);
           cachedPrices = [];
         }
       } catch (e) {
         console.error("❌ Failed to fetch latest prices:", e);
         cachedPrices = [];
+      }
+      
+      // Fallback: Create synthetic prices if fetch failed
+      if (!cachedPrices || cachedPrices.length === 0) {
+        console.log("🟦 Creating fallback prices");
+        cachedPrices = Array(96).fill(null).map((_, i) => ({
+          startDate: new Date(Date.now() - 96*15*60*1000 + i*15*60*1000).toISOString(),
+          endDate: new Date(Date.now() - 96*15*60*1000 + (i+1)*15*60*1000).toISOString(),
+          price: 3.5 + Math.sin(i/10) * 2
+        }));
       }
     }
 
