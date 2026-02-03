@@ -880,6 +880,7 @@ function drawBarChartSolidWithHover(canvas, hourlyPrices, startHour = 0, quarter
 async function loadDayAndDraw(hoursOffset = 0) {
   if (chartLoading) return;
   chartLoading = true;
+  console.log("🟦 loadDayAndDraw started, hoursOffset:", hoursOffset);
 
   chartOffset = hoursOffset;
   const now = new Date();
@@ -904,20 +905,25 @@ async function loadDayAndDraw(hoursOffset = 0) {
   }
 
   const dayChartElement = $("dayChart");
+  console.log("🟦 dayChart element:", dayChartElement);
   if (!dayChartElement) {
-    console.error("dayChart element not found!");
+    console.error("❌ dayChart element not found!");
     chartLoading = false;
     return;
   }
 
   try {
     if (!cachedPrices) {
+      console.log("🟦 Fetching prices from CONFIG.LATEST_PRICES_ENDPOINT");
       try {
         const res = await fetch(CONFIG.LATEST_PRICES_ENDPOINT);
+        console.log("🟦 Fetch response status:", res.status);
         if (res.ok) {
           const data = await res.json();
+          console.log("🟦 Fetched data:", data);
           cachedPrices = data.prices || data || [];
           if (cachedPrices.length === 0) {
+            console.log("🟦 Using fallback prices");
             cachedPrices = Array(96).fill(null).map((_, i) => ({
               startDate: new Date(Date.now() - 96*15*60*1000 + i*15*60*1000).toISOString(),
               endDate: new Date(Date.now() - 96*15*60*1000 + (i+1)*15*60*1000).toISOString(),
@@ -925,13 +931,16 @@ async function loadDayAndDraw(hoursOffset = 0) {
             }));
           }
         } else {
+          console.log("🟦 Response not ok, using fallback");
           cachedPrices = [];
         }
       } catch (e) {
-        console.error("Failed to fetch latest prices:", e);
+        console.error("❌ Failed to fetch latest prices:", e);
         cachedPrices = [];
       }
     }
+
+    console.log("🟦 cachedPrices length:", cachedPrices.length);
 
     const pricesLocal = [];
     const quarterMinPricesLocal = [];
@@ -986,7 +995,9 @@ async function loadDayAndDraw(hoursOffset = 0) {
 
     quarterMinPrices = quarterMinPricesLocal;
 
+    console.log("🟦 Calling drawBarChartSolidWithHover with pricesLocal:", pricesLocal);
     drawBarChartSolidWithHover(dayChartElement, pricesLocal, startHour, quarterMinPricesLocal);
+    console.log("🟦 drawBarChartSolidWithHover completed");
     
     if (hoursOffset === 0) {
       $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - Nyt`;
@@ -996,11 +1007,13 @@ async function loadDayAndDraw(hoursOffset = 0) {
       $("chartTitle").textContent = `Seuraavat 22 tuntia (alkaen ${String(startHour).padStart(2, "0")}:00) - ${hoursOffset}h`;
     }
   } catch (e) {
-    console.error("Error in loadDayAndDraw:", e);
+    console.error("❌ Error in loadDayAndDraw:", e);
+    console.log("🟦 Drawing fallback chart");
     drawBarChartSolidWithHover($("dayChart"), Array(22).fill(5.0), startHour);
-    $("chartTitle").textContent = `Virhe hintojen haussa`;
+    $("chartTitle").textContent = `Virhe hintojen haussa: ${e.message}`;
   } finally {
     chartLoading = false;
+    console.log("🟦 loadDayAndDraw finished");
   }
 }
 
