@@ -3,6 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#1e293b" />
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pörssisähkö">
+  <link rel="manifest" href="manifest.json" />
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- SEO -->
@@ -237,6 +243,9 @@
               </button>
             </div>
             <div id="priceWatchStatus" class="mt-2 text-xs text-blue-700"></div>
+            <button id="simulatePriceWatch" class="mt-2 w-full rounded-lg bg-blue-200 text-blue-900 py-2 px-3 font-medium hover:bg-blue-300 text-xs sm:text-sm" title="Demonstroi Price Watch toiminta">
+              Simuloi hälytystä
+            </button>
           </div>
         </div>
 
@@ -597,6 +606,19 @@
 
   <!-- SOVELLUSLOGIIKKA -->
   <script>
+  // Register Service Worker for PWA
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((registration) => {
+          console.log('SW registered:', registration);
+        })
+        .catch((error) => {
+          console.log('SW registration failed:', error);
+        });
+    });
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
     const $ = (id) => document.getElementById(id);
 
@@ -1885,14 +1907,17 @@ function addSavings(euro) {
       const cheapestPrice = Math.min(...currentDayPrices.map(p => p.price || 999));
       
       if (cheapestPrice <= priceWatchThreshold) {
-        const msg = `Hinta laski alle ${priceWatchThreshold} snt/kWh! Halvin hinta nyt: ${cheapestPrice.toFixed(2)} snt/kWh`;
-        showToast(msg);
-
-        // Browser notification if permitted
+        const cheapestHour = currentDayPrices.find(p => p.price === cheapestPrice);
+        
+        // Browser notification
         if ("Notification" in window && Notification.permission === "granted") {
           new Notification("Price Watch - Hinta laski!", {
-            body: msg,
-            icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='70' font-size='70' text-anchor='middle'>⚡</text></svg>"
+            body: `Hinta laski alle ${priceWatchThreshold.toFixed(2)} snt/kWh!\nHalvin hinta: ${cheapestPrice.toFixed(2)} snt/kWh klo ${cheapestHour ? cheapestHour.hour.toString().padStart(2, '0') + ':00' : 'tuntematon'}`,
+            icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='70' font-size='70' text-anchor='middle'>⚡</text></svg>",
+            badge: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50' y='70' font-size='70' text-anchor='middle'>⚡</text></svg>",
+            tag: "price-watch",
+            requireInteraction: true,
+            vibrate: [200, 100, 200]
           });
         }
       }
@@ -1936,6 +1961,48 @@ function addSavings(euro) {
       $("stopPriceWatch").classList.add("hidden");
       $("priceWatchStatus").textContent = "";
       showToast("Price Watch pysäytetty");
+    });
+
+    // Price Watch Simulation
+    $("simulatePriceWatch").addEventListener("click", async () => {
+      if (!currentDayPrices || currentDayPrices.length === 0) {
+        showToast("Lataa ensin hinnat");
+        return;
+      }
+
+      // Get the cheapest price
+      const cheapestPrice = Math.min(...currentDayPrices.map(p => p.price || 999));
+      const cheapestHour = currentDayPrices.find(p => p.price === cheapestPrice);
+      
+      if (!cheapestHour) return;
+
+      // Simulate threshold alert at cheapest price
+      const threshold = cheapestPrice + 5;
+      
+      // Request notification permission if needed
+      if ("Notification" in window) {
+        // Request permission if not already granted or denied
+        if (Notification.permission !== "granted") {
+          const permission = await Notification.requestPermission();
+          if (permission !== "granted") {
+            alert("❌ Ilmoitukset estetty\n\nOta käyttöön:\n1. Avaa puhelimen Asetukset\n2. Etsi 'Pörssisähkö' sovellus\n3. Salli ilmoitukset");
+            return;
+          }
+        }
+        
+        // Send notification
+        new Notification("Price Watch - Hinta laski!", {
+          body: `Hinta laski alle ${threshold.toFixed(2)} snt/kWh!\nHalvin hinta: ${cheapestPrice.toFixed(2)} snt/kWh klo ${cheapestHour.hour.toString().padStart(2, '0')}:00`,
+          icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='%23fbbf24'>⚡</text></svg>",
+          badge: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%231e293b'/><text x='50' y='70' font-size='60' text-anchor='middle' fill='%23fbbf24'>⚡</text></svg>",
+          tag: "price-watch",
+          requireInteraction: false,
+          vibrate: [200, 100, 200]
+        });
+        showToast("✅ Ilmoitus lähetetty! Tarkista ilmoituksesi");
+      } else {
+        showToast("Selain ei tue ilmoituksia");
+      }
     });
 
     // Auto-optimize
@@ -1992,25 +2059,42 @@ function addSavings(euro) {
       }
 
       // Create array of {hour, price} and sort by price
-      const hourPrices = currentDayPrices
-        .filter(item => item && item.price !== null && item.price !== undefined)
-        .sort((a, b) => a.price - b.price)
-        .slice(0, 3);
+      // Find 3 cheapest 15-min slots with their hour context
+      const allQuarterHours = [];
+      currentDayPrices.forEach((item, idx) => {
+        if (item && item.price !== null && item.price !== undefined && quarterMinPrices && quarterMinPrices[idx]) {
+          quarterMinPrices[idx].forEach((qPrice, qIdx) => {
+            allQuarterHours.push({
+              hour: item.hour,
+              hourIdx: idx,
+              quarter: qIdx,
+              startMin: qIdx * 15,
+              price: qPrice
+            });
+          });
+        }
+      });
 
-      if (hourPrices.length === 0) {
+      if (allQuarterHours.length === 0) {
         $("top3Out").innerHTML = "Ei dataa saatavilla";
         $("top3Out").classList.remove("hidden");
         return;
       }
 
-      const html = `<strong>3 halvinta tuntia:</strong><br>` +
-        hourPrices.map((item, idx) => 
-          `${idx + 1}. klo ${item.hour.toString().padStart(2, '0')}:00 – <strong>${item.price.toFixed(2)} snt/kWh</strong>`
-        ).join('<br>');
+      const cheapest3 = allQuarterHours
+        .sort((a, b) => a.price - b.price)
+        .slice(0, 3);
+      
+      const html = `<strong>3 halvinta 15 min jaksoa:</strong><br>` +
+        cheapest3.map((item, idx) => {
+          const startMin = item.startMin;
+          const endMin = startMin + 15;
+          return `${idx + 1}. klo ${item.hour.toString().padStart(2, '0')}:${startMin.toString().padStart(2, '0')}–${endMin.toString().padStart(2, '0')} – <strong>${item.price.toFixed(2)} snt/kWh</strong>`;
+        }).join('<br>');
       
       $("top3Out").innerHTML = html;
       $("top3Out").classList.remove("hidden");
-      showToast("Halvimmat tunnit näytetty");
+      showToast("3 halvinta 15 min jaksoa näytetty");
     });
 
     setTodayDefaults();
