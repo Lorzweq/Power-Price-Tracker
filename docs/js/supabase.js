@@ -21,36 +21,34 @@ export let isPremium = false;
 
 // Initialize Supabase with proper error handling
 function initializeSupabase() {
-  if (SUPABASE_URL && SUPABASE_ANON_KEY && window.supabase) {
-    try {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      console.log('✅ Supabase initialized successfully');
-      return supabase;
-    } catch (error) {
-      console.error('❌ Error initializing Supabase:', error);
-      return null;
-    }
-  } else {
-    console.warn('⚠️ Supabase not fully configured:', {
-      hasUrl: !!SUPABASE_URL,
-      hasKey: !!SUPABASE_ANON_KEY,
-      hasClient: !!window.supabase
-    });
+  // Validate URL format first
+  if (!SUPABASE_URL || !SUPABASE_URL.startsWith('http')) {
+    console.warn('⚠️ Invalid Supabase URL:', SUPABASE_URL);
+    return null;
+  }
+
+  if (!SUPABASE_ANON_KEY) {
+    console.warn('⚠️ Missing Supabase Anon Key');
+    return null;
+  }
+
+  if (!window.supabase) {
+    console.warn('⚠️ Supabase library not loaded yet');
+    return null;
+  }
+
+  try {
+    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('✅ Supabase initialized successfully');
+    return client;
+  } catch (error) {
+    console.error('❌ Error initializing Supabase:', error);
     return null;
   }
 }
 
-// Try to initialize immediately, but also provide a fallback
-if (window.supabase) {
-  supabase = initializeSupabase();
-} else {
-  // Wait for supabase to be available
-  window.addEventListener('load', () => {
-    if (!supabase) {
-      supabase = initializeSupabase();
-    }
-  });
-}
+// Don't try to initialize immediately - wait for DOMContentLoaded
+// This is called from initSupabase() in main.js
 
 export async function generateDeviceId() {
   const canvas = document.createElement('canvas');
@@ -491,18 +489,25 @@ export function updateAuthUI() {
 }
 
 export async function initSupabase() {
-  // Ensure Supabase is initialized
+  // Try to initialize Supabase client first
   if (!supabase) {
-    console.log('⏳ Waiting for Supabase to initialize...');
-    // Wait for supabase to be available
-    for (let i = 0; i < 50; i++) {
-      if (supabase) break;
-      await new Promise(resolve => setTimeout(resolve, 100));
+    console.log('⏳ Initializing Supabase...');
+    supabase = initializeSupabase();
+    
+    // If still not available, wait and retry
+    if (!supabase) {
+      for (let i = 0; i < 50; i++) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        supabase = initializeSupabase();
+        if (supabase) break;
+      }
     }
   }
 
   if (!supabase) {
-    console.warn('⚠️ Supabase still not available after initialization attempts');
+    console.warn('⚠️ Supabase not available - running in offline mode');
+    const localPremium = localStorage.getItem('isPremium');
+    isPremium = localPremium === 'true';
     return;
   }
 
