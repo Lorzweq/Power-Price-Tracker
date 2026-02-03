@@ -222,30 +222,54 @@
           <div id="suggestOut" class="mt-3 text-xs sm:text-sm text-slate-700"></div>
 
           <div class="mt-6 rounded-2xl bg-blue-50 border border-blue-200 p-3 sm:p-4">
-            <div class="text-sm font-semibold text-blue-900">Price Watch</div>
+            <div class="flex items-center justify-between">
+              <div class="text-sm font-semibold text-blue-900">Price Watch</div>
+              <span id="premiumBadge" class="hidden px-2 py-1 text-xs font-bold rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-slate-900">⭐ PREMIUM</span>
+            </div>
             <p class="mt-1 text-xs text-blue-800">
               Saa ilmoitus, kun sähköhinta laskee alle asetetun rajan.
             </p>
-            <div class="mt-3 flex gap-2">
-              <input
-                id="priceWatchThreshold"
-                type="number"
-                placeholder="Hinta snt/kWh"
-                class="flex-1 h-10 rounded-xl border p-2 text-xs sm:text-sm"
-                step="0.01"
-                min="0"
-              />
-              <button id="startPriceWatch" class="rounded-xl bg-slate-600 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Käynnistä hinnan seuranta">
-                Käynnistä
-              </button>
-              <button id="stopPriceWatch" class="hidden rounded-xl bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Pysäytä hinnan seuranta">
-                Pysäytä
+            
+            <!-- Premium Key Input -->
+            <div id="premiumKeySection" class="hidden mt-3 p-3 rounded-lg bg-yellow-50 border border-yellow-300">
+              <p class="text-xs font-semibold text-yellow-900 mb-2">🔑 Aktivoi Premium</p>
+              <div class="flex gap-2">
+                <input
+                  id="premiumKeyInput"
+                  type="text"
+                  placeholder="Syötä premium-avain"
+                  class="flex-1 h-9 rounded-lg border border-yellow-300 p-2 text-xs"
+                />
+                <button id="activatePremium" class="rounded-lg bg-yellow-500 text-slate-900 py-2 px-3 font-bold hover:bg-yellow-400 text-xs">
+                  Aktivoi
+                </button>
+              </div>
+              <p class="mt-2 text-xs text-yellow-800">Laite ID: <span id="deviceIdDisplay" class="font-mono"></span></p>
+            </div>
+
+            <!-- Price Watch Controls -->
+            <div id="priceWatchControls">
+              <div class="mt-3 flex gap-2">
+                <input
+                  id="priceWatchThreshold"
+                  type="number"
+                  placeholder="Hinta snt/kWh"
+                  class="flex-1 h-10 rounded-xl border p-2 text-xs sm:text-sm"
+                  step="0.01"
+                  min="0"
+                />
+                <button id="startPriceWatch" class="rounded-xl bg-slate-600 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Käynnistä hinnan seuranta">
+                  Käynnistä
+                </button>
+                <button id="stopPriceWatch" class="hidden rounded-xl bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-500 text-xs sm:text-sm" title="Pysäytä hinnan seuranta">
+                  Pysäytä
+                </button>
+              </div>
+              <div id="priceWatchStatus" class="mt-2 text-xs text-blue-700"></div>
+              <button id="simulatePriceWatch" class="mt-2 w-full rounded-lg bg-blue-200 text-blue-900 py-2 px-3 font-medium hover:bg-blue-300 text-xs sm:text-sm" title="Demonstroi Price Watch toiminta">
+                Simuloi hälytystä
               </button>
             </div>
-            <div id="priceWatchStatus" class="mt-2 text-xs text-blue-700"></div>
-            <button id="simulatePriceWatch" class="mt-2 w-full rounded-lg bg-blue-200 text-blue-900 py-2 px-3 font-medium hover:bg-blue-300 text-xs sm:text-sm" title="Demonstroi Price Watch toiminta">
-              Simuloi hälytystä
-            </button>
           </div>
         </div>
 
@@ -475,7 +499,26 @@
         }
       }
 
-      document.addEventListener("DOMContentLoaded", () => {
+      document.addEventListener("DOMContentLoaded", async () => {
+        // Initialize device ID and premium status
+        deviceId = await generateDeviceId();
+        isPremiumUser = checkPremiumStatus();
+        
+        $("deviceIdDisplay").textContent = deviceId;
+        updatePremiumUI();
+        
+        // Premium key activation
+        $("activatePremium").addEventListener("click", () => {
+          const key = $("premiumKeyInput").value;
+          if (validatePremiumKey(key)) {
+            setPremiumStatus(true);
+            showToast("✅ Premium aktivoitu!");
+            $("premiumKeyInput").value = "";
+          } else {
+            showToast("❌ Virheellinen premium-avain");
+          }
+        });
+        
         // Näytä banneri jos päätöstä ei ole
         showConsentBanner(false);
 
@@ -548,6 +591,85 @@
             } else {
               reject(new Error("copy failed"));
             }
+
+      // -------------------------
+      // PREMIUM SYSTEM
+      // -------------------------
+      async function generateDeviceId() {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.textBaseline = 'top';
+        ctx.font = '14px Arial';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillStyle = '#f60';
+        ctx.fillRect(125, 1, 62, 20);
+        ctx.fillStyle = '#069';
+        ctx.fillText('Device ID', 2, 15);
+        const canvasData = canvas.toDataURL();
+        
+        const fingerprint = [
+          navigator.userAgent,
+          navigator.language,
+          screen.width + 'x' + screen.height,
+          screen.colorDepth,
+          new Date().getTimezoneOffset(),
+          canvasData.slice(-50)
+        ].join('|');
+        
+        const encoder = new TextEncoder();
+        const data = encoder.encode(fingerprint);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex.slice(0, 16).toUpperCase();
+      }
+      
+      function checkPremiumStatus() {
+        const stored = localStorage.getItem('premium_status');
+        if (!stored) return false;
+        
+        try {
+          const data = JSON.parse(stored);
+          if (data.deviceId === deviceId && data.isPremium) {
+            return true;
+          }
+        } catch (e) {
+          console.error('Premium check error:', e);
+        }
+        return false;
+      }
+      
+      function setPremiumStatus(status) {
+        localStorage.setItem('premium_status', JSON.stringify({
+          deviceId: deviceId,
+          isPremium: status,
+          activatedAt: Date.now()
+        }));
+        isPremiumUser = status;
+        updatePremiumUI();
+      }
+      
+      function updatePremiumUI() {
+        const badge = $("premiumBadge");
+        const keySection = $("premiumKeySection");
+        const controls = $("priceWatchControls");
+        
+        if (isPremiumUser) {
+          badge.classList.remove("hidden");
+          keySection.classList.add("hidden");
+          controls.style.opacity = "1";
+          controls.style.pointerEvents = "auto";
+        } else {
+          badge.classList.add("hidden");
+          keySection.classList.remove("hidden");
+          controls.style.opacity = "0.5";
+          controls.style.pointerEvents = "none";
+        }
+      }
+      
+      function validatePremiumKey(key) {
+        return PREMIUM_KEYS.includes(key.toUpperCase().trim());
+      }
           } catch (err) {
             reject(err);
           }
@@ -702,6 +824,15 @@
     let priceWatchActive = false; // Price Watch state
     let priceWatchThreshold = 0; // Price threshold for alerts
     let priceWatchInterval = null; // Price Watch interval ID
+    
+    // Premium System
+    let deviceId = null;
+    let isPremiumUser = false;
+    const PREMIUM_KEYS = [
+      'PREMIUM2026',
+      'POWERUSER',
+      'ELITE2026'
+    ];
 
     // ---- EHDOTUSLASKURIN APUFUNKTIOT (pidä tässä, ennen suggest-listeneriä) ----
     function parseHour(x, fallback = 0) {
@@ -1924,6 +2055,11 @@ function addSavings(euro) {
     }
 
     $("startPriceWatch").addEventListener("click", () => {
+      if (!isPremiumUser) {
+        showToast("⭐ Price Watch vaatii Premium-tilauksen");
+        return;
+      }
+      
       const threshold = parseFloat($("priceWatchThreshold").value);
       if (!threshold || threshold <= 0) {
         showToast("Aseta hinnan raja");
@@ -1965,6 +2101,11 @@ function addSavings(euro) {
 
     // Price Watch Simulation
     $("simulatePriceWatch").addEventListener("click", async () => {
+      if (!isPremiumUser) {
+        showToast("⭐ Price Watch vaatii Premium-tilauksen");
+        return;
+      }
+      
       if (!currentDayPrices || currentDayPrices.length === 0) {
         showToast("Lataa ensin hinnat");
         return;
