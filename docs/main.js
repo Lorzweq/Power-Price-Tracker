@@ -34,7 +34,6 @@ if ('serviceWorker' in navigator) {
 }
 
 // ========== APPLICATION STATE ==========
-let cachedPrices = null;
 let showInEuros = true;
 let lastResultText = "";
 let currentDayPrices = [];
@@ -975,35 +974,15 @@ async function loadDayAndDraw(hoursOffset = 0) {
   }
 
   try {
-    if (!cachedPrices) {
-      console.log("🟦 Fetching prices from CONFIG.LATEST_PRICES_ENDPOINT");
-      try {
-        const res = await fetch(CONFIG.LATEST_PRICES_ENDPOINT, { cache: "no-store" });
-        console.log("🟦 Fetch response status:", res.status);
-        if (res.ok) {
-          const data = await res.json();
-          console.log("🟦 Fetched data:", data);
-          cachedPrices = data.prices || data || [];
-          lastPricesSignature = getPricesSignature(cachedPrices);
-        } else {
-          console.log("🟦 Response not ok, status:", res.status);
-          cachedPrices = [];
-        }
-      } catch (e) {
-        console.error("❌ Failed to fetch latest prices:", e);
-        cachedPrices = [];
-      }
-      
-      // Fallback: Create synthetic prices if fetch failed
-      if (!cachedPrices || cachedPrices.length === 0) {
-        console.log("🟦 Creating fallback prices");
-        cachedPrices = Array(96).fill(null).map((_, i) => ({
-          startDate: new Date(Date.now() - 96*15*60*1000 + i*15*60*1000).toISOString(),
-          endDate: new Date(Date.now() - 96*15*60*1000 + (i+1)*15*60*1000).toISOString(),
-          price: 3.5 + Math.sin(i/10) * 2
-        }));
-        lastPricesSignature = getPricesSignature(cachedPrices);
-      }
+    // Use shared cache from pricing.js
+    const cachedPrices = await fetchLatestPrices();
+    
+    if (!cachedPrices || cachedPrices.length === 0) {
+      console.log("🟦 No prices available, using fallback");
+    } else {
+      // Update signature to track changes
+      const currentSig = getPricesSignature(cachedPrices);
+      if (currentSig) lastPricesSignature = currentSig;
     }
 
     console.log("🟦 cachedPrices length:", cachedPrices.length);
@@ -1086,16 +1065,13 @@ async function loadDayAndDraw(hoursOffset = 0) {
 async function refreshLatestPricesIfChanged() {
   if (chartLoading) return;
   try {
-    const res = await fetch(CONFIG.LATEST_PRICES_ENDPOINT, { cache: "no-store" });
-    if (!res.ok) return;
-    const data = await res.json().catch(() => null);
-    const nextPrices = data?.prices || data || [];
+    clearCachedPrices(); // Clear cache to force refresh
+    const nextPrices = await fetchLatestPrices();
+    
     if (!Array.isArray(nextPrices) || nextPrices.length === 0) return;
 
     const nextSig = getPricesSignature(nextPrices);
     if (nextSig && nextSig !== lastPricesSignature) {
-      clearCachedPrices(); // Clear cache before updating
-      cachedPrices = nextPrices;
       lastPricesSignature = nextSig;
       await loadDayAndDraw(chartOffset);
     }
