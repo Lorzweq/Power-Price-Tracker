@@ -24,7 +24,7 @@ jobs:
           import re
           from pathlib import Path
 
-          index_path = Path('docs/Index.html')
+          index_path = Path('docs/index.html')
           updates_path = Path('docs/updates.html')
 
           text = index_path.read_text(encoding='utf-8')
@@ -32,7 +32,7 @@ jobs:
           # Match both "Build X.XXXv" and "<span>Build</span> X.XXXv" patterns
           m = re.search(r'(?:Build|</span>)\s+(\d+)\.(\d{3})v', text)
           if not m:
-            raise SystemExit('Build number not found in docs/Index.html')
+            raise SystemExit('Build number not found in docs/index.html')
 
           major = int(m.group(1))
           minor = int(m.group(2))
@@ -62,6 +62,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/Index.html docs/updates.html
+          git add docs/index.html docs/updates.html
           git commit -m "chore: bump build [skip ci]"
           git push
