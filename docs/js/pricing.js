@@ -3,6 +3,7 @@ import { CONFIG } from './config.js';
 import { $ } from './ui.js';
 
 export let cachedPrices = null;
+let _fetchPromise = null;
 export let currentDayPrices = [];
 export let quarterMinPrices = [];
 
@@ -114,28 +115,31 @@ export async function updateDateAvgPrice(dateInputId) {
 
 export async function fetchLatestPrices() {
   if (cachedPrices) return cachedPrices;
+  if (_fetchPromise) return _fetchPromise;
 
-  try {
-    const res = await fetch(CONFIG.LATEST_PRICES_ENDPOINT);
-    if (res.ok) {
-      const data = await res.json();
-      cachedPrices = data.prices || data || [];
-      if (cachedPrices.length === 0) {
-        // Test data fallback
-        cachedPrices = Array(96).fill(null).map((_, i) => ({
-          startDate: new Date(Date.now() - 96*15*60*1000 + i*15*60*1000).toISOString(),
-          endDate: new Date(Date.now() - 96*15*60*1000 + (i+1)*15*60*1000).toISOString(),
-          price: 3.5 + Math.sin(i/10) * 2
-        }));
+  _fetchPromise = (async () => {
+    try {
+      const res = await fetch(CONFIG.LATEST_PRICES_ENDPOINT);
+      if (res.ok) {
+        const data = await res.json();
+        cachedPrices = data.prices || data || [];
+        if (cachedPrices.length === 0) {
+          cachedPrices = Array(96).fill(null).map((_, i) => ({
+            startDate: new Date(Date.now() - 96*15*60*1000 + i*15*60*1000).toISOString(),
+            endDate: new Date(Date.now() - 96*15*60*1000 + (i+1)*15*60*1000).toISOString(),
+            price: 3.5 + Math.sin(i/10) * 2
+          }));
+        }
+        return cachedPrices;
       }
-      return cachedPrices;
+    } catch (e) {
+      console.error("Failed to fetch latest prices:", e);
     }
-  } catch (e) {
-    console.error("Failed to fetch latest prices:", e);
-  }
-  
-  cachedPrices = [];
-  return cachedPrices;
+    cachedPrices = [];
+    return cachedPrices;
+  })().finally(() => { _fetchPromise = null; });
+
+  return _fetchPromise;
 }
 
 export function setPricesData(prices, quarterPrices) {
