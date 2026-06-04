@@ -1,23 +1,12 @@
 // Main Application Logic
 import { CONFIG, DEVICES, PRESETS, DEVICE_INDEX_BY_NAME } from './js/config.js';
 import { initConsent } from './js/consent.js';
-import { $, showToast, copyTextToClipboard, twoDigits, setTodayDefaults, setupAuthToggle } from './js/ui.js';
+import { $, showToast, copyTextToClipboard, twoDigits, setTodayDefaults } from './js/ui.js';
 import { fetchPriceCentsPerKwh, moneyEuro, updateDateAvgPrice, fetchLatestPrices, setPricesData, clearCachedPrices } from './js/pricing.js';
 import { renderDevicesHTML, collectDeviceData, getDevice } from './js/devices.js';
 import { calculateSavings } from './js/calculator.js';
 import { drawHourlyChart, draw15MinChart, drawTop3Chart } from './js/chart.js';
-import {
-  initSupabase,
-  activatePremium,
-  handleLogin,
-  handleLogout,
-  showSignupModal,
-  showPasswordResetModal,
-  showNewPasswordModal,
-  isPremium,
-  supabase,
-  currentUser
-} from './js/supabase.js';
+
 import { getCurrentLanguage, setLanguage, t, translateCategory, translateDeviceName } from './js/translations.js';
 
 // ========== SERVICE WORKER REGISTRATION ==========
@@ -186,15 +175,12 @@ function applyPresetById(presetId) {
 
 // ========== DEVICE RENDERING ==========
 function renderDevices() {
-  console.log("🟦 renderDevices called");
-  console.log("🟦 DEVICES:", DEVICES);
   
   const groups = DEVICES.reduce((acc, d, i) => {
     (acc[d.category] ||= []).push({ d, i });
     return acc;
   }, {});
 
-  console.log("🟦 Groups:", groups);
 
   const html = Object.entries(groups).map(([cat, items]) => {
     const bodyId = `cat-${cat.replace(/\s+/g, "-")}`;
@@ -257,7 +243,6 @@ function renderDevices() {
   }).join("");
 
   const deviceListEl = $("deviceList");
-  console.log("🟦 deviceList element:", deviceListEl);
   
   if (!deviceListEl) {
     console.error("❌ deviceList element not found!");
@@ -758,16 +743,14 @@ function ensureTooltip(canvas) {
 
 function drawBarChartSolidWithHover(canvas, hourlyPrices, startHour = 0, quarterMinPrices = null) {
   try {
-    console.log("🟦 drawBarChartSolidWithHover called with canvas:", canvas, "prices:", hourlyPrices);
-    
+      
     if (!canvas) {
       console.error("❌ Canvas element is null!");
       return;
     }
 
     const prices = (hourlyPrices || []).slice(0, 24);
-    console.log("🟦 Prices array length:", prices.length, "values:", prices);
-    
+      
     const ctx = canvas.getContext("2d");
     if (!ctx) {
       console.error("❌ Could not get canvas context!");
@@ -939,7 +922,6 @@ function drawBarChartSolidWithHover(canvas, hourlyPrices, startHour = 0, quarter
 async function loadDayAndDraw(hoursOffset = 0) {
   if (chartLoading) return;
   chartLoading = true;
-  console.log("🟦 loadDayAndDraw started, hoursOffset:", hoursOffset);
 
   chartOffset = hoursOffset;
   const now = new Date();
@@ -966,7 +948,6 @@ async function loadDayAndDraw(hoursOffset = 0) {
   }
 
   const dayChartElement = $("dayChart");
-  console.log("🟦 dayChart element:", dayChartElement);
   if (!dayChartElement) {
     console.error("❌ dayChart element not found!");
     chartLoading = false;
@@ -978,15 +959,13 @@ async function loadDayAndDraw(hoursOffset = 0) {
     const cachedPrices = await fetchLatestPrices();
     
     if (!cachedPrices || cachedPrices.length === 0) {
-      console.log("🟦 No prices available, using fallback");
-    } else {
+        } else {
       // Update signature to track changes
       const currentSig = getPricesSignature(cachedPrices);
       if (currentSig) lastPricesSignature = currentSig;
     }
 
-    console.log("🟦 cachedPrices length:", cachedPrices.length);
-
+  
     const pricesLocal = [];
     const quarterMinPricesLocal = [];
 
@@ -1040,10 +1019,8 @@ async function loadDayAndDraw(hoursOffset = 0) {
 
     quarterMinPrices = quarterMinPricesLocal;
 
-    console.log("🟦 Calling drawBarChartSolidWithHover with pricesLocal:", pricesLocal);
-    drawBarChartSolidWithHover(dayChartElement, pricesLocal, startHour, quarterMinPricesLocal);
-    console.log("🟦 drawBarChartSolidWithHover completed");
-    
+      drawBarChartSolidWithHover(dayChartElement, pricesLocal, startHour, quarterMinPricesLocal);
+      
     if (hoursOffset === 0) {
       $("chartTitle").textContent = `${t('next22Hours')} (${t('starting')} ${String(startHour).padStart(2, "0")}:00) - ${t('currentTime')} ⏳`;
     } else if (hoursOffset > 0) {
@@ -1053,13 +1030,11 @@ async function loadDayAndDraw(hoursOffset = 0) {
     }
   } catch (e) {
     console.error("❌ Error in loadDayAndDraw:", e);
-    console.log("🟦 Drawing fallback chart");
-    drawBarChartSolidWithHover($("dayChart"), Array(22).fill(5.0), startHour);
+      drawBarChartSolidWithHover($("dayChart"), Array(22).fill(5.0), startHour);
     $("chartTitle").textContent = `${t('errorFetchingPrices')}: ${e.message}`;
   } finally {
     chartLoading = false;
-    console.log("🟦 loadDayAndDraw finished");
-  }
+    }
 }
 
 async function refreshLatestPricesIfChanged() {
@@ -1237,9 +1212,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     applyTheme(isDarkNow ? "dark" : "light");
   });
 
-  // Initialize Supabase
-  await initSupabase();
-
   // Initialize Cookie Consent
   initConsent();
 
@@ -1251,7 +1223,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (content) {
         const isHidden = content.classList.toggle('hidden');
         localStorage.setItem('priceWatchCollapsed', isHidden);
-        priceWatchHeader.querySelector('span:last-child').textContent = isHidden ? '▶' : '▼';
+        const tog = document.getElementById('priceWatchToggle'); if (tog) tog.textContent = isHidden ? '▶' : '▼';
       }
     });
     
@@ -1260,73 +1232,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const content = $('priceWatchContent');
       if (content) {
         content.classList.add('hidden');
-        priceWatchHeader.querySelector('span:last-child').textContent = '▶';
+        const tog2 = document.getElementById('priceWatchToggle'); if (tog2) tog2.textContent = '▶';
       }
     }
   }
 
-  // Auth event listeners
-  const loginBtn = $('loginBtn');
-  if (loginBtn) loginBtn.addEventListener('click', handleLogin);
-  
-  const openSignupModalBtn = $('openSignupModal');
-  if (openSignupModalBtn) openSignupModalBtn.addEventListener('click', showSignupModal);
-  
-  const forgotPasswordLink = $('forgotPasswordLink');
-  if (forgotPasswordLink) forgotPasswordLink.addEventListener('click', showPasswordResetModal);
-  
-  const changePasswordBtn = $('changePasswordBtn');
-  if (changePasswordBtn) changePasswordBtn.addEventListener('click', showNewPasswordModal);
-  
-  const logoutBtn = $('logoutBtn');
-  if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
-
-  // Premium activation
-  const activatePremiumBtn = $('activatePremium');
-  if (activatePremiumBtn) activatePremiumBtn.addEventListener('click', activatePremium);
-
-  // Feedback submission
-  const sendFeedbackBtn = $('sendFeedback');
-  if (sendFeedbackBtn) {
-    sendFeedbackBtn.addEventListener('click', async () => {
-      const name = $('fbName')?.value?.trim() || '';
-      const ratingRaw = $('fbRating')?.value || '';
-      const message = $('fbMessage')?.value?.trim() || '';
-
-      if (!message) {
-        showToast(t('feedbackMissingMessage'));
-        return;
-      }
-
-      if (!supabase) {
-        showToast(t('feedbackNotAvailable'));
-        return;
-      }
-
-      const rating = ratingRaw ? Number(ratingRaw) : null;
-      const payload = {
-        name: name || null,
-        rating: Number.isFinite(rating) ? rating : null,
-        message,
-        language: getCurrentLanguage(),
-        user_id: currentUser?.id || null,
-        created_at: new Date().toISOString()
-      };
-
-      try {
-        const { error } = await supabase.from('feedback').insert([payload]);
-        if (error) throw error;
-
-        $('fbName').value = '';
-        $('fbRating').value = '';
-        $('fbMessage').value = '';
-        showToast(t('feedbackSendSuccess'));
-      } catch (error) {
-        console.error('Feedback send error:', error);
-        showToast(t('feedbackSendError'));
-      }
-    });
-  }
 
   // Setup suggestion calculator
   const suggestBtn = $("suggest");
@@ -1468,11 +1378,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Price Watch
   $("startPriceWatch")?.addEventListener("click", () => {
-    if (!isPremium) {
-      showToast("⭐ Price Watch vaatii Premium-tilauksen");
-      return;
-    }
-    
     const threshold = parseFloat($("priceWatchThreshold")?.value);
     if (!threshold || threshold <= 0) {
       showToast("Aseta hinnan raja");
@@ -1557,21 +1462,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   // Initialize
-  console.log("🟦 DOMContentLoaded initialization starting");
   
   try {
-    console.log("🟦 Setting today defaults...");
-    setTodayDefaults();
-    console.log("🟦 Today defaults set");
-  } catch (e) {
+      setTodayDefaults();
+    } catch (e) {
     console.error("❌ Error in setTodayDefaults:", e);
   }
   
   try {
-    console.log("🟦 Rendering devices...");
-    renderDevices();
-    console.log("🟦 Devices rendered");
-  } catch (e) {
+      renderDevices();
+    } catch (e) {
     console.error("❌ Error in renderDevices:", e);
   }
   
@@ -1579,13 +1479,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     onSelectionChange();
   } catch (e) {
     console.error("❌ Error in onSelectionChange:", e);
-  }
-
-  // Setup auth toggle
-  try {
-    setupAuthToggle();
-  } catch (e) {
-    console.error("❌ Error in setupAuthToggle:", e);
   }
 
   // Load chart
@@ -1609,4 +1502,124 @@ document.addEventListener("DOMContentLoaded", async () => {
   updateDateAvgPrice("date1");
   updateDateAvgPrice("date2");
   updateDateAvgPrice("date3");
+
+  // Update current price hero
+  updateCurrentPriceHero();
+  setInterval(updateCurrentPriceHero, 5 * 60 * 1000);
+
+  // Add Huominen button listener
+  const loadTomorrowBtn = $("loadTomorrow");
+  if (loadTomorrowBtn) loadTomorrowBtn.addEventListener("click", async () => {
+    const now = new Date();
+    const tomorrowMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0);
+    const hoursToTomorrow = Math.round((tomorrowMidnight.getTime() - now.getTime()) / 3600000);
+    await loadDayAndDraw(hoursToTomorrow);
+    showToast("Huomisen hinnat — saatavilla yleensä klo 14 jälkeen");
+  });
 });
+
+// ========== CURRENT PRICE HERO ==========
+function priceColor(price) {
+  if (price < 5) return 'green';
+  if (price < 10) return 'yellow';
+  if (price < 15) return 'orange';
+  return 'red';
+}
+
+function updateFavicon(price) {
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 32; canvas.height = 32;
+    const ctx = canvas.getContext('2d');
+    const color = price < 5 ? '#22c55e' : price < 10 ? '#eab308' : price < 15 ? '#f97316' : '#ef4444';
+    ctx.beginPath();
+    ctx.arc(16, 16, 15, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+    ctx.fillStyle = 'white';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(price < 10 ? price.toFixed(1) : Math.round(price).toString(), 16, 17);
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) { link = document.createElement('link'); link.rel = 'icon'; document.head.appendChild(link); }
+    link.href = canvas.toDataURL();
+  } catch(e) {}
+}
+
+function updateKannattaako(price) {
+  const laitteet = [
+    { id: 'k-pyykinpesu', kwh: 0.7 },
+    { id: 'k-astianpesukone', kwh: 1.1 },
+    { id: 'k-sauna', kwh: 4.5 },
+    { id: 'k-sahkoauto', kwh: 9 },
+  ];
+  laitteet.forEach(({ id, kwh }) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const cost = (price / 100) * kwh;
+    const tulos = el.querySelector('.k-tulos');
+    const hinta = el.querySelector('.k-hinta');
+    let label, bgClass, borderClass, textClass;
+    if (price < 5) {
+      label = 'Kyllä'; bgClass = 'bg-green-50'; borderClass = 'border-green-300'; textClass = 'text-green-700';
+    } else if (price < 10) {
+      label = 'Ihan ok'; bgClass = 'bg-yellow-50'; borderClass = 'border-yellow-300'; textClass = 'text-yellow-700';
+    } else if (price < 15) {
+      label = 'Odota'; bgClass = 'bg-orange-50'; borderClass = 'border-orange-300'; textClass = 'text-orange-700';
+    } else {
+      label = 'Kallista'; bgClass = 'bg-red-50'; borderClass = 'border-red-300'; textClass = 'text-red-700';
+    }
+    el.className = `rounded-xl border p-3 text-center transition-colors ${bgClass} ${borderClass}`;
+    if (tulos) { tulos.textContent = label; tulos.className = `k-tulos mt-1 text-xs font-bold ${textClass}`; }
+    if (hinta) { hinta.textContent = `n. ${cost.toFixed(2)} €`; hinta.className = `k-hinta mt-0.5 text-xs ${textClass} opacity-70`; }
+  });
+}
+
+async function updateCurrentPriceHero() {
+  try {
+    const prices = await fetchLatestPrices();
+    if (!prices || prices.length === 0) return;
+    const now = new Date();
+    const current = prices.find(p => {
+      const start = new Date(p.startDate);
+      const end = new Date(p.endDate);
+      return start <= now && end > now;
+    });
+    if (!current) return;
+    const price = typeof current.price === 'string' ? parseFloat(current.price.replace(',', '.')) : current.price;
+
+    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+    const byHour = {};
+    prices
+      .filter(p => new Date(p.startDate) >= todayStart && new Date(p.startDate) < todayEnd)
+      .forEach(p => {
+        const h = new Date(p.startDate).getHours();
+        const v = typeof p.price === 'string' ? parseFloat(p.price.replace(',', '.')) : p.price;
+        if (!(h in byHour) && Number.isFinite(v)) byHour[h] = { price: v, hour: h };
+      });
+    const hourly = Object.values(byHour);
+    const cheapest = hourly.length ? hourly.reduce((a, b) => a.price < b.price ? a : b) : null;
+    const mostExpensive = hourly.length ? hourly.reduce((a, b) => a.price > b.price ? a : b) : null;
+
+    const color = priceColor(price);
+    const colorMap = { green: 'text-green-600', yellow: 'text-yellow-600', orange: 'text-orange-600', red: 'text-red-600' };
+    const labelMap = { green: 'Halpaa', yellow: 'Kohtalaista', orange: 'Kallista', red: 'Hyvin kallista' };
+
+    const heroEl = document.getElementById('heroPriceValue');
+    const labelEl = document.getElementById('heroPriceLabel');
+    const cheapestEl = document.getElementById('heroCheapest');
+    const expensiveEl = document.getElementById('heroMostExpensive');
+
+    if (heroEl) { heroEl.textContent = price.toFixed(2); heroEl.className = `text-6xl font-bold tabular-nums ${colorMap[color]}`; }
+    if (labelEl) { labelEl.textContent = labelMap[color]; labelEl.className = `mt-2 text-sm font-semibold ${colorMap[color]}`; }
+    if (cheapestEl && cheapest) cheapestEl.textContent = `${cheapest.price.toFixed(2)} snt — klo ${cheapest.hour}`;
+    if (expensiveEl && mostExpensive) expensiveEl.textContent = `${mostExpensive.price.toFixed(2)} snt — klo ${mostExpensive.hour}`;
+
+    updateFavicon(price);
+    updateKannattaako(price);
+  } catch (e) {
+    console.error('Hero update error:', e);
+  }
+}

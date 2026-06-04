@@ -10,7 +10,6 @@
   <meta name="apple-mobile-web-app-title" content="Pörssisähkö">
   <link rel="manifest" href="manifest.json" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     #authToggle {
@@ -57,6 +56,26 @@
     html.dark .bg-amber-50 { background: #3b2f1a !important; }
     html.dark .border-amber-200 { border-color: #7c5a2b !important; }
     html.dark .text-amber-700 { color: #f8c27a !important; }
+    html.dark .bg-green-50 { background: #052e16 !important; }
+    html.dark .border-green-200 { border-color: #166534 !important; }
+    html.dark .text-green-600 { color: #4ade80 !important; }
+    html.dark .text-green-700 { color: #4ade80 !important; }
+    html.dark .text-green-800 { color: #86efac !important; }
+    html.dark .bg-red-50 { background: #450a0a !important; }
+    html.dark .border-red-200 { border-color: #991b1b !important; }
+    html.dark .text-red-600 { color: #f87171 !important; }
+    html.dark .text-red-700 { color: #f87171 !important; }
+    html.dark .text-red-800 { color: #fca5a5 !important; }
+    html.dark .bg-yellow-50 { background: #422006 !important; }
+    html.dark .border-yellow-300 { border-color: #92400e !important; }
+    html.dark .text-yellow-600 { color: #fbbf24 !important; }
+    html.dark .text-yellow-700 { color: #fbbf24 !important; }
+    html.dark .bg-orange-50 { background: #431407 !important; }
+    html.dark .border-orange-300 { border-color: #9a3412 !important; }
+    html.dark .text-orange-600 { color: #fb923c !important; }
+    html.dark .text-orange-700 { color: #fb923c !important; }
+    html.dark .border-green-300 { border-color: #166534 !important; }
+    html.dark .border-red-300 { border-color: #991b1b !important; }
     
     /* Modal Blur Overlay */
     .modal-overlay {
@@ -152,78 +171,83 @@
       Valitse laitteet, määritä päivät ja kellonajat ja paina "Laske säästö".
     </p>
 
-    <!-- Authentication Section (Collapsible) -->
-    <div class="mt-6 rounded-2xl bg-gradient-to-r from-slate-100 to-slate-50 border border-slate-200 p-3 sm:p-4">
-      <div class="flex items-center justify-between cursor-pointer" id="authHeader">
-        <div class="flex items-center gap-2">
-          <span id="authToggle" class="text-slate-900 transition-transform">▼</span>
-          <div class="text-sm font-semibold text-slate-900" data-i18n="authentication">👤 Kirjautuminen</div>
+    <!-- Current Price Hero -->
+    <div class="mt-4 rounded-2xl bg-white border border-slate-200 shadow p-4 sm:p-6 text-center">
+      <div class="text-sm text-slate-500 mb-1"> Sähkön hinta nyt</div>
+      <div id="heroPriceValue" class="text-6xl font-bold text-slate-900 tabular-nums">–</div>
+      <div class="text-base text-slate-500 mt-1">snt/kWh</div>
+      <div id="heroPriceLabel" class="mt-2 text-sm font-semibold"></div>
+      <div class="mt-4 grid grid-cols-2 gap-3 text-sm max-w-xs mx-auto">
+        <div class="rounded-xl bg-green-50 border border-green-200 p-3">
+          <div class="text-xs text-green-600 font-medium">Halvin tänään</div>
+          <div id="heroCheapest" class="font-bold text-green-800 text-base mt-1">–</div>
         </div>
-        <span id="authStatusBadge" class="text-xs px-2 py-1 rounded-lg bg-slate-200 text-slate-700" data-i18n="notLoggedIn">Ei kirjautunut</span>
+        <div class="rounded-xl bg-red-50 border border-red-200 p-3">
+          <div class="text-xs text-red-600 font-medium">Kallein tänään</div>
+          <div id="heroMostExpensive" class="font-bold text-red-800 text-base mt-1">–</div>
+        </div>
       </div>
-      
-      <div id="authContent" class="mt-3 hidden">
-        <div id="loginForm" class="p-3 rounded-lg bg-white border border-slate-300">
-          <p class="text-xs font-semibold text-slate-900 mb-2" data-i18n="loginTitle">Kirjaudu sisään</p>
-          <div class="flex flex-col gap-2">
-            <input
-              id="authEmail"
-              type="email"
-              placeholder="Sähköposti"
-              data-i18n="email"
-              class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
-            />
-            <input
-              id="authPassword"
-              type="password"
-              placeholder="Salasana"
-              data-i18n="password"
-              class="h-9 rounded-lg border border-slate-300 p-2 text-xs"
-            />
-            <button id="forgotPasswordLink" class="text-xs text-slate-500 hover:text-slate-700 underline mb-2 text-left w-full" data-i18n="forgotPassword">
-              Unohditko salasanan?
-            </button>
-            <div class="flex gap-2">
-              <button id="loginBtn" class="flex-1 rounded-lg bg-slate-600 text-white py-2 px-3 font-bold hover:bg-slate-500 text-xs" data-i18n="loginBtn">
-                Kirjaudu
-              </button>
-              <button id="openSignupModal" class="flex-1 rounded-lg bg-slate-400 text-white py-2 px-3 font-medium hover:bg-slate-300 text-xs" data-i18n="signupBtn">
-                Rekisteröidy
-              </button>
-            </div>
-          </div>
-        </div>
-        
-        <div id="userInfo" class="hidden p-3 rounded-lg bg-white border border-slate-300">
-          <div class="flex items-center justify-between mb-3">
-            <p class="text-xs font-semibold text-slate-900">👤 <span id="userEmail"></span></p>
-            <div class="flex gap-2">
-              <button id="changePasswordBtn" class="rounded-lg bg-slate-300 text-slate-700 py-1 px-2 font-medium hover:bg-slate-400 text-xs" data-i18n="changePassword">
-                Vaihda salasana
-              </button>
-              <button id="logoutBtn" class="rounded-lg bg-slate-400 text-white py-1 px-2 font-medium hover:bg-slate-300 text-xs" data-i18n="logout">
-                Kirjaudu ulos
-              </button>
-            </div>
-          </div>
+    </div>
 
-          <!-- Premium Key Activation -->
-          <div id="premiumKeySection" class="p-3 rounded-lg bg-yellow-50 border border-yellow-300">
-            <p class="text-xs font-semibold text-yellow-900 mb-2" data-i18n="activatePremium">Aktivoi Premium</p>
-            <div class="flex gap-2">
-              <input
-                id="premiumKeyInput"
-                type="text"
-                placeholder="Syötä premium-avain"
-                data-i18n="premiumKeyPlaceholder"
-                class="flex-1 h-9 rounded-lg border border-yellow-300 p-2 text-xs"
-              />
-              <button id="activatePremium" class="rounded-lg bg-yellow-500 text-slate-900 py-2 px-3 font-bold hover:bg-yellow-400 text-xs" data-i18n="activateBtn">
-                Aktivoi
-              </button>
-            </div>
-            <p class="mt-2 text-xs text-yellow-800" data-i18n="deviceId">Laite ID: <span id="deviceIdDisplay" class="font-mono"></span></p>
+    <div class="mt-4 sm:mt-6 bg-white rounded-2xl shadow p-3 sm:p-4 md:p-5">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-1 sm:gap-3">
+          <button id="chartPrev" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-100" title="Aiemmat hinnat">
+            <span class="hidden sm:inline" data-i18n="previous">← Aiemmin</span>
+            <span class="sm:hidden">←</span>
+          </button>
+          <div class="min-w-0">
+            <div class="text-xs sm:text-sm text-slate-600" data-i18n="chartTitle">Päivän pörssisähkö (snt/kWh)</div>
+            <div id="chartTitle" class="text-xs sm:text-sm font-medium truncate"></div>
           </div>
+          <button id="chartNext" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-100" title="Tulevat hinnat">
+            <span class="hidden sm:inline" data-i18n="next">Myöhemmin →</span>
+            <span class="sm:hidden">→</span>
+          </button>
+        </div>
+        <div class="flex gap-2">
+          <button id="loadDay" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50" title="Palaa nykyhetken hintoihin">
+            <span class="hidden sm:inline" data-i18n="now">Nykyhetki</span>
+            <span class="sm:hidden">Nyt</span>
+          </button>
+          <button id="loadTomorrow" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50 bg-slate-50" title="Näytä huomisen hinnat">
+            <span class="hidden sm:inline">Huominen →</span>
+            <span class="sm:hidden">Huom.</span>
+          </button>
+        </div>
+        <button id="refreshChart" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50 bg-blue-50 border-blue-300" title="Päivitä chart">
+          <span class="hidden sm:inline" data-i18n="refresh">Päivitä</span>
+          <span class="sm:hidden">↺</span>
+        </button>
+      </div>
+
+      <div class="overflow-x-auto">
+        <canvas id="dayChart" class="mt-3 sm:mt-4 w-full" height="220" style="display: block; max-width: 100%;"></canvas>
+      </div>
+    </div>
+    <!-- Kannattaako nyt? -->
+    <div class="mt-4 bg-white rounded-2xl shadow p-4 sm:p-5">
+      <h2 class="text-sm sm:text-base font-semibold text-slate-800 mb-3">Kannattaako nyt?</h2>
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div id="k-pyykinpesu" class="rounded-xl border p-3 text-center transition-colors">
+          <div class="text-xs font-medium text-slate-700 mb-2">Pyykinpesu</div>
+          <div class="k-tulos mt-1 text-xs font-bold text-slate-400">–</div>
+          <div class="k-hinta mt-0.5 text-xs text-slate-400"></div>
+        </div>
+        <div id="k-astianpesukone" class="rounded-xl border p-3 text-center transition-colors">
+          <div class="text-xs font-medium text-slate-700 mb-2">Astianpesukone</div>
+          <div class="k-tulos mt-1 text-xs font-bold text-slate-400">–</div>
+          <div class="k-hinta mt-0.5 text-xs text-slate-400"></div>
+        </div>
+        <div id="k-sauna" class="rounded-xl border p-3 text-center transition-colors">
+          <div class="text-xs font-medium text-slate-700 mb-2">Sauna (1h)</div>
+          <div class="k-tulos mt-1 text-xs font-bold text-slate-400">–</div>
+          <div class="k-hinta mt-0.5 text-xs text-slate-400"></div>
+        </div>
+        <div id="k-sahkoauto" class="rounded-xl border p-3 text-center transition-colors">
+          <div class="text-xs font-medium text-slate-700 mb-2">Sähköauto (1h)</div>
+          <div class="k-tulos mt-1 text-xs font-bold text-slate-400">–</div>
+          <div class="k-hinta mt-0.5 text-xs text-slate-400"></div>
         </div>
       </div>
     </div>
@@ -436,7 +460,6 @@
                 <span id="priceWatchToggle" class="text-blue-900 transition-transform">▼</span>
                 <div class="text-sm font-semibold text-blue-900" data-i18n="priceWatch">Price Watch</div>
               </div>
-              <span id="premiumBadge" class="hidden px-2 py-1 text-xs font-bold rounded-lg bg-gradient-to-r from-yellow-400 to-yellow-600 text-slate-900" data-i18n="premiumActive">PREMIUM</span>
             </div>
             
             <div id="priceWatchContent">
@@ -490,92 +513,6 @@
         </div>
       </div>
     </div>
-
-    <div class="mt-4 sm:mt-6 bg-white rounded-2xl shadow p-3 sm:p-4 md:p-5">
-      <div class="flex flex-wrap items-center justify-between gap-2">
-        <div class="flex items-center gap-1 sm:gap-3">
-          <button id="chartPrev" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-100" title="Aiemmat hinnat">
-            <span class="hidden sm:inline" data-i18n="previous">← Aiemmin</span>
-            <span class="sm:hidden">←</span>
-          </button>
-          <div class="min-w-0">
-            <div class="text-xs sm:text-sm text-slate-600" data-i18n="chartTitle">Päivän pörssisähkö (snt/kWh)</div>
-            <div id="chartTitle" class="text-xs sm:text-sm font-medium truncate"></div>
-          </div>
-          <button id="chartNext" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-100" title="Tulevat hinnat">
-            <span class="hidden sm:inline" data-i18n="next">Myöhemmin →</span>
-            <span class="sm:hidden">→</span>
-          </button>
-        </div>
-        <button id="loadDay" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50" title="Palaa nykyhetken hintoihin">
-          <span class="hidden sm:inline" data-i18n="now">Nykyhetki</span>
-          <span class="sm:hidden">Nyt</span>
-        </button>
-        <button id="refreshChart" class="rounded-xl border px-2 py-1 sm:px-3 sm:py-2 text-xs sm:text-sm hover:bg-slate-50 bg-blue-50 border-blue-300" title="Päivitä chart">
-          <span class="hidden sm:inline" data-i18n="refresh">🔄 Päivitä</span>
-          <span class="sm:hidden">🔄</span>
-        </button>
-      </div>
-
-      <div class="overflow-x-auto">
-        <canvas id="dayChart" class="mt-3 sm:mt-4 w-full" height="220" style="display: block; max-width: 100%;"></canvas>
-      </div>
-    </div>
-
-    <section class="mt-6 bg-white rounded-2xl shadow p-4">
-      <h2 class="text-lg font-semibold" data-i18n="feedback">Palaute</h2>
-      <p class="text-sm text-slate-600" data-i18n="feedbackDescription">
-        Lähetä palautetta sovelluksesta.
-      </p>
-
-      <div class="mt-4 grid gap-3 md:grid-cols-2">
-        <div>
-          <label class="block text-xs sm:text-sm font-medium" data-i18n="name">Nimi (valinnainen)</label>
-          <input
-            id="fbName"
-            type="text"
-            class="mt-1 w-full rounded-xl border p-2 text-xs sm:text-sm"
-            placeholder="Maija Meikäläinen"
-            data-i18n="namePlaceholder"
-          />
-        </div>
-
-        <div>
-          <label class="block text-xs sm:text-sm font-medium" data-i18n="rating">Arvosana</label>
-          <select
-            id="fbRating"
-            class="mt-1 w-full rounded-xl border p-2 text-xs sm:text-sm"
-          >
-            <option value="" data-i18n="selectRating">Valitse</option>
-            <option value="5">⭐⭐⭐⭐⭐ 5</option>
-            <option value="4">⭐⭐⭐⭐ 4</option>
-            <option value="3">⭐⭐⭐ 3</option>
-            <option value="2">⭐⭐ 2</option>
-            <option value="1">⭐ 1</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="mt-3">
-        <label class="block text-xs sm:text-sm font-medium" data-i18n="feedbackMessage">Palaute</label>
-        <textarea
-          id="fbMessage"
-          rows="4"
-          class="mt-1 w-full rounded-xl border p-2 text-xs sm:text-sm"
-          placeholder="Mikä toimi hyvin? Mitä parantaisit?"
-          data-i18n="feedbackPlaceholder"
-          required
-        ></textarea>
-      </div>
-
-      <button
-        id="sendFeedback"
-        class="mt-3 sm:mt-4 rounded-xl bg-slate-600 text-white px-3 sm:px-4 py-2 font-medium hover:bg-slate-700 text-xs sm:text-sm"
-        data-i18n="sendFeedback"
-      >
-        Lähetä palaute
-      </button>
-    </section>
 
     <!-- Footer: evästeasetukset + policy linkit -->
     <footer class="mt-8 pb-10 text-xs sm:text-sm text-slate-500 flex flex-col gap-2 sm:gap-3 items-center">
@@ -640,3 +577,4 @@
     console.log("PWA asennettu");
   });
 </script>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
