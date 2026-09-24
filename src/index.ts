@@ -1,6 +1,8 @@
 // src/index.ts
 const ALLOWED_ORIGINS = new Set<string>([
   "https://porssisahkosaasto.com",
+  "https://www.porssisahkosaasto.com",
+  "https://lorzweq.github.io",
   "https://porssisahko-proxy.leevi-hanninen3.workers.dev",
   "http://localhost:5500",
   "http://127.0.0.1:5500",
@@ -11,14 +13,16 @@ const ALLOWED_ORIGINS = new Set<string>([
 ]);
 
 function corsHeaders(origin: string | null) {
-  const allow = origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://porssisahkosaasto.com";
-  return {
-    "Access-Control-Allow-Origin": allow,
+  const headers: Record<string, string> = {
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
     "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Max-Age": "86400",
     "Vary": "Origin",
   };
+  if (origin && ALLOWED_ORIGINS.has(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+  return headers;
 }
 
 function json(data: unknown, init: ResponseInit = {}) {
