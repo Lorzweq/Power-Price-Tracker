@@ -181,3 +181,5 @@ node_modules/
 .env
 dist/
 build/
+# Claude-sovelluksen paikalliset asetukset (testipalvelin)
+.claude/
