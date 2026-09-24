@@ -52,8 +52,15 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   if (new URL(request.url).origin !== self.location.origin) return;
 
+  // cache: 'no-cache' ohittaa selaimen HTTP-välimuistin (GitHub Pages: max-age=600) ja
+  // tarkistaa palvelimelta, onko tiedosto muuttunut. Ilman tätä julkaisun jälkeen voisi
+  // hetken saada uuden index.html:n ja vanhan main.js:n, jolloin sivu näyttää rikkinäiseltä.
+  // Muuttumaton tiedosto kuitataan kevyellä 304-vastauksella, joten hinta on pieni.
+  // Navigointipyyntöön ei voi antaa asetuksia (TypeError), joten se haetaan sellaisenaan.
+  const networkRequest = request.mode === 'navigate' ? request : new Request(request, { cache: 'no-cache' });
+
   event.respondWith(
-    fetch(request)
+    fetch(networkRequest)
       .then((response) => {
         if (response.ok) {
           // Bodyn voi lukea vain kerran, joten välimuistiin menee kopio.
