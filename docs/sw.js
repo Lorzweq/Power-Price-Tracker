@@ -5,7 +5,7 @@
 // tavut muuttuvat joka julkaisussa, selain huomaa uuden workerin, asentaa sen ja
 // activate-vaihe siivoaa vanhan välimuistin pois. Ilman tätä offline-käyttäjä
 // jäisi ikuisesti ensimmäiseen asennettuun versioon.
-const CACHE_VERSION = '0.010v';
+const CACHE_VERSION = '0.011v';
 const CACHE_NAME = `porssisahko-${CACHE_VERSION}`;
 
 // Sovelluskuori: kaikki mitä sivun piirtämiseen tarvitaan ilman verkkoa.
