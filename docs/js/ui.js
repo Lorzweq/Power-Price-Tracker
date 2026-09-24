@@ -50,35 +50,6 @@ export function copyTextToClipboard(text) {
   });
 }
 
-export function setupAuthToggle() {
-  const authHeader = $("authHeader");
-  const authContent = $("authContent");
-  const authToggle = $("authToggle");
-
-  if (!authHeader || !authContent || !authToggle) return;
-
-  authHeader.addEventListener("click", () => {
-    const isHidden = authContent.classList.contains("hidden");
-    
-    if (isHidden) {
-      authContent.classList.remove("hidden");
-      authToggle.style.transform = "rotate(0deg)";
-      localStorage.setItem("authSectionOpen", "true");
-    } else {
-      authContent.classList.add("hidden");
-      authToggle.style.transform = "rotate(-90deg)";
-      localStorage.setItem("authSectionOpen", "false");
-    }
-  });
-
-  // Restore toggle state from localStorage
-  const wasOpen = localStorage.getItem("authSectionOpen") !== "false";
-  if (!wasOpen) {
-    authContent.classList.add("hidden");
-    authToggle.style.transform = "rotate(-90deg)";
-  }
-}
-
 export function twoDigits(n) {
   return (n < 10 ? "0" + n : "" + n);
 }
@@ -91,7 +62,6 @@ export function setTodayDefaults() {
   const iso = `${yyyy}-${mm}-${dd}`;
   $("date1").value = iso;
   $("date2").value = iso;
-  $("date3").value = iso;
   const h = today.getHours();
   const h2 = (h + 1) % 24;
   if ($("hour1")) $("hour1").value = h;

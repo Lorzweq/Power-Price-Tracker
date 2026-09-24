@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Pörssisähkö-säästölaskuri: säästövinkit</title>
+    <link>https://porssisahkosaasto.com/saastovinkit.html</link>
+    <atom:link href="https://porssisahkosaasto.com/feed.xml" rel="self" type="application/rss+xml" />
+    <description>Käytännön oppaat pörssisähkön käyttäjälle: milloin sähkö on halvinta ja paljonko ajoitus säästää.</description>
+    <language>fi</language>
+    <lastBuildDate>Thu, 24 Sep 2026 12:00:00 +0000</lastBuildDate>
+    <item>
+      <title>Pörssisähkön hinta huomenna – milloin hinnat julkaistaan?</title>
+      <link>https://porssisahkosaasto.com/porssisahko-huomenna.html</link>
+      <guid isPermaLink="true">https://porssisahkosaasto.com/porssisahko-huomenna.html</guid>
+      <description>Huomisen pörssisähkön hinnat julkaistaan yleensä noin klo 14. Katso miten hinnat muodostuvat, miksi ne vaihtelevat ja miten hyödynnät huomisen halvimmat tunnit.</description>
+      <pubDate>Thu, 24 Sep 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Milloin kannattaa pestä pyykit pörssisähköllä?</title>
+      <link>https://porssisahkosaasto.com/milloin-kannattaa-pesta-pyykit.html</link>
+      <guid isPermaLink="true">https://porssisahkosaasto.com/milloin-kannattaa-pesta-pyykit.html</guid>
+      <description>Pyykinpesu, kuivausrumpu ja astianpesukone ovat helpoimpia tapoja säästää pörssisähköllä. Katso paljonko ne kuluttavat ja miten löydät halvimman ajan.</description>
+      <pubDate>Thu, 24 Sep 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Sähköauton lataus pörssisähköllä – halvin aika ladata</title>
+      <link>https://porssisahkosaasto.com/sahkoauton-lataus-halvin-aika.html</link>
+      <guid isPermaLink="true">https://porssisahkosaasto.com/sahkoauton-lataus-halvin-aika.html</guid>
+      <description>Sähköauton lataus on kodin suurimpia ajastettavia kuormia. Katso paljonko ajoitus säästää ja miten löydät pörssisähkön halvimmat tunnit lataukselle.</description>
+      <pubDate>Thu, 24 Sep 2026 12:00:00 +0000</pubDate>
+    </item>
+    <item>
+      <title>Paljonko saunan lämmitys maksaa pörssisähköllä?</title>
+      <link>https://porssisahkosaasto.com/saunan-lammitys-hinta.html</link>
+      <guid isPermaLink="true">https://porssisahkosaasto.com/saunan-lammitys-hinta.html</guid>
+      <description>Sähkökiuas kuluttaa 6–9 kW. Katso paljonko saunominen maksaa pörssisähköllä eri hinnoilla ja miten valitset edullisimman saunavuoron.</description>
+      <pubDate>Thu, 24 Sep 2026 12:00:00 +0000</pubDate>
+    </item>
+  </channel>
+</rss>

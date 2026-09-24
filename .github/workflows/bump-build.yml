@@ -47,6 +47,16 @@ jobs:
           new_text = re.sub(r'((?:Build|</span>)\s+)\d+\.\d{3}v', rf'\g<1>{new_build}', text, count=1)
           index_path.write_text(new_text, encoding='utf-8')
 
+          # Pida service workerin välimuistiversio synkassa build-numeron kanssa,
+          # jotta selain huomaa uuden workerin ja vanha välimuisti siivoutuu.
+          sw_path = Path('docs/sw.js')
+          if sw_path.exists():
+            sw_text = sw_path.read_text(encoding='utf-8')
+            sw_text, n = re.subn(r"(const CACHE_VERSION = ')[^']*(';)", rf'\g<1>{new_build}\g<2>', sw_text, count=1)
+            if n != 1:
+              raise SystemExit('CACHE_VERSION not found in docs/sw.js')
+            sw_path.write_text(sw_text, encoding='utf-8')
+
           if updates_path.exists():
             updates_text = updates_path.read_text(encoding='utf-8')
             updates_text = re.sub(r'\b\d+\.\d{3}v\b', new_build, updates_text, count=1)
@@ -62,6 +72,6 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add docs/index.html docs/updates.html
+          git add docs/index.html docs/updates.html docs/sw.js
           git commit -m "chore: bump build [skip ci]"
           git push

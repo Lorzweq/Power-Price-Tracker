@@ -6,9 +6,12 @@
 		"deploy": "wrangler deploy",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
-		"cf-typegen": "wrangler types"
+		"cf-typegen": "wrangler types",
+		"build:css": "tailwindcss -i ./tailwind/input.css -o ./docs/styles.css --minify",
+		"watch:css": "tailwindcss -i ./tailwind/input.css -o ./docs/styles.css --watch"
 	},
 	"devDependencies": {
+		"tailwindcss": "^3.4.19",
 		"typescript": "^5.5.2",
 		"wrangler": "^4.61.1"
 	},

@@ -1,0 +1,11 @@
+# Normalisoi kaikki tekstitiedostot LF:ksi sekä repossa että työpuussa.
+# Vastaa .editorconfigin asetusta end_of_line = lf ja estää CRLF/LF-heilahtelun,
+# joka on aiemmin näyttänyt diffissä koko tiedoston uudelleenkirjoitettuna.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.pdf binary
+*.keystore binary

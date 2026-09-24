@@ -29,33 +29,6 @@ export function hideConsentBanner() {
   banner.classList.add("hidden");
 }
 
-export function loadAdSenseIfAllowed() {
-  const consent = getConsent();
-  const adSlot = document.getElementById("adSlot");
-
-  if (consent?.ads) {
-    if (adSlot && !window.__adsenseLoaded) {
-      window.__adsenseLoaded = true;
-
-      const script = document.createElement("script");
-      script.async = true;
-      script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2933152668442386";
-      script.crossOrigin = "anonymous";
-      document.head.appendChild(script);
-
-      script.onload = () => {
-        if (adSlot) {
-          adSlot.innerHTML = '<ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-2933152668442386" data-ad-slot="1234567890" data-ad-format="auto" data-full-width-responsive="true"></ins>';
-          (window.adsbygoogle = window.adsbygoogle || []).push({});
-          adSlot.classList.remove("hidden");
-        }
-      };
-    }
-  } else {
-    if (adSlot) adSlot.classList.add("hidden");
-  }
-}
-
 export function loadGoogleAnalytics() {
   const consent = getConsent();
 
@@ -64,15 +37,25 @@ export function loadGoogleAnalytics() {
 
     const gtagScript = document.createElement("script");
     gtagScript.async = true;
-    gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=G-Y72HX00VPT";
+    gtagScript.src = `https://www.googletagmanager.com/gtag/js?id=${CONFIG.GA_MEASUREMENT_ID}`;
     document.head.appendChild(gtagScript);
 
     window.dataLayer = window.dataLayer || [];
     function gtag() { window.dataLayer.push(arguments); }
     window.gtag = gtag;
     gtag('js', new Date());
-    gtag('config', 'G-Y72HX00VPT');
+    // Asennetun PWA:n käyttäjät erottuvat selainkäyttäjistä GA:n raporteissa.
+    const displayMode = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone
+      ? 'standalone' : 'browser';
+    gtag('set', 'user_properties', { display_mode: displayMode });
+    gtag('config', CONFIG.GA_MEASUREMENT_ID);
   }
+}
+
+// Lähettää GA-tapahtuman vain, jos käyttäjä on hyväksynyt analytiikan
+// (window.gtag on olemassa vasta loadGoogleAnalytics()-kutsun jälkeen).
+export function trackEvent(name, params = {}) {
+  if (typeof window.gtag === 'function') window.gtag('event', name, params);
 }
 
 export function initConsent() {
@@ -83,20 +66,18 @@ export function initConsent() {
   });
 
   document.getElementById("consentAccept")?.addEventListener("click", () => {
-    setConsent({ ads: true, analytics: true, ts: Date.now() });
+    setConsent({ analytics: true, ts: Date.now() });
     hideConsentBanner();
     window.dispatchEvent(new Event("consent-updated"));
   });
 
   document.getElementById("consentReject")?.addEventListener("click", () => {
-    setConsent({ ads: false, analytics: false, ts: Date.now() });
+    setConsent({ analytics: false, ts: Date.now() });
     hideConsentBanner();
     window.dispatchEvent(new Event("consent-updated"));
   });
 
-  loadAdSenseIfAllowed();
   loadGoogleAnalytics();
 
-  window.addEventListener("consent-updated", loadAdSenseIfAllowed);
   window.addEventListener("consent-updated", loadGoogleAnalytics);
 }

@@ -4,4 +4,6 @@
     <string name="title_activity_main">Pörssisähkö Laskuri</string>
     <string name="package_name">fi.porssisahko.laskuri</string>
     <string name="custom_url_scheme">fi.porssisahko.laskuri</string>
+    <string name="widget_title">Pörssisähkö</string>
+    <string name="widget_description">Näyttää nykyisen pörssisähkön hinnan aloitusnäytöllä</string>
 </resources>

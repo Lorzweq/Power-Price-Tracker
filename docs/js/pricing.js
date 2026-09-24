@@ -4,8 +4,31 @@ import { $ } from './ui.js';
 
 export let cachedPrices = null;
 let _fetchPromise = null;
-export let currentDayPrices = [];
-export let quarterMinPrices = [];
+
+// ========== ALV ==========
+// Rajapinnan (porssisahko.net) hinnat sisältävät ALV:n 25,5 %. Käyttäjä voi valita, näytetäänkö
+// hinnat ilman sitä. Välimuistissa pidetään aina alkuperäiset hinnat, ja valinta tehdään lukiessa,
+// joten vaihto ei vaadi uutta hakua. Negatiiviseen hintaan ei lisätä ALV:tä, joten sitä ei vähennetä.
+export const VAT_RATE = 0.255;
+const VAT_KEY = "vatIncluded";
+
+export function isVatIncluded() {
+  try { return localStorage.getItem(VAT_KEY) !== "false"; } catch { return true; }
+}
+
+export function setVatIncluded(included) {
+  try { localStorage.setItem(VAT_KEY, String(included)); } catch {}
+}
+
+export function applyVat(price) {
+  const n = typeof price === "string" ? parseFloat(price.replace(",", ".")) : price;
+  if (isVatIncluded() || !(n > 0)) return n;
+  return n / (1 + VAT_RATE);
+}
+
+function withVatSetting(prices) {
+  return prices.map(p => ({ ...p, price: applyVat(p.price) }));
+}
 
 export async function fetchPriceCentsPerKwh(dateStr, hour) {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -51,7 +74,7 @@ export async function fetchPriceCentsPerKwh(dateStr, hour) {
     throw new Error("API ei palauttanut data.price-numeroa");
   }
 
-  return data.price;
+  return applyVat(data.price);
 }
 
 export function moneyEuro(centsPerKwh, kwh) {
@@ -114,22 +137,16 @@ export async function updateDateAvgPrice(dateInputId) {
 }
 
 export async function fetchLatestPrices() {
-  if (cachedPrices) return cachedPrices;
-  if (_fetchPromise) return _fetchPromise;
+  if (cachedPrices) return withVatSetting(cachedPrices);
+  if (_fetchPromise) return _fetchPromise.then(withVatSetting);
 
   _fetchPromise = (async () => {
     try {
       const res = await fetch(CONFIG.LATEST_PRICES_ENDPOINT);
       if (res.ok) {
         const data = await res.json();
+        // Tyhjä vastaus näytetään tyhjänä ("–"), ei koskaan keksittyinä hintoina.
         cachedPrices = data.prices || data || [];
-        if (cachedPrices.length === 0) {
-          cachedPrices = Array(96).fill(null).map((_, i) => ({
-            startDate: new Date(Date.now() - 96*15*60*1000 + i*15*60*1000).toISOString(),
-            endDate: new Date(Date.now() - 96*15*60*1000 + (i+1)*15*60*1000).toISOString(),
-            price: 3.5 + Math.sin(i/10) * 2
-          }));
-        }
         return cachedPrices;
       }
     } catch (e) {
@@ -139,12 +156,7 @@ export async function fetchLatestPrices() {
     return cachedPrices;
   })().finally(() => { _fetchPromise = null; });
 
-  return _fetchPromise;
-}
-
-export function setPricesData(prices, quarterPrices) {
-  currentDayPrices = prices;
-  quarterMinPrices = quarterPrices;
+  return _fetchPromise.then(withVatSetting);
 }
 
 export function clearCachedPrices() {

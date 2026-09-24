@@ -1,31 +1,17 @@
 // src/index.ts
-
-export interface Env {
-  FEEDBACK_KV: KVNamespace;
-}
-
 const ALLOWED_ORIGINS = new Set<string>([
-  "https://lorzweq.github.io",
+  "https://porssisahkosaasto.com",
   "https://porssisahko-proxy.leevi-hanninen3.workers.dev",
   "http://localhost:5500",
   "http://127.0.0.1:5500",
   "http://192.168.101.100:5500",
-]);
-
-// Premium keys stored server-side (not exposed to clients)
-const PREMIUM_KEYS = new Set<string>([
-  'PREM-8K9L-M3N7-Q2R5-X4W8',
-  'PWAT-7H2J-F9D6-C5V1-B8N3',
-  'ELEC-4T3Y-G8K2-P7M9-L6H5',
-  'GOLD-9X2C-V5B7-N4M8-K3J6',
-  'STAR-6L8H-J2K9-M5P3-R7T4',
-  'LITE-3W5Y-B8N2-V6C9-X4Z7',
-  'MEGA-2R9T-H5K7-J3M6-P8L4',
-  'ULTR-7C4V-N8B2-M6K5-G9F3'
+  // Capacitor WebView origins (Android app)
+  "https://localhost",
+  "http://localhost",
 ]);
 
 function corsHeaders(origin: string | null) {
-  const allow = origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://lorzweq.github.io";
+  const allow = origin && ALLOWED_ORIGINS.has(origin) ? origin : "https://porssisahkosaasto.com";
   return {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
@@ -46,84 +32,13 @@ function json(data: unknown, init: ResponseInit = {}) {
 }
 
 export default {
-  async fetch(request: Request, env: Env): Promise<Response> {
+  async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const origin = request.headers.get("Origin");
     const cors = corsHeaders(origin);
 
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: cors });
-    }
-
-    // --- PREMIUM KEY VALIDATION ---
-    if (url.pathname === "/validate-premium") {
-      if (request.method !== "POST") {
-        return json({ ok: false, error: "Method not allowed" }, { status: 405, headers: cors });
-      }
-
-      let data: any = null;
-      try {
-        data = await request.json();
-      } catch {
-        return json({ ok: false, error: "Invalid JSON" }, { status: 400, headers: cors });
-      }
-
-      const key = typeof data?.key === "string" ? data.key.trim().toUpperCase() : "";
-      const deviceId = typeof data?.deviceId === "string" ? data.deviceId : "";
-
-      if (!key || !deviceId) {
-        return json({ valid: false, error: "Key and deviceId required" }, { status: 400, headers: cors });
-      }
-
-      // Validate the premium key
-      const isValid = PREMIUM_KEYS.has(key);
-
-      if (isValid) {
-        // Optional: Store activation in KV for tracking
-        const activationKey = `premium:${deviceId}`;
-        await env.FEEDBACK_KV.put(
-          activationKey,
-          JSON.stringify({ key, deviceId, activatedAt: new Date().toISOString() }),
-          { expirationTtl: 60 * 60 * 24 * 365 } // 1 year
-        );
-      }
-
-      return json({ valid: isValid }, { status: 200, headers: cors });
-    }
-
-    // --- FEEDBACK ---
-    if (url.pathname === "/feedback") {
-      if (request.method !== "POST") {
-        return json({ ok: false, error: "Method not allowed" }, { status: 405, headers: cors });
-      }
-
-      let data: any = null;
-      try {
-        data = await request.json();
-      } catch {
-        return json({ ok: false, error: "Invalid JSON" }, { status: 400, headers: cors });
-      }
-
-      const name = typeof data?.name === "string" ? data.name.slice(0, 80) : "Nimetön";
-      const rating = typeof data?.rating === "string" ? data.rating.slice(0, 20) : "ei annettu";
-      const message = typeof data?.message === "string" ? data.message.slice(0, 2000) : "";
-      const page = typeof data?.page === "string" ? data.page.slice(0, 300) : "";
-      const ts = typeof data?.ts === "string" ? data.ts.slice(0, 80) : new Date().toISOString();
-
-      if (!message.trim()) {
-        return json({ ok: false, error: "Message required" }, { status: 400, headers: cors });
-      }
-
-      const key = `fb:${Date.now()}:${crypto.randomUUID()}`;
-      console.log("SAVING FEEDBACK", key);
-
-      await env.FEEDBACK_KV.put(
-        key,
-        JSON.stringify({ name, rating, message, page, ts, origin }),
-        { expirationTtl: 60 * 60 * 24 * 90 } // 90 päivää
-      );
-
-      return json({ ok: true, key }, { status: 200, headers: cors });
     }
 
     // --- ELECTRICITY PRICE PROXY ---

@@ -2,13 +2,35 @@
 export const translations = {
   fi: {
     // Page title and meta
-    pageTitle: "Pörssisähkö-säästölaskuri",
-    metaDescription: "Laske pörssisähkön säästö siirtämällä laitteiden käyttöä halvemmille tunneille. Valitse laitteet, vertaa tuntihintoja ja ehdota halvin aloitusaika.",
+    pageTitle: "Pörssisähkö nyt ja huomenna – halvin tunti | Säästölaskuri",
+    metaDescription: "Sähkön hinta nyt ja huomenna 15 minuutin tarkkuudella. Näe halvin tunti ja paljonko säästät, kun ajoitat pyykit, saunan tai sähköauton lataamisen.",
     
     // Header
     mainTitle: "Pörssisähkö - säästö laitteella ja kellonajalla",
     subtitle: "Laske, kuinka paljon voit säästää siirtämällä sähkölaitteiden käyttöä edullisempaan aikaan päivän aikana. Valitse laitteet, määritä päivät ja kellonajat ja paina \"Laske säästö\".",
-    
+
+    // Hinta nyt ja "Kannattaako nyt?"
+    priceNow: "Sähkön hinta nyt",
+    priceCheap: "Halpaa",
+    priceModerate: "Kohtalaista",
+    priceExpensive: "Kallista",
+    priceVeryExpensive: "Hyvin kallista",
+    cheapestHour: "Halvin tunti",
+    mostExpensiveHour: "Kallein tunti",
+    upcomingHours: "Seuraavan 12 tunnin ajalta",
+    worthItNow: "Kannattaako nyt?",
+    kLaundry: "Pyykinpesu (2 h)",
+    kDishwasher: "Astianpesukone (2 h)",
+    kSauna: "Sauna (1 h)",
+    kEv: "Sähköauto (1 h)",
+    startNow: "Käynnistä nyt",
+    waitUntil: "Odota klo",
+    youSave: "säästät",
+    vatIncluded: "sis. ALV 25,5 %",
+    vatExcluded: "ilman ALV:tä",
+    vatShowExcluded: "näytä ilman",
+    vatShowIncluded: "näytä ALV:n kanssa",
+
     // Theme toggle
     darkMode: "Tumma tila",
     lightMode: "Vaalea tila",
@@ -17,29 +39,16 @@ export const translations = {
     languageToggle: "English",
     
     // Authentication
-    authentication: "Kirjautuminen",
-    notLoggedIn: "Ei kirjautunut",
-    loggedIn: "Kirjautunut",
-    loginTitle: "Kirjaudu sisään",
-    email: "Sähköposti",
-    password: "Salasana",
-    forgotPassword: "Unohditko salasanan?",
-    loginBtn: "Kirjaudu",
-    signupBtn: "Rekisteröidy",
-    changePassword: "Vaihda salasana",
-    logout: "Kirjaudu ulos",
-    activatePremium: "Aktivoi Premium",
-    premiumKeyPlaceholder: "Syötä premium-avain",
-    activateBtn: "Aktivoi",
-    deviceId: "Laite ID:",
     
     // Install section
     installation: "Asennus",
     application: "Sovellus",
     installApp: "Asenna sovellus",
     installDescription: "Asenna sovellus puhelimeesi nopeampaa käyttöä varten",
+    iosInstallHint: "Avaa selaimen Jaa-valikko ja valitse \"Lisää Koti-valikkoon\".",
     
     // Devices
+    advancedCalculation: "Tarkempi laskenta",
     devices: "Laitteet",
     closeAllCategories: "Sulje kaikki",
     selectDevices: "Valitse yksi tai useampi laite.",
@@ -50,24 +59,31 @@ export const translations = {
     max: "Max",
     
     // Device categories
-    lighting: "Valaistus",
-    heating: "Lämmitys",
-    cooling: "Kylmälaitteet",
-    kitchen: "Keittiö",
-    housekeeping: "Kodinhoito",
-    entertainment: "Viihde",
-    computing: "Tietotekniikka",
-    office: "Toimisto",
     
     // Time settings
     time1: "Aika 1 (päivä + tunti)",
     time2: "Aika 2 (vertailu)",
     hour: "Klo",
-    suggestCheapest: "Ehdota halvin aika",
-    timeWindowStart: "Aikaväli alkaa",
-    timeWindowEnd: "Aikaväli päättyy",
-    duration: "Kesto (h)",
-    day: "Päivä",
+
+    // Etsi halvin aika
+    findCheapest: "Etsi halvin aika",
+    findCheapestHint: "Valitse kesto ja milloin laitteen pitää olla valmis.",
+    durationLabel: "Kesto",
+    readyBy: "Valmis viimeistään",
+    noDeadline: "Ei rajaa",
+    startAt: "Käynnistä klo",
+    readyAt: "valmis klo",
+    startsIn: "alkaa {time} päästä",
+    alreadyCheapest: "Nyt on jo halvin hetki",
+    savingVsNow: "Säästät {amount} verrattuna heti käynnistämiseen",
+    cheaperPerKwh: "{amount} snt/kWh halvempi kuin nyt",
+    avgPrice: "Keskihinta",
+    nowLower: "nyt",
+    selectDevicesForEuros: "Valitse laitteet yltä, niin näet säästön euroina.",
+    pricesKnownUntil: "Hinnat ovat tiedossa klo {time} asti.",
+    notEnoughTime: "Laite ei ehdi valmiiksi ennen valittua aikaa. Valitse myöhempi aika tai lyhyempi kesto.",
+    pricesUnavailable: "Hintoja ei saatu haettua. Yritä hetken päästä uudelleen.",
+    dailyNote: "Huom: jatkuvaa kulutusta ei voi siirtää, joten sitä ei lasketa mukaan:",
     
     // Favorites and presets
     saveFavorites: "Tallenna suosikit",
@@ -81,20 +97,6 @@ export const translations = {
     usePreset: "Käytä",
     presetDescription: "Valitse esiasetus ja muokkaa laitteita tai määriä tarvittaessa.",
     
-    // Optimization
-    autoOptimize: "Optimoi automaattisesti",
-    autoOptimizeDescription: "Laskee valituille laitteille halvimman aloitusajan ja asettaa sen automaattisesti.",
-    suggestCheapestTime: "Ehdota halvin aloitusaika",
-    
-    // Price Watch
-    priceWatch: "Price Watch",
-    premium: "PREMIUM",
-    premiumActive: "Premium aktiivinen",
-    priceWatchDescription: "Saa ilmoitus, kun sähköhinta laskee alle asetetun rajan.",
-    priceThreshold: "Hinta €/kWh",
-    startWatch: "Käynnistä",
-    stopWatch: "Pysäytä",
-    
     // Calculate
     calculate: "Laske säästö",
     resetSelections: "Tyhjennä valinnat",
@@ -104,42 +106,28 @@ export const translations = {
     defaultResult: "Valitse laite ja paina \"Laske säästö\".",
     
     // Chart
-    chartTitle: "Päivän pörssisähkö (€/kWh)",
+    chartTitle: "Päivän pörssisähkö (snt/kWh)",
     previous: "Aiemmin",
     next: "Myöhemmin",
     now: "Nykyhetki",
     refresh: "Päivitä",
     
     // Feedback
-    feedback: "Palaute",
-    feedbackDescription: "Lähetä palautetta sovelluksesta.",
-    name: "Nimi (valinnainen)",
-    namePlaceholder: "Maija Meikäläinen",
-    rating: "Arvosana",
-    selectRating: "Valitse",
-    feedbackMessage: "Palaute",
-    feedbackPlaceholder: "Mikä toimi hyvin? Mitä parantaisit?",
-    sendFeedback: "Lähetä palaute",
-    feedbackMissingMessage: "Kirjoita palaute ennen lähettämistä",
-    feedbackNotAvailable: "Palaute ei ole käytettävissä juuri nyt",
-    feedbackSendSuccess: "Kiitos palautteesta!",
-    feedbackSendError: "Palautteen lähetys epäonnistui",
     
     // Footer
     changeConsent: "Muuta evästeasetuksia",
     privacy: "Tietosuoja",
     cookies: "Evästeet",
+    savingTips: "Säästövinkit",
     updates: "Päivitykset",
-    build: "Build",
     
     // Cookie consent
     cookieTitle: "Evästeet",
-    cookieMessage: "Käytämme evästeitä/analytiikkaa ja (valinnaisesti) mainoksia käyttökokemuksen ja rahoituksen vuoksi. Voit hyväksyä tai hylätä ei-välttämättömät.",
+    cookieMessage: "Käytämme Google Analyticsia nähdäksemme, miten sivustoa käytetään. Se otetaan käyttöön vain, jos hyväksyt. Sivustolla ei ole mainoksia.",
     reject: "Hylkää",
     accept: "Hyväksy",
     
     // Toast messages
-    message: "Viesti",
     
     // Chart
     next22Hours: "Seuraavat 22 tuntia",
@@ -151,13 +139,35 @@ export const translations = {
   
   en: {
     // Page title and meta
-    pageTitle: "Electricity Price Savings Calculator",
-    metaDescription: "Calculate electricity savings by shifting device usage to cheaper hours. Select devices, compare hourly prices, and find the cheapest time.",
+    pageTitle: "Finnish spot electricity price now and tomorrow – cheapest hour",
+    metaDescription: "Finnish spot electricity prices now and tomorrow in 15-minute resolution. See the cheapest hour and how much you save by timing laundry, sauna or EV charging.",
     
     // Header
     mainTitle: "Spot Electricity - Savings by Device and Time",
     subtitle: "Calculate how much you can save by shifting electrical device usage to cheaper times during the day. Select devices, set dates and times, and press \"Calculate Savings\".",
-    
+
+    // Price now and "Worth it now?"
+    priceNow: "Electricity price now",
+    priceCheap: "Cheap",
+    priceModerate: "Moderate",
+    priceExpensive: "Expensive",
+    priceVeryExpensive: "Very expensive",
+    cheapestHour: "Cheapest hour",
+    mostExpensiveHour: "Most expensive hour",
+    upcomingHours: "Within the next 12 hours",
+    worthItNow: "Worth it now?",
+    kLaundry: "Laundry (2 h)",
+    kDishwasher: "Dishwasher (2 h)",
+    kSauna: "Sauna (1 h)",
+    kEv: "Electric car (1 h)",
+    startNow: "Start now",
+    waitUntil: "Wait until",
+    youSave: "save",
+    vatIncluded: "incl. 25.5% VAT",
+    vatExcluded: "excl. VAT",
+    vatShowExcluded: "show without",
+    vatShowIncluded: "show with VAT",
+
     // Theme toggle
     darkMode: "Dark mode",
     lightMode: "Light mode",
@@ -166,29 +176,16 @@ export const translations = {
     languageToggle: "Suomi",
     
     // Authentication
-    authentication: "Authentication",
-    notLoggedIn: "Not logged in",
-    loggedIn: "Logged in",
-    loginTitle: "Log in",
-    email: "Email",
-    password: "Password",
-    forgotPassword: "Forgot password?",
-    loginBtn: "Log in",
-    signupBtn: "Sign up",
-    changePassword: "Change password",
-    logout: "Log out",
-    activatePremium: "Activate Premium",
-    premiumKeyPlaceholder: "Enter premium key",
-    activateBtn: "Activate",
-    deviceId: "Device ID:",
     
     // Install section
     installation: "Installation",
     application: "Application",
     installApp: "Install app",
     installDescription: "Install the app on your phone for faster access",
+    iosInstallHint: "Open the browser Share menu and choose \"Add to Home Screen\".",
     
     // Devices
+    advancedCalculation: "Detailed calculation",
     devices: "Devices",
     closeAllCategories: "Close all",
     selectDevices: "Select one or more devices.",
@@ -199,24 +196,31 @@ export const translations = {
     max: "Max",
     
     // Device categories
-    lighting: "Lighting",
-    heating: "Heating",
-    cooling: "Cooling Appliances",
-    kitchen: "Kitchen",
-    housekeeping: "Housekeeping",
-    entertainment: "Entertainment",
-    computing: "Computing",
-    office: "Office",
     
     // Time settings
     time1: "Time 1 (date + hour)",
     time2: "Time 2 (comparison)",
     hour: "Hour",
-    suggestCheapest: "Suggest cheapest time",
-    timeWindowStart: "Time window starts",
-    timeWindowEnd: "Time window ends",
-    duration: "Duration (h)",
-    day: "Day",
+
+    // Find cheapest time
+    findCheapest: "Find cheapest time",
+    findCheapestHint: "Choose the duration and when the device must be done.",
+    durationLabel: "Duration",
+    readyBy: "Done by",
+    noDeadline: "No limit",
+    startAt: "Start at",
+    readyAt: "done at",
+    startsIn: "starts in {time}",
+    alreadyCheapest: "Now is already the cheapest time",
+    savingVsNow: "You save {amount} compared to starting now",
+    cheaperPerKwh: "{amount} c/kWh cheaper than now",
+    avgPrice: "Average price",
+    nowLower: "now",
+    selectDevicesForEuros: "Select devices above to see the saving in euros.",
+    pricesKnownUntil: "Prices are known until {time}.",
+    notEnoughTime: "The device can't finish before the chosen time. Pick a later time or a shorter duration.",
+    pricesUnavailable: "Could not fetch prices. Please try again shortly.",
+    dailyNote: "Note: continuous consumption can't be shifted, so it is not included:",
     
     // Favorites and presets
     saveFavorites: "Save favorites",
@@ -230,20 +234,6 @@ export const translations = {
     usePreset: "Use",
     presetDescription: "Select a preset and modify devices or quantities as needed.",
     
-    // Optimization
-    autoOptimize: "Auto-optimize",
-    autoOptimizeDescription: "Calculates the cheapest start time for selected devices and sets it automatically.",
-    suggestCheapestTime: "Suggest cheapest start time",
-    
-    // Price Watch
-    priceWatch: "Price Watch",
-    premium: "PREMIUM",
-    premiumActive: "Premium Active",
-    priceWatchDescription: "Get notified when electricity price drops below the set threshold.",
-    priceThreshold: "Price €/kWh",
-    startWatch: "Start",
-    stopWatch: "Stop",
-    
     // Calculate
     calculate: "Calculate savings",
     resetSelections: "Clear selections",
@@ -253,42 +243,28 @@ export const translations = {
     defaultResult: "Select a device and press \"Calculate Savings\".",
     
     // Chart
-    chartTitle: "Daily spot electricity (€/kWh)",
+    chartTitle: "Daily spot electricity (c/kWh)",
     previous: "Previous",
     next: "Next",
     now: "Current time",
     refresh: "Refresh",
     
     // Feedback
-    feedback: "Feedback",
-    feedbackDescription: "Send feedback about the application.",
-    name: "Name (optional)",
-    namePlaceholder: "John Doe",
-    rating: "Rating",
-    selectRating: "Select",
-    feedbackMessage: "Feedback",
-    feedbackPlaceholder: "What worked well? What would you improve?",
-    sendFeedback: "Send feedback",
-    feedbackMissingMessage: "Please enter feedback before sending",
-    feedbackNotAvailable: "Feedback is not available right now",
-    feedbackSendSuccess: "Thanks for your feedback!",
-    feedbackSendError: "Failed to send feedback",
     
     // Footer
     changeConsent: "Change cookie settings",
     privacy: "Privacy",
     cookies: "Cookies",
+    savingTips: "Saving tips",
     updates: "Updates",
-    build: "Build",
     
     // Cookie consent
     cookieTitle: "Cookies",
-    cookieMessage: "We use cookies/analytics and (optionally) ads for user experience and funding. You can accept or reject non-essential cookies.",
+    cookieMessage: "We use Google Analytics to see how the site is used. It is only enabled if you accept. There are no ads on this site.",
     reject: "Reject",
     accept: "Accept",
     
     // Toast messages
-    message: "Message",
     
     // Chart
     next22Hours: "Next 22 hours",

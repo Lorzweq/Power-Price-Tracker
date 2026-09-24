@@ -5,84 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Evästekäytäntö</title>
   <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://porssisahkosaasto.com/cookies.html">
+  <style>
+    table { border-collapse: collapse; width: 100%; font-size: 0.95em; }
+    th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    code { font-size: 0.9em; }
+  </style>
 </head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-Y72HX00VPT"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-Y72HX00VPT');
-</script>
 <body>
-<main style="max-width: 800px; margin: 40px auto; font-family: system-ui; line-height: 1.6;">
+<main style="max-width: 800px; margin: 40px auto; padding: 0 16px; font-family: system-ui; line-height: 1.6;">
   <h1>Evästekäytäntö</h1>
 
   <p>
-    Tämä sivusto käyttää evästeitä ja selaimen paikallista tallennusta (localStorage)
-    käyttökokemuksen parantamiseen ja mainonnan mahdollistamiseen.
+    Pörssisähkö-säästölaskuri käyttää selaimen paikallista tallennustilaa asetustesi muistamiseen
+    ja, suostumuksellasi, Google Analyticsin evästeitä kävijätilastointiin.
+    <strong>Sivustolla ei ole mainoksia.</strong>
   </p>
 
-  <h2>1. Mitä evästeet ovat?</h2>
+  <h2>1. Välttämättömät (aina käytössä)</h2>
   <p>
-    Evästeet ovat pieniä tekstitiedostoja, jotka tallennetaan käyttäjän laitteelle
-    selaimen kautta.
+    Nämä tallennetaan vain laitteellesi (localStorage), eikä niitä lähetetä minnekään.
+    Ne ovat tarpeen, jotta sovellus muistaa valintasi.
   </p>
-
-  <h2>2. Käytössä olevat evästetyypit</h2>
-
-  <h3>Välttämättömät</h3>
+  <table>
+    <tr><th>Nimi</th><th>Tarkoitus</th></tr>
+    <tr><td><code>consent_v1</code></td><td>evästesuostumuksesi</td></tr>
+    <tr><td><code>psl_state_v1</code></td><td>valitut laitteet ja määrät</td></tr>
+    <tr><td><code>psl_favorites_v1</code></td><td>tallentamasi suosikit</td></tr>
+    <tr><td><code>psl_suggest_v1</code></td><td>"Etsi halvin aika" -haun viimeisimmät valinnat</td></tr>
+    <tr><td><code>language</code>, <code>theme</code></td><td>kieli ja tumma/vaalea tila</td></tr>
+    <tr><td><code>advancedOpen</code></td><td>onko "Tarkempi laskenta" -osio auki</td></tr>
+  </table>
   <p>
-    Näitä tarvitaan sivuston perustoimintojen mahdollistamiseksi.
+    Lisäksi sovellus tallentaa omat tiedostonsa selaimen välimuistiin, jotta se toimii myös
+    ilman verkkoyhteyttä. Välimuisti ei sisällä tietoja sinusta.
   </p>
+
+  <h2>2. Analytiikka (vain suostumuksella)</h2>
+  <p>
+    Jos hyväksyt evästeet, Google Analytics asettaa seuraavat evästeet. Jos hylkäät, niitä ei aseteta.
+  </p>
+  <table>
+    <tr><th>Nimi</th><th>Tarkoitus</th><th>Voimassa</th></tr>
+    <tr><td><code>_ga</code></td><td>erottaa kävijät toisistaan satunnaisella tunnisteella</td><td>2 vuotta</td></tr>
+    <tr><td><code>_ga_09J90FFNLV</code></td><td>säilyttää käyntikerran tilan</td><td>2 vuotta</td></tr>
+  </table>
+  <p>
+    Google käsittelee tietoja omien käytäntöjensä mukaisesti:
+    <a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">Miten Google käyttää tietoja</a>.
+    Lisätietoa käsittelystä on <a href="./privacy.html">tietosuojaselosteessa</a>.
+  </p>
+
+  <h2>3. Suostumuksen muuttaminen</h2>
   <ul>
-    <li>evästesuostumuksen tallennus</li>
-    <li>sovelluksen asetusten muistaminen</li>
+    <li>Voit muuttaa valintaasi milloin tahansa sivun alareunan "Muuta evästeasetuksia" -painikkeesta.</li>
+    <li>Voit poistaa evästeet ja tallennetut tiedot selaimesi asetuksista. Tällöin sovellus unohtaa myös asetuksesi.</li>
   </ul>
 
-  <h3>Tilastointi ja analytiikka (valinnainen)</h3>
-  <p>
-    Näiden avulla voidaan seurata sivuston käyttöä ja kehittää palvelua.
-  </p>
-
-  <h3>Mainonta (valinnainen)</h3>
-  <p>
-    Sivusto voi näyttää Google AdSense -mainoksia.
-    Mainokset voivat olla personoituja käyttäjän suostumuksen perusteella.
-  </p>
-
-  <h2>3. Kolmannet osapuolet</h2>
-  <p>
-    Google voi asettaa evästeitä mainosten näyttämistä varten.
-    Google käyttää tietoja omien tietosuojakäytäntöjensä mukaisesti.
-  </p>
-  <p>
-    Lisätietoa:
-    <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener">
-      https://policies.google.com/technologies/ads
-    </a>
-  </p>
-
-  <h2>4. Suostumuksen hallinta</h2>
-  <p>
-    Käyttäjä voi:
-  </p>
-  <ul>
-    <li>hyväksyä tai hylätä evästeet sivustolle saapuessaan</li>
-    <li>muuttaa suostumustaan myöhemmin “Muuta evästeasetuksia” -painikkeesta</li>
-    <li>poistaa evästeet selaimen asetuksista</li>
-  </ul>
-
-  <h2>5. Evästeiden poistaminen</h2>
-  <p>
-    Evästeet voidaan poistaa selaimen asetuksista. Tämä voi vaikuttaa sivuston toimintaan.
-  </p>
-
-  <p><em>Päivitetty: 2026</em></p>
+  <p><em>Päivitetty: 24.9.2026</em></p>
 
   <div style="margin-top: 2rem;">
-    <a style="color: #64748b; text-decoration: underline;" href="/docs/Index.html">← Takaisin</a>
+    <a style="color: #64748b; text-decoration: underline;" href="/">← Takaisin</a>
   </div>
 </main>
 </body>

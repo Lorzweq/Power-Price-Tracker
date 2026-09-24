@@ -4,12 +4,10 @@
 export const CONFIG = {
   PRICE_ENDPOINT: "https://porssisahko-proxy.leevi-hanninen3.workers.dev",
   LATEST_PRICES_ENDPOINT: "https://porssisahko-proxy.leevi-hanninen3.workers.dev?latest=true",
-  PREMIUM_API_URL: 'https://porssisahko-proxy.leevi-hanninen3.workers.dev/validate-premium',
-  SUPABASE_URL: 'https://lztelpmsfyrlohjcawkm.supabase.co',
-  SUPABASE_ANON_KEY: 'sb_publishable__DJPPvPSjAZgVuaAQ-FyAw_MFiHt2qN',
   STORAGE_KEY: "psl_state_v1",
-  SAVINGS_KEY: "psl_savings_v1",
-  CONSENT_KEY: "consent_v1"
+  CONSENT_KEY: "consent_v1",
+  // Google Analytics 4 -mittaustunnus. Ladataan vasta, kun käyttäjä hyväksyy analytiikan (consent.js).
+  GA_MEASUREMENT_ID: "G-09J90FFNLV"
 };
 
 export const DEVICES = [

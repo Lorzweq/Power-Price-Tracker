@@ -1,0 +1,4 @@
+/* Lähdetiedosto: `npm run build:css` kääntää tämän tiedostoon docs/styles.css. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
